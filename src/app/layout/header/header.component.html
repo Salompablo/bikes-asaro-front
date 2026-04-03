@@ -38,8 +38,17 @@
 
                         @if (isAccountMenuOpen) {
                         <div class="account-menu" role="menu" aria-label="Opciones de cuenta">
-                            <button type="button" class="account-menu-item" role="menuitem">Mis ordenes</button>
-                            <button type="button" class="account-menu-item" role="menuitem">Desconectar</button>
+                            @if (authService.isLoggedIn()) {
+                            <a routerLink="/orders" class="account-menu-item" role="menuitem"
+                                (click)="isAccountMenuOpen = false">Mis pedidos</a>
+                            <button type="button" class="account-menu-item" role="menuitem"
+                                (click)="logout()">Cerrar sesión</button>
+                            } @else {
+                            <a routerLink="/auth/login" class="account-menu-item" role="menuitem"
+                                (click)="isAccountMenuOpen = false">Iniciar sesión</a>
+                            <a routerLink="/auth/register" class="account-menu-item" role="menuitem"
+                                (click)="isAccountMenuOpen = false">Crear cuenta</a>
+                            }
                         </div>
                         }
                     </div>
@@ -83,7 +92,7 @@
                             d="M21 21l-4.35-4.35M10.8 18a7.2 7.2 0 100-14.4 7.2 7.2 0 000 14.4z"></path>
                     </svg>
                     <input #searchInput type="search" class="search-input"
-                        placeholder="Buscar productos, marcas y categorias" aria-label="Buscar productos" />
+                        placeholder="Buscá productos, marcas y categorías" aria-label="Buscar productos" />
                     <button type="button" class="search-close" (click)="closeSearch()" aria-label="Cerrar busqueda">
                         Esc
                     </button>

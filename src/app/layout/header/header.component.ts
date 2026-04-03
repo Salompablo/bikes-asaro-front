@@ -1,6 +1,7 @@
 import { Component, ElementRef, HostListener, ViewChild, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { CartStateService } from '../../core/services/cart-state.service';
+import { AuthService } from '../../features/auth/services/auth.service';
 
 @Component({
   selector: 'app-header',
@@ -11,6 +12,8 @@ import { CartStateService } from '../../core/services/cart-state.service';
 })
 export class HeaderComponent {
   readonly cartState = inject(CartStateService);
+  readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
   isSearchOpen = false;
   isAccountMenuOpen = false;
 
@@ -38,5 +41,11 @@ export class HeaderComponent {
     if (this.isAccountMenuOpen) {
       this.isAccountMenuOpen = false;
     }
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.isAccountMenuOpen = false;
+    this.router.navigate(['/']);
   }
 }
