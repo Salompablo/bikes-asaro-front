@@ -1,5 +1,11 @@
 import { Component, inject, signal } from '@angular/core';
-import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../services/auth.service';
@@ -27,13 +33,16 @@ export class RegisterComponent {
   readonly loading = signal(false);
   readonly showPassword = signal(false);
 
-  readonly form = this.fb.nonNullable.group({
-    firstName: ['', Validators.required],
-    lastName: ['', Validators.required],
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(15)]],
-    confirmPassword: ['', Validators.required],
-  }, { validators: passwordMatchValidator });
+  readonly form = this.fb.nonNullable.group(
+    {
+      firstName: ['', Validators.required],
+      lastName: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(15)]],
+      confirmPassword: ['', Validators.required],
+    },
+    { validators: passwordMatchValidator },
+  );
 
   onSubmit(): void {
     if (this.form.invalid) {

@@ -60,20 +60,24 @@ export class ForgotPasswordComponent {
 
     this.loading.set(true);
     const { code, newPassword } = this.resetForm.getRawValue();
-    this.authService.resetPassword({
-      email: this.emailForm.getRawValue().email,
-      code,
-      newPassword,
-    }).subscribe({
-      next: (res) => {
-        this.toast.success(res.message || 'Contraseña restablecida correctamente.');
-        this.router.navigate(['/auth/login']);
-      },
-      error: (err: HttpErrorResponse) => {
-        this.loading.set(false);
-        const body = err.error as ErrorResponse;
-        this.toast.error(body?.message ?? 'Error al restablecer. Verificá el código e intentá de nuevo.');
-      },
-    });
+    this.authService
+      .resetPassword({
+        email: this.emailForm.getRawValue().email,
+        code,
+        newPassword,
+      })
+      .subscribe({
+        next: (res) => {
+          this.toast.success(res.message || 'Contraseña restablecida correctamente.');
+          this.router.navigate(['/auth/login']);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.loading.set(false);
+          const body = err.error as ErrorResponse;
+          this.toast.error(
+            body?.message ?? 'Error al restablecer. Verificá el código e intentá de nuevo.',
+          );
+        },
+      });
   }
 }

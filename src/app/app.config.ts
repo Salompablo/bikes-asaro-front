@@ -11,9 +11,6 @@ export const appConfig: ApplicationConfig = {
     provideZonelessChangeDetection(),
     provideRouter(routes, withViewTransitions()),
     provideClientHydration(withEventReplay()),
-    provideHttpClient(
-      withFetch(), 
-      withInterceptors([authInterceptor, apiInterceptor]), 
-    ),
+    provideHttpClient(withFetch(), withInterceptors([authInterceptor, apiInterceptor])),
   ],
 };

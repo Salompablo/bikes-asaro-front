@@ -24,12 +24,12 @@ export class ToastService {
   }
 
   dismiss(id: number): void {
-    this.toasts.update(list => list.filter(t => t.id !== id));
+    this.toasts.update((list) => list.filter((t) => t.id !== id));
   }
 
   private show(message: string, type: Toast['type'], duration = 4000): void {
     const id = this.nextId++;
-    this.toasts.update(list => [...list, { id, message, type }]);
+    this.toasts.update((list) => [...list, { id, message, type }]);
     setTimeout(() => this.dismiss(id), duration);
   }
 }

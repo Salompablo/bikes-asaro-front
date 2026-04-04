@@ -30,22 +30,22 @@ export class AuthService {
   }
 
   login(request: LoginRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>('/auth/login', request).pipe(
-      tap(res => this.storeToken(res.token)),
-    );
+    return this.http
+      .post<AuthResponse>('/auth/login', request)
+      .pipe(tap((res) => this.storeToken(res.token)));
   }
 
   googleLogin(request: GoogleLoginRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>('/auth/google', request).pipe(
-      tap(res => this.storeToken(res.token)),
-    );
+    return this.http
+      .post<AuthResponse>('/auth/google', request)
+      .pipe(tap((res) => this.storeToken(res.token)));
   }
 
   verifyEmail(token: string): Observable<AuthResponse> {
     const params = new HttpParams().set('token', token);
-    return this.http.post<AuthResponse>('/auth/verify', null, { params }).pipe(
-      tap(res => this.storeToken(res.token)),
-    );
+    return this.http
+      .post<AuthResponse>('/auth/verify', null, { params })
+      .pipe(tap((res) => this.storeToken(res.token)));
   }
 
   forgotPassword(request: ForgotPasswordRequest): Observable<{ message: string }> {
@@ -63,9 +63,9 @@ export class AuthService {
 
   reactivate(token: string): Observable<AuthResponse> {
     const params = new HttpParams().set('token', token);
-    return this.http.post<AuthResponse>('/auth/reactivate', null, { params }).pipe(
-      tap(res => this.storeToken(res.token)),
-    );
+    return this.http
+      .post<AuthResponse>('/auth/reactivate', null, { params })
+      .pipe(tap((res) => this.storeToken(res.token)));
   }
 
   logout(): void {
