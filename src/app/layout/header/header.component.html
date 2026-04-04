@@ -41,8 +41,8 @@
                             @if (authService.isLoggedIn()) {
                             <a routerLink="/orders" class="account-menu-item" role="menuitem"
                                 (click)="isAccountMenuOpen = false">Mis pedidos</a>
-                            <button type="button" class="account-menu-item" role="menuitem"
-                                (click)="logout()">Cerrar sesión</button>
+                            <button type="button" class="account-menu-item" role="menuitem" (click)="logout()">Cerrar
+                                sesión</button>
                             } @else {
                             <a routerLink="/auth/login" class="account-menu-item" role="menuitem"
                                 (click)="isAccountMenuOpen = false">Iniciar sesión</a>

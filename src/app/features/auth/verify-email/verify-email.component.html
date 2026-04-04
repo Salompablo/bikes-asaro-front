@@ -1,55 +1,50 @@
 <section class="min-h-[60vh] flex items-center justify-center px-4 py-12">
-  <div class="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 sm:p-10 text-center">
-    <!-- Email icon -->
-    <div class="mx-auto w-16 h-16 rounded-full bg-brand-accent/10 flex items-center justify-center mb-6">
-      <svg class="w-8 h-8 text-brand-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-      </svg>
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 sm:p-10 text-center">
+        <!-- Email icon -->
+        <div class="mx-auto w-16 h-16 rounded-full bg-brand-accent/10 flex items-center justify-center mb-6">
+            <svg class="w-8 h-8 text-brand-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+        </div>
+
+        <h1 class="text-2xl font-display font-black text-brand-black">
+            Verificá tu correo
+        </h1>
+        <p class="text-sm text-brand-gray mt-2 mb-8">
+            Ingresá el código de 6 dígitos que te enviamos por correo electrónico
+        </p>
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+            <div class="mb-6">
+                <input id="verify-code" type="text" formControlName="code"
+                    class="form-input text-center text-2xl tracking-[0.5em] font-mono"
+                    [class.form-input--error]="form.controls.code.touched && form.controls.code.invalid"
+                    placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code" />
+                @if (form.controls.code.touched && form.controls.code.errors) {
+                <p class="form-error">
+                    @if (form.controls.code.errors['required']) {
+                    El código es obligatorio
+                    } @else if (form.controls.code.errors['pattern']) {
+                    Ingresá un código de 6 dígitos
+                    }
+                </p>
+                }
+            </div>
+
+            <button type="submit" class="btn-primary" [disabled]="loading()">
+                @if (loading()) {
+                <span class="spinner"></span>
+                Verificando...
+                } @else {
+                Verificar
+                }
+            </button>
+        </form>
+
+        <p class="text-sm text-brand-gray mt-8">
+            <a routerLink="/auth/login" class="text-brand-accent hover:underline font-semibold">Volver a iniciar
+                sesión</a>
+        </p>
     </div>
-
-    <h1 class="text-2xl font-display font-black text-brand-black">
-      Verificá tu correo
-    </h1>
-    <p class="text-sm text-brand-gray mt-2 mb-8">
-      Ingresá el código de 6 dígitos que te enviamos por correo electrónico
-    </p>
-
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
-      <div class="mb-6">
-        <input
-          id="verify-code"
-          type="text"
-          formControlName="code"
-          class="form-input text-center text-2xl tracking-[0.5em] font-mono"
-          [class.form-input--error]="form.controls.code.touched && form.controls.code.invalid"
-          placeholder="000000"
-          maxlength="6"
-          inputmode="numeric"
-          autocomplete="one-time-code" />
-        @if (form.controls.code.touched && form.controls.code.errors) {
-          <p class="form-error">
-            @if (form.controls.code.errors['required']) {
-              El código es obligatorio
-            } @else if (form.controls.code.errors['pattern']) {
-              Ingresá un código de 6 dígitos
-            }
-          </p>
-        }
-      </div>
-
-      <button type="submit" class="btn-primary" [disabled]="loading()">
-        @if (loading()) {
-          <span class="spinner"></span>
-          Verificando...
-        } @else {
-          Verificar
-        }
-      </button>
-    </form>
-
-    <p class="text-sm text-brand-gray mt-8">
-      <a routerLink="/auth/login" class="text-brand-accent hover:underline font-semibold">Volver a iniciar sesión</a>
-    </p>
-  </div>
 </section>

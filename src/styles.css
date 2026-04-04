@@ -31,13 +31,21 @@
 }
 
 @keyframes fadeOut {
-  from { opacity: 1; }
-  to { opacity: 0; }
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* ── Shared form styles ── */
@@ -101,7 +109,9 @@
 
 .btn-primary:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px white, 0 0 0 4px #ffd600;
+  box-shadow:
+    0 0 0 2px white,
+    0 0 0 4px #ffd600;
 }
 
 .btn-primary:disabled {
