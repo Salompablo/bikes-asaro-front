@@ -13,6 +13,12 @@ import {
 
 const TOKEN_KEY = 'auth_token';
 
+interface JwtPayload {
+  sub?: string;
+  role?: string;
+  exp?: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
@@ -20,6 +26,8 @@ export class AuthService {
   private readonly tokenSignal = signal<string | null>(this.loadToken());
 
   readonly isLoggedIn = computed(() => !!this.tokenSignal());
+  readonly role = computed(() => this.decodeToken()?.role?.replace('ROLE_', '') ?? null);
+  readonly isAdmin = computed(() => this.role() === 'ADMIN');
 
   getToken(): string | null {
     return this.tokenSignal();
@@ -87,5 +95,18 @@ export class AuthService {
       return localStorage.getItem(TOKEN_KEY);
     }
     return null;
+  }
+
+  private decodeToken(): JwtPayload | null {
+    const token = this.tokenSignal();
+    if (!token) return null;
+    try {
+      const payload = token.split('.')[1];
+      const decoded = JSON.parse(atob(payload));
+      console.log('[AuthService] JWT decoded:', decoded);
+      return decoded;
+    } catch {
+      return null;
+    }
   }
 }

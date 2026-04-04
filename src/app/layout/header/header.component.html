@@ -1,4 +1,4 @@
-<header class="w-full bg-brand-black border-b-4 border-brand-accent sticky top-0 z-50">
+<header class="w-full bg-brand-black border-b-4 border-brand-accent fixed top-0 z-50">
     <div class="w-full px-3 sm:px-6 lg:px-10 xl:px-14">
         <div class="relative h-20">
             @if (!isSearchOpen) {
@@ -16,7 +16,8 @@
                 </nav>
 
                 <div class="header-actions flex items-center justify-end">
-                    <button type="button" class="icon-button text-brand-silver hover:text-brand-white"
+                    <button type="button"
+                        class="icon-button text-brand-silver hover:text-brand-accent transition-colors duration-200"
                         (click)="openSearch()" aria-label="Buscar productos">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                             xmlns="http://www.w3.org/2000/svg">
@@ -26,7 +27,8 @@
                     </button>
 
                     <div class="account-trigger-wrap">
-                        <button type="button" class="icon-button text-brand-silver hover:text-brand-white"
+                        <button type="button"
+                            class="icon-button text-brand-silver hover:text-brand-accent transition-colors duration-200"
                             (click)="toggleAccountMenu()" [attr.aria-expanded]="isAccountMenuOpen" aria-haspopup="menu"
                             aria-label="Cuenta">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -39,10 +41,15 @@
                         @if (isAccountMenuOpen) {
                         <div class="account-menu" role="menu" aria-label="Opciones de cuenta">
                             @if (authService.isLoggedIn()) {
+                            @if (authService.isAdmin()) {
+                            <button type="button" class="account-menu-item" role="menuitem"
+                                (click)="logout()">Desconectar</button>
+                            } @else {
                             <a routerLink="/orders" class="account-menu-item" role="menuitem"
                                 (click)="isAccountMenuOpen = false">Mis pedidos</a>
                             <button type="button" class="account-menu-item" role="menuitem" (click)="logout()">Cerrar
                                 sesión</button>
+                            }
                             } @else {
                             <a routerLink="/auth/login" class="account-menu-item" role="menuitem"
                                 (click)="isAccountMenuOpen = false">Iniciar sesión</a>
@@ -53,8 +60,23 @@
                         }
                     </div>
 
+                    @if (authService.isAdmin()) {
+                    <a routerLink="/admin"
+                        class="icon-button text-brand-silver hover:text-brand-accent transition-colors duration-200"
+                        aria-label="Panel de administración">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+                            </path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                    </a>
+                    }
+
                     <button routerLink="/carrito" type="button"
-                        class="relative icon-button text-brand-silver hover:text-brand-white group"
+                        class="relative icon-button text-brand-silver hover:text-brand-accent transition-colors duration-200 group"
                         aria-label="Carrito">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                             xmlns="http://www.w3.org/2000/svg">
@@ -72,7 +94,7 @@
                     </button>
 
                     <button type="button"
-                        class="icon-button mobile-menu-toggle text-brand-silver hover:text-brand-white"
+                        class="icon-button mobile-menu-toggle text-brand-silver hover:text-brand-accent transition-colors duration-200"
                         aria-label="Abrir menu movil">
                         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                             xmlns="http://www.w3.org/2000/svg">
