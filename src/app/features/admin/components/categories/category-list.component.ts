@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CategoryService } from '../../services/category.service';
+import { FileService } from '../../services/file.service';
 import { CategoryResponse, CategoryRequest } from '../../models/admin.models';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { FormsModule } from '@angular/forms';
@@ -12,6 +13,7 @@ import { FormsModule } from '@angular/forms';
 })
 export class CategoryListComponent implements OnInit {
   private readonly categoryService = inject(CategoryService);
+  private readonly fileService = inject(FileService);
   private readonly toast = inject(ToastService);
 
   categories = signal<CategoryResponse[]>([]);
@@ -19,8 +21,9 @@ export class CategoryListComponent implements OnInit {
   showForm = signal(false);
   editingId = signal<number | null>(null);
   saving = signal(false);
+  uploading = signal(false);
 
-  formData: CategoryRequest = { name: '', description: '' };
+  formData: CategoryRequest = { name: '', description: '', defaultImageUrl: '' };
 
   ngOnInit(): void {
     this.loadCategories();
@@ -41,15 +44,39 @@ export class CategoryListComponent implements OnInit {
   }
 
   openForm(): void {
-    this.formData = { name: '', description: '' };
+    this.formData = { name: '', description: '', defaultImageUrl: '' };
     this.editingId.set(null);
     this.showForm.set(true);
   }
 
   editCategory(cat: CategoryResponse): void {
-    this.formData = { name: cat.name, description: cat.description };
+    this.formData = {
+      name: cat.name,
+      description: cat.description,
+      defaultImageUrl: cat.defaultImageUrl ?? '',
+    };
     this.editingId.set(cat.id);
     this.showForm.set(true);
+  }
+
+  onImageSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    this.uploading.set(true);
+    this.fileService.upload(file).subscribe({
+      next: (url) => {
+        this.formData.defaultImageUrl = url;
+        this.uploading.set(false);
+      },
+      error: () => {
+        this.toast.error('Error al subir la imagen');
+        this.uploading.set(false);
+      },
+    });
+  }
+
+  removeImage(): void {
+    this.formData.defaultImageUrl = '';
   }
 
   cancelForm(): void {
