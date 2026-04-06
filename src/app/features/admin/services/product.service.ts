@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { PageResponse, ProductRequest, ProductResponse } from '../models/admin.models';
+import { API_ENDPOINTS } from '../../../core/http/api-endpoints';
 
 @Injectable({ providedIn: 'root' })
 export class ProductService {
@@ -16,22 +17,22 @@ export class ProductService {
     let params = new HttpParams().set('page', page).set('size', size);
     if (categoryId) params = params.set('categoryId', categoryId);
     if (search) params = params.set('search', search);
-    return this.http.get<PageResponse<ProductResponse>>('/products', { params });
+    return this.http.get<PageResponse<ProductResponse>>(API_ENDPOINTS.PRODUCTS.BASE, { params });
   }
 
   getById(id: number): Observable<ProductResponse> {
-    return this.http.get<ProductResponse>(`/products/${id}`);
+    return this.http.get<ProductResponse>(API_ENDPOINTS.PRODUCTS.BY_ID(id));
   }
 
   create(request: ProductRequest): Observable<ProductResponse> {
-    return this.http.post<ProductResponse>('/products', request);
+    return this.http.post<ProductResponse>(API_ENDPOINTS.PRODUCTS.BASE, request);
   }
 
   update(id: number, request: ProductRequest): Observable<ProductResponse> {
-    return this.http.put<ProductResponse>(`/products/${id}`, request);
+    return this.http.put<ProductResponse>(API_ENDPOINTS.PRODUCTS.BY_ID(id), request);
   }
 
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(`/products/${id}`);
+    return this.http.delete<void>(API_ENDPOINTS.PRODUCTS.BY_ID(id));
   }
 }

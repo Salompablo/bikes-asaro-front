@@ -1,0 +1,89 @@
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <h2 class="text-2xl font-display tracking-tight text-brand-black">Categorías</h2>
+        <button (click)="openForm()"
+            class="bg-brand-black text-brand-white px-5 py-2.5 rounded-lg font-display text-sm uppercase tracking-wider hover:bg-brand-dark transition-colors">
+            + Nueva categoría
+        </button>
+    </div>
+
+    @if (showForm()) {
+    <div class="bg-brand-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
+        <h3 class="text-lg font-display tracking-tight text-brand-black">
+            {{ editingId() ? 'Editar categoría' : 'Nueva categoría' }}
+        </h3>
+        <form (ngSubmit)="onSubmit()" class="space-y-4">
+            <div>
+                <label
+                    class="block text-[0.7rem] font-bold uppercase tracking-widest text-brand-gray mb-1">Nombre</label>
+                <input type="text" [(ngModel)]="formData.name" name="name" required
+                    class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-brand-black"
+                    placeholder="Mountain Bikes" />
+            </div>
+            <div>
+                <label
+                    class="block text-[0.7rem] font-bold uppercase tracking-widest text-brand-gray mb-1">Descripción</label>
+                <textarea [(ngModel)]="formData.description" name="description" rows="2"
+                    class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-brand-black"
+                    placeholder="Bicicletas para montaña..."></textarea>
+            </div>
+            <div class="flex items-center gap-3">
+                <button type="submit" [disabled]="saving()"
+                    class="bg-brand-black text-brand-white px-5 py-2 rounded-lg font-display text-sm uppercase tracking-wider hover:bg-brand-dark disabled:opacity-50 transition-colors">
+                    {{ saving() ? 'Guardando...' : (editingId() ? 'Actualizar' : 'Crear') }}
+                </button>
+                <button type="button" (click)="cancelForm()"
+                    class="text-brand-gray hover:text-brand-black text-sm font-display uppercase tracking-wider transition-colors">
+                    Cancelar
+                </button>
+            </div>
+        </form>
+    </div>
+    }
+
+    @if (loading()) {
+    <div class="text-center py-12 text-brand-gray">Cargando categorías...</div>
+    } @else {
+    <div class="bg-brand-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="bg-gray-50 border-b border-gray-200">
+                    <th class="text-left px-4 py-3 font-display uppercase tracking-wider text-xs text-brand-gray">ID
+                    </th>
+                    <th class="text-left px-4 py-3 font-display uppercase tracking-wider text-xs text-brand-gray">Nombre
+                    </th>
+                    <th class="text-left px-4 py-3 font-display uppercase tracking-wider text-xs text-brand-gray">
+                        Descripción</th>
+                    <th class="text-right px-4 py-3 font-display uppercase tracking-wider text-xs text-brand-gray">
+                        Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (cat of categories(); track cat.id) {
+                <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                    <td class="px-4 py-3 text-brand-gray">{{ cat.id }}</td>
+                    <td class="px-4 py-3 font-medium text-brand-black">{{ cat.name }}</td>
+                    <td class="px-4 py-3 text-brand-gray">{{ cat.description || '—' }}</td>
+                    <td class="px-4 py-3 text-right">
+                        <div class="flex items-center justify-end gap-2">
+                            <button (click)="editCategory(cat)"
+                                class="text-brand-gray hover:text-brand-black transition-colors text-xs font-display uppercase tracking-wider">
+                                Editar
+                            </button>
+                            <button (click)="deleteCategory(cat)"
+                                class="text-red-500 hover:text-red-700 transition-colors text-xs font-display uppercase tracking-wider">
+                                Baja
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                } @empty {
+                <tr>
+                    <td colspan="4" class="text-center py-8 text-brand-gray">No hay categorías registradas.</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    }
+</div>

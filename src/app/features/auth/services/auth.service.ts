@@ -10,6 +10,7 @@ import {
   RegisterRequest,
   ResetPasswordRequest,
 } from '../models/auth.models';
+import { API_ENDPOINTS } from '../../../core/http/api-endpoints';
 
 const TOKEN_KEY = 'auth_token';
 
@@ -34,45 +35,45 @@ export class AuthService {
   }
 
   register(request: RegisterRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>('/auth/register', request);
+    return this.http.post<AuthResponse>(API_ENDPOINTS.AUTH.REGISTER, request);
   }
 
   login(request: LoginRequest): Observable<AuthResponse> {
     return this.http
-      .post<AuthResponse>('/auth/login', request)
+      .post<AuthResponse>(API_ENDPOINTS.AUTH.LOGIN, request)
       .pipe(tap((res) => this.storeToken(res.token)));
   }
 
   googleLogin(request: GoogleLoginRequest): Observable<AuthResponse> {
     return this.http
-      .post<AuthResponse>('/auth/google', request)
+      .post<AuthResponse>(API_ENDPOINTS.AUTH.GOOGLE, request)
       .pipe(tap((res) => this.storeToken(res.token)));
   }
 
   verifyEmail(token: string): Observable<AuthResponse> {
     const params = new HttpParams().set('token', token);
     return this.http
-      .post<AuthResponse>('/auth/verify', null, { params })
+      .post<AuthResponse>(API_ENDPOINTS.AUTH.VERIFY, null, { params })
       .pipe(tap((res) => this.storeToken(res.token)));
   }
 
   forgotPassword(request: ForgotPasswordRequest): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>('/auth/forgot-password', request);
+    return this.http.post<{ message: string }>(API_ENDPOINTS.AUTH.FORGOT_PASSWORD, request);
   }
 
   resetPassword(request: ResetPasswordRequest): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>('/auth/reset-password', request);
+    return this.http.post<{ message: string }>(API_ENDPOINTS.AUTH.RESET_PASSWORD, request);
   }
 
   requestReactivation(email: string): Observable<void> {
     const params = new HttpParams().set('email', email);
-    return this.http.post<void>('/auth/request-reactivation', null, { params });
+    return this.http.post<void>(API_ENDPOINTS.AUTH.REQUEST_REACTIVATION, null, { params });
   }
 
   reactivate(token: string): Observable<AuthResponse> {
     const params = new HttpParams().set('token', token);
     return this.http
-      .post<AuthResponse>('/auth/reactivate', null, { params })
+      .post<AuthResponse>(API_ENDPOINTS.AUTH.REACTIVATE, null, { params })
       .pipe(tap((res) => this.storeToken(res.token)));
   }
 
