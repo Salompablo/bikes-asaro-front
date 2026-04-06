@@ -11,142 +11,35 @@ import { ToastService } from '../../../../shared/services/toast.service';
   selector: 'app-product-form',
   standalone: true,
   imports: [FormsModule, RouterLink],
-  template: `
-    <div class="max-w-3xl space-y-6">
-      <div class="flex items-center gap-4">
-        <a routerLink="/admin/products" class="text-brand-gray hover:text-brand-black transition-colors">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-          </svg>
-        </a>
-        <h2 class="text-2xl font-display tracking-tight text-brand-black">
-          {{ isEdit() ? 'Editar producto' : 'Nuevo producto' }}
-        </h2>
-      </div>
-
-      <form (ngSubmit)="onSubmit()" class="bg-brand-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-5">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <div>
-            <label class="admin-label">SKU</label>
-            <input type="text" [(ngModel)]="form.sku" name="sku" required class="admin-input" placeholder="MTB-TREK-M5" />
-          </div>
-          <div>
-            <label class="admin-label">Nombre</label>
-            <input type="text" [(ngModel)]="form.name" name="name" required class="admin-input" placeholder="Trek Marlin 5" />
-          </div>
-        </div>
-
-        <div>
-          <label class="admin-label">Descripción</label>
-          <textarea [(ngModel)]="form.description" name="description" rows="3" class="admin-input" placeholder="Descripción del producto..."></textarea>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-          <div>
-            <label class="admin-label">Precio</label>
-            <input type="number" [(ngModel)]="form.price" name="price" required min="0" step="0.01" class="admin-input" />
-          </div>
-          <div>
-            <label class="admin-label">Stock</label>
-            <input type="number" [(ngModel)]="form.stock" name="stock" required min="0" class="admin-input" />
-          </div>
-          <div>
-            <label class="admin-label">Categoría</label>
-            <select [(ngModel)]="form.categoryId" name="categoryId" required class="admin-input">
-              <option [ngValue]="0" disabled>Seleccionar...</option>
-              @for (cat of categories(); track cat.id) {
-                <option [ngValue]="cat.id">{{ cat.name }}</option>
-              }
-            </select>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-5">
-          <div>
-            <label class="admin-label">Peso (kg)</label>
-            <input type="number" [(ngModel)]="form.weight" name="weight" required min="0" step="0.1" class="admin-input" />
-          </div>
-          <div>
-            <label class="admin-label">Largo (cm)</label>
-            <input type="number" [(ngModel)]="form.length" name="length" required min="0" step="0.1" class="admin-input" />
-          </div>
-          <div>
-            <label class="admin-label">Ancho (cm)</label>
-            <input type="number" [(ngModel)]="form.width" name="width" required min="0" step="0.1" class="admin-input" />
-          </div>
-          <div>
-            <label class="admin-label">Alto (cm)</label>
-            <input type="number" [(ngModel)]="form.height" name="height" required min="0" step="0.1" class="admin-input" />
-          </div>
-        </div>
-
-        <!-- Images -->
-        <div class="space-y-3">
-          <label class="admin-label">Imágenes</label>
-
-          @if (form.images.length > 0) {
-            <div class="flex flex-wrap gap-3">
-              @for (img of form.images; track img; let i = $index) {
-                <div class="relative group w-24 h-24 rounded-lg overflow-hidden border border-gray-200">
-                  <img [src]="img" alt="Producto" class="w-full h-full object-cover" />
-                  <button type="button" (click)="removeImage(i)"
-                          class="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs font-bold">
-                    ✕
-                  </button>
-                </div>
-              }
-            </div>
-          }
-
-          <div class="flex items-center gap-3">
-            <label class="cursor-pointer bg-gray-100 hover:bg-gray-200 text-brand-gray px-4 py-2 rounded-lg text-sm font-display uppercase tracking-wider transition-colors">
-              {{ uploading() ? 'Subiendo...' : 'Subir imagen' }}
-              <input type="file" accept="image/*" class="hidden" (change)="onFileSelected($event)" [disabled]="uploading()" />
-            </label>
-            @if (uploading()) {
-              <span class="text-sm text-brand-gray">Subiendo archivo...</span>
-            }
-          </div>
-        </div>
-
-        <div class="flex items-center gap-3 pt-2">
-          <button type="submit" [disabled]="saving()"
-                  class="bg-brand-black text-brand-white px-6 py-2.5 rounded-lg font-display text-sm uppercase tracking-wider hover:bg-brand-dark disabled:opacity-50 transition-colors">
-            {{ saving() ? 'Guardando...' : (isEdit() ? 'Actualizar' : 'Crear producto') }}
-          </button>
-          <a routerLink="/admin/products" class="text-brand-gray hover:text-brand-black text-sm font-display uppercase tracking-wider transition-colors">
-            Cancelar
-          </a>
-        </div>
-      </form>
-    </div>
-  `,
-  styles: [`
-    .admin-label {
-      display: block;
-      font-size: 0.7rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: #4A4A4A;
-      margin-bottom: 0.35rem;
-    }
-    .admin-input {
-      display: block;
-      width: 100%;
-      padding: 0.55rem 0.75rem;
-      border: 1px solid #e5e7eb;
-      border-radius: 0.5rem;
-      font-size: 0.875rem;
-      color: #0B0B0B;
-      background: #fff;
-      transition: border-color 160ms ease;
-    }
-    .admin-input:focus {
-      outline: none;
-      border-color: #0B0B0B;
-    }
-  `],
+  templateUrl: './product-form.component.html',
+  styles: [
+    `
+      .admin-label {
+        display: block;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #4a4a4a;
+        margin-bottom: 0.35rem;
+      }
+      .admin-input {
+        display: block;
+        width: 100%;
+        padding: 0.55rem 0.75rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        color: #0b0b0b;
+        background: #fff;
+        transition: border-color 160ms ease;
+      }
+      .admin-input:focus {
+        outline: none;
+        border-color: #0b0b0b;
+      }
+    `,
+  ],
 })
 export class ProductFormComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);

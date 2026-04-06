@@ -5,62 +5,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
   selector: 'app-admin-dashboard',
   standalone: true,
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
-  template: `
-    <div class="min-h-screen bg-brand-light -mt-20 pt-16">
-      <div class="bg-brand-black border-b-4 border-brand-accent">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="flex items-center justify-between h-14">
-            <h1 class="text-brand-white font-display text-lg tracking-widest uppercase">
-              Panel Admin
-            </h1>
-            <a
-              routerLink="/"
-              class="text-brand-silver hover:text-brand-accent text-sm font-display uppercase tracking-wider transition-colors"
-            >
-              ← Volver a la tienda
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <nav
-          class="flex gap-1 mb-8 bg-brand-white rounded-xl p-1.5 shadow-sm border border-gray-200 overflow-x-auto"
-        >
-          <a
-            routerLink="products"
-            routerLinkActive="bg-brand-black text-brand-white"
-            class="nav-pill px-4 py-2.5 rounded-lg text-sm font-display uppercase tracking-wider text-brand-gray hover:text-brand-black transition-colors whitespace-nowrap"
-          >
-            Productos
-          </a>
-          <a
-            routerLink="categories"
-            routerLinkActive="bg-brand-black text-brand-white"
-            class="nav-pill px-4 py-2.5 rounded-lg text-sm font-display uppercase tracking-wider text-brand-gray hover:text-brand-black transition-colors whitespace-nowrap"
-          >
-            Categorías
-          </a>
-          <a
-            routerLink="orders"
-            routerLinkActive="bg-brand-black text-brand-white"
-            class="nav-pill px-4 py-2.5 rounded-lg text-sm font-display uppercase tracking-wider text-brand-gray hover:text-brand-black transition-colors whitespace-nowrap"
-          >
-            Pedidos
-          </a>
-          <a
-            routerLink="users"
-            routerLinkActive="bg-brand-black text-brand-white"
-            class="nav-pill px-4 py-2.5 rounded-lg text-sm font-display uppercase tracking-wider text-brand-gray hover:text-brand-black transition-colors whitespace-nowrap"
-          >
-            Usuarios
-          </a>
-        </nav>
-
-        <router-outlet />
-      </div>
-    </div>
-  `,
+  templateUrl: './admin-dashboard.component.html',
   styles: [
     `
       .nav-pill {
