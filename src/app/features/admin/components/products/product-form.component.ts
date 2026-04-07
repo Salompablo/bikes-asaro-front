@@ -6,6 +6,7 @@ import { CategoryService } from '../../services/category.service';
 import { FileService } from '../../services/file.service';
 import { ProductRequest, CategoryResponse } from '../../models/admin.models';
 import { ToastService } from '../../../../shared/services/toast.service';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-product-form',
@@ -70,7 +71,7 @@ export class ProductFormComponent implements OnInit {
   };
 
   ngOnInit(): void {
-    this.categoryService.getAll().subscribe({
+    this.categoryService.getActive().subscribe({
       next: (cats) => this.categories.set(cats),
       error: () => this.toast.error('Error al cargar categorías'),
     });
@@ -131,8 +132,12 @@ export class ProductFormComponent implements OnInit {
         this.toast.success(this.isEdit() ? 'Producto actualizado' : 'Producto creado');
         this.router.navigate(['/admin/products']);
       },
-      error: () => {
-        this.toast.error('Error al guardar el producto');
+      error: (err: HttpErrorResponse) => {
+        if (err.status === 409) {
+          this.toast.error('La categoría seleccionada está inactiva. Activá la categoría primero.');
+        } else {
+          this.toast.error('Error al guardar el producto');
+        }
         this.saving.set(false);
       },
     });

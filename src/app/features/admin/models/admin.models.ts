@@ -17,6 +17,7 @@ export interface ProductRequest {
 export interface CategoryRequest {
   name: string;
   description: string;
+  defaultImageUrl: string;
 }
 
 // ── Response DTOs ──
@@ -41,6 +42,8 @@ export interface CategoryResponse {
   id: number;
   name: string;
   description: string;
+  defaultImageUrl: string;
+  isActive: boolean;
 }
 
 export interface UserResponse {
