@@ -43,6 +43,7 @@ export interface CategoryResponse {
   name: string;
   description: string;
   defaultImageUrl: string;
+  isActive: boolean;
 }
 
 export interface UserResponse {

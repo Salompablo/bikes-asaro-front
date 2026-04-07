@@ -70,10 +70,17 @@
                                     class="text-brand-gray hover:text-brand-black transition-colors text-xs font-display uppercase tracking-wider">
                                     Editar
                                 </a>
-                                <button (click)="deleteProduct(product)"
+                                @if (product.isActive) {
+                                <button (click)="openDeleteModal(product)"
                                     class="text-red-500 hover:text-red-700 transition-colors text-xs font-display uppercase tracking-wider">
                                     Baja
                                 </button>
+                                } @else {
+                                <button (click)="openActivateModal(product)"
+                                    class="text-green-600 hover:text-green-800 transition-colors text-xs font-display uppercase tracking-wider">
+                                    Alta
+                                </button>
+                                }
                             </div>
                         </td>
                     </tr>
@@ -106,3 +113,11 @@
     }
     }
 </div>
+
+<app-confirm-modal [visible]="showDeleteModal()" title="Dar de baja producto"
+    [message]="'¿Dar de baja el producto ' + (productToDelete()?.name ?? '') + '?'" confirmText="Dar de baja"
+    (confirm)="confirmDelete()" (cancel)="closeDeleteModal()" />
+
+<app-confirm-modal [visible]="showActivateModal()" title="Dar de alta producto"
+    [message]="'¿Dar de alta el producto ' + (productToActivate()?.name ?? '') + '?'" confirmText="Dar de alta"
+    variant="confirm" (confirm)="confirmActivate()" (cancel)="closeActivateModal()" />

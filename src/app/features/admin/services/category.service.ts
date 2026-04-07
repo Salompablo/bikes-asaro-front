@@ -12,6 +12,10 @@ export class CategoryService {
     return this.http.get<CategoryResponse[]>(API_ENDPOINTS.CATEGORIES.BASE);
   }
 
+  getActive(): Observable<CategoryResponse[]> {
+    return this.http.get<CategoryResponse[]>(API_ENDPOINTS.CATEGORIES.ACTIVE);
+  }
+
   getById(id: number): Observable<CategoryResponse> {
     return this.http.get<CategoryResponse>(API_ENDPOINTS.CATEGORIES.BY_ID(id));
   }
@@ -26,5 +30,9 @@ export class CategoryService {
 
   delete(id: number): Observable<void> {
     return this.http.delete<void>(API_ENDPOINTS.CATEGORIES.BY_ID(id));
+  }
+
+  activate(id: number): Observable<void> {
+    return this.http.patch<void>(API_ENDPOINTS.CATEGORIES.ACTIVATE(id), null);
   }
 }

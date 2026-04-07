@@ -35,4 +35,8 @@ export class ProductService {
   delete(id: number): Observable<void> {
     return this.http.delete<void>(API_ENDPOINTS.PRODUCTS.BY_ID(id));
   }
+
+  activate(id: number): Observable<void> {
+    return this.http.patch<void>(API_ENDPOINTS.PRODUCTS.ACTIVATE(id), null);
+  }
 }
