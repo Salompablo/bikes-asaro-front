@@ -133,7 +133,9 @@ export class CategoryListComponent implements OnInit {
       },
       error: (err: HttpErrorResponse) => {
         if (err.status === 409) {
-          this.toast.error('No se puede dar de baja: la categoría tiene productos activos. Dá de baja esos productos primero.');
+          this.toast.error(
+            'No se puede dar de baja: la categoría tiene productos activos. Dá de baja esos productos primero.',
+          );
         } else {
           this.toast.error('Error al dar de baja la categoría');
         }

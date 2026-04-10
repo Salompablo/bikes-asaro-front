@@ -5,6 +5,7 @@ import { ProductResponse, PageResponse } from '../../models/admin.models';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { CurrencyPipe } from '@angular/common';
 import { ConfirmModalComponent } from '../../../../shared/components/confirm-modal/confirm-modal.component';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-product-list',
@@ -33,7 +34,7 @@ export class ProductListComponent implements OnInit {
 
   loadProducts(): void {
     this.loading.set(true);
-    this.productService.getProducts(this.currentPage()).subscribe({
+    this.productService.getAllProducts(this.currentPage()).subscribe({
       next: (res) => {
         this.products.set(res.content);
         this.totalPages.set(res.page.totalPages);
@@ -93,7 +94,13 @@ export class ProductListComponent implements OnInit {
         this.toast.success('Producto dado de alta');
         this.loadProducts();
       },
-      error: () => this.toast.error('Error al dar de alta el producto'),
+      error: (err: HttpErrorResponse) => {
+        const msg = err.error?.message ?? '';
+        const toast = msg.toLowerCase().includes('inactive category')
+          ? 'La categoría de este producto está desactivada. Reactivala primero para poder dar de alta el producto.'
+          : 'Error al dar de alta el producto';
+        this.toast.error(toast);
+      },
     });
   }
 }
