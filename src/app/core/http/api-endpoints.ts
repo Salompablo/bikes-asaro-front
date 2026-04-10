@@ -17,6 +17,7 @@ export const API_ENDPOINTS = {
   },
   PRODUCTS: {
     BASE: '/products',
+    ADMIN: '/products/admin',
     BY_ID: (id: number) => `/products/${id}`,
     ACTIVATE: (id: number) => `/products/${id}/activate`,
   },

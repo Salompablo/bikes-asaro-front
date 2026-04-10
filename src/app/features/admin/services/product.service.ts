@@ -20,6 +20,14 @@ export class ProductService {
     return this.http.get<PageResponse<ProductResponse>>(API_ENDPOINTS.PRODUCTS.BASE, { params });
   }
 
+  getAllProducts(
+    page = 0,
+    size = 10,
+  ): Observable<PageResponse<ProductResponse>> {
+    const params = new HttpParams().set('page', page).set('size', size);
+    return this.http.get<PageResponse<ProductResponse>>(API_ENDPOINTS.PRODUCTS.ADMIN, { params });
+  }
+
   getById(id: number): Observable<ProductResponse> {
     return this.http.get<ProductResponse>(API_ENDPOINTS.PRODUCTS.BY_ID(id));
   }
