@@ -10,8 +10,20 @@ export const routes: Routes = [
     loadChildren: () => import('./features/admin/admin.routes').then((r) => r.adminRoutes),
   },
   {
+    path: 'catalog',
+    loadComponent: () =>
+      import('./features/catalog/catalog.component').then((c) => c.CatalogComponent),
+  },
+  {
+    path: 'products/:id',
+    loadComponent: () =>
+      import('./features/catalog/product-detail/product-detail.component').then(
+        (c) => c.ProductDetailComponent,
+      ),
+  },
+  {
     path: '',
     pathMatch: 'full',
-    redirectTo: '',
+    redirectTo: 'catalog',
   },
 ];

@@ -77,4 +77,12 @@ export class OrderListComponent implements OnInit {
     };
     return map[status] ?? 'bg-gray-100 text-gray-700';
   }
+
+  deliveryMethodLabel(method: string): string {
+    const map: Record<string, string> = {
+      STORE_PICKUP: 'Retiro en tienda',
+      SHIPPING: 'Envío a domicilio',
+    };
+    return map[method] ?? method;
+  }
 }

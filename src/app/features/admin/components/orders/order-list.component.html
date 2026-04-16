@@ -30,8 +30,8 @@
                         <td class="px-4 py-3 text-brand-gray text-xs">{{ order.createdAt | date:'dd/MM/yyyy HH:mm' }}
                         </td>
                         <td class="px-4 py-3 text-right tabular-nums">{{ order.totalAmount |
-                            currency:'ARS':'symbol':'1.0-0' }}</td>
-                        <td class="px-4 py-3 text-brand-gray text-xs">{{ order.shippingAddress || 'Retiro en tienda' }}
+                            currency:'':'$':'1.0-0' }}</td>
+                        <td class="px-4 py-3 text-brand-gray text-xs">{{ deliveryMethodLabel(order.deliveryMethod) }}
                         </td>
                         <td class="px-4 py-3 text-center">
                             <span class="inline-block px-2 py-0.5 rounded-full text-xs font-bold uppercase"

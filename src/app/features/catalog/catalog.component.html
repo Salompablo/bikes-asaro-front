@@ -1,0 +1,119 @@
+<section class="min-h-screen">
+    <!-- ── Sticky filter bar ── -->
+    <div class="sticky top-20 z-30 bg-brand-light/80 backdrop-blur-lg border-b border-gray-200/60">
+        <div
+            class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+
+            <!-- Category pills -->
+            <nav class="flex items-center gap-2 overflow-x-auto scrollbar-hide" aria-label="Categorías">
+                <button (click)="changeCategory(undefined)"
+                    class="shrink-0 px-4 py-1.5 rounded-full text-xs font-display uppercase tracking-widest transition-colors duration-200"
+                    [class]="!filters().categoryId
+            ? 'bg-brand-black text-brand-white'
+            : 'bg-brand-white text-brand-gray hover:bg-gray-100'">
+                    Todas
+                </button>
+                @for (cat of categories(); track cat.id) {
+                <button (click)="changeCategory(cat.id)"
+                    class="shrink-0 px-4 py-1.5 rounded-full text-xs font-display uppercase tracking-widest transition-colors duration-200"
+                    [class]="filters().categoryId === cat.id
+              ? 'bg-brand-black text-brand-white'
+              : 'bg-brand-white text-brand-gray hover:bg-gray-100'">
+                    {{ cat.name }}
+                </button>
+                }
+            </nav>
+
+            <!-- Search + Sort -->
+            <div class="flex items-center gap-3 shrink-0">
+                <div class="relative">
+                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-gray pointer-events-none"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-4.35-4.35M10.8 18a7.2 7.2 0 100-14.4 7.2 7.2 0 000 14.4z" />
+                    </svg>
+                    <input type="text" placeholder="Buscar..."
+                        class="w-44 sm:w-56 pl-9 pr-3 py-2 rounded-lg bg-brand-white border border-gray-200 text-sm text-brand-black placeholder:text-brand-silver focus:outline-none focus:ring-2 focus:ring-brand-black/10 transition"
+                        [value]="filters().search ?? ''" (input)="changeSearch($any($event.target).value)" />
+                </div>
+
+                <select
+                    class="appearance-none bg-brand-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-brand-black cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-black/10 transition"
+                    [value]="filters().sort" (change)="changeSort($any($event.target).value)">
+                    @for (opt of sortOptions; track opt.value) {
+                    <option [value]="opt.value">{{ opt.label }}</option>
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Product grid ── -->
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
+
+        @if (loading()) {
+        <!-- Skeleton loader -->
+        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            @for (i of [1,2,3,4,5,6,7,8]; track i) {
+            <div class="animate-pulse">
+                <div class="aspect-square rounded-2xl bg-gray-200"></div>
+                <div class="mt-4 h-4 w-3/4 rounded bg-gray-200"></div>
+                <div class="mt-2 h-4 w-1/3 rounded bg-gray-200"></div>
+            </div>
+            }
+        </div>
+        } @else if (products().length === 0) {
+        <!-- Empty state -->
+        <div class="flex flex-col items-center justify-center py-24 text-center">
+            <svg class="w-16 h-16 text-brand-silver mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
+            <p class="text-brand-gray text-lg font-display uppercase tracking-wider">Sin resultados</p>
+            <p class="text-brand-silver text-sm mt-1">Probá ajustar los filtros o buscar otra cosa.</p>
+        </div>
+        } @else {
+        <!-- Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            @for (product of products(); track product.id) {
+            <a [routerLink]="['/products', product.id]" class="group block">
+                <div class="bg-brand-white rounded-2xl overflow-hidden">
+                    <div class="aspect-square overflow-hidden">
+                        <img [src]="productImage(product)" [alt]="product.name" (error)="onImageError($event, product)"
+                            class="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                            loading="lazy" />
+                    </div>
+                    <div class="p-4">
+                        <p class="text-xs text-brand-gray uppercase tracking-wider mb-1">{{ product.category.name }}
+                        </p>
+                        <h3 class="font-display font-black text-brand-black leading-tight line-clamp-2">
+                            {{ product.name }}
+                        </h3>
+                        <p class="mt-2 text-lg tabular-nums text-brand-black">
+                            {{ product.price | currency: '' : '$' : '1.0-0' }}
+                        </p>
+                    </div>
+                </div>
+            </a>
+            }
+        </div>
+
+        <!-- Pagination -->
+        @if (totalPages() > 1) {
+        <div class="flex items-center justify-center gap-3 pt-12 pb-4">
+            <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 0"
+                class="px-4 py-2 rounded-lg text-sm font-display uppercase tracking-wider border border-gray-200 bg-brand-white text-brand-black disabled:opacity-30 hover:bg-gray-50 transition-colors">
+                ← Anterior
+            </button>
+            <span class="text-sm text-brand-gray tabular-nums">
+                {{ currentPage + 1 }} / {{ totalPages() }}
+            </span>
+            <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage + 1 >= totalPages()"
+                class="px-4 py-2 rounded-lg text-sm font-display uppercase tracking-wider border border-gray-200 bg-brand-white text-brand-black disabled:opacity-30 hover:bg-gray-50 transition-colors">
+                Siguiente →
+            </button>
+        </div>
+        }
+        }
+    </div>
+</section>
