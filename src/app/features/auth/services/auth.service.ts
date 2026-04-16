@@ -16,6 +16,7 @@ const TOKEN_KEY = 'auth_token';
 
 interface JwtPayload {
   sub?: string;
+  userId?: number;
   role?: string;
   exp?: number;
 }
@@ -30,6 +31,7 @@ export class AuthService {
   readonly role = computed(() => this.decodeToken()?.role?.replace('ROLE_', '') ?? null);
   readonly isAdmin = computed(() => this.role() === 'ADMIN');
   readonly userEmail = computed(() => this.decodeToken()?.sub ?? null);
+  readonly userId = computed(() => this.decodeToken()?.userId ?? null);
 
   getToken(): string | null {
     return this.tokenSignal();

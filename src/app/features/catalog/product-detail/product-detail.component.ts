@@ -197,7 +197,7 @@ export class ProductDetailComponent implements OnInit {
   }
 
   isOwnReview(review: ReviewResponse): boolean {
-    return this.authService.userEmail() === review.userEmail;
+    return this.authService.userId() === review.userId;
   }
 
   confirmDeleteReview(reviewId: number): void {
