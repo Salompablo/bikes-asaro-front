@@ -52,7 +52,7 @@
                         <td class="px-4 py-3 font-medium text-brand-black">{{ product.name }}</td>
                         <td class="px-4 py-3 text-brand-gray">{{ product.category.name }}</td>
                         <td class="px-4 py-3 text-right tabular-nums">
-                            {{ product.price | currency: 'ARS' : 'symbol' : '1.0-0' }}
+                            {{ product.price | currency: '' : '$' : '1.0-0' }}
                         </td>
                         <td class="px-4 py-3 text-right tabular-nums">{{ product.stock }}</td>
                         <td class="px-4 py-3 text-center">

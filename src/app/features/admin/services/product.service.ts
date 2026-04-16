@@ -3,27 +3,26 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { PageResponse, ProductRequest, ProductResponse } from '../models/admin.models';
 import { API_ENDPOINTS } from '../../../core/http/api-endpoints';
+import { ProductFilterRequest } from '../../catalog/models/catalog.models';
 
 @Injectable({ providedIn: 'root' })
 export class ProductService {
   private readonly http = inject(HttpClient);
 
-  getProducts(
-    page = 0,
-    size = 10,
-    categoryId?: number,
-    search?: string,
-  ): Observable<PageResponse<ProductResponse>> {
-    let params = new HttpParams().set('page', page).set('size', size);
-    if (categoryId) params = params.set('categoryId', categoryId);
-    if (search) params = params.set('search', search);
+  getPublicProducts(filters: ProductFilterRequest): Observable<PageResponse<ProductResponse>> {
+    let params = new HttpParams()
+      .set('page', filters.page)
+      .set('size', filters.size)
+      .set('sort', filters.sort);
+    if (filters.categoryId != null) params = params.set('categoryId', filters.categoryId);
+    if (filters.search) params = params.set('search', filters.search);
+    if (filters.minPrice != null) params = params.set('minPrice', filters.minPrice);
+    if (filters.maxPrice != null) params = params.set('maxPrice', filters.maxPrice);
+    if (filters.inStock != null) params = params.set('inStock', filters.inStock);
     return this.http.get<PageResponse<ProductResponse>>(API_ENDPOINTS.PRODUCTS.BASE, { params });
   }
 
-  getAllProducts(
-    page = 0,
-    size = 10,
-  ): Observable<PageResponse<ProductResponse>> {
+  getAllProducts(page = 0, size = 10): Observable<PageResponse<ProductResponse>> {
     const params = new HttpParams().set('page', page).set('size', size);
     return this.http.get<PageResponse<ProductResponse>>(API_ENDPOINTS.PRODUCTS.ADMIN, { params });
   }

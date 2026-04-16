@@ -29,6 +29,7 @@ export class AuthService {
   readonly isLoggedIn = computed(() => !!this.tokenSignal());
   readonly role = computed(() => this.decodeToken()?.role?.replace('ROLE_', '') ?? null);
   readonly isAdmin = computed(() => this.role() === 'ADMIN');
+  readonly userEmail = computed(() => this.decodeToken()?.sub ?? null);
 
   getToken(): string | null {
     return this.tokenSignal();

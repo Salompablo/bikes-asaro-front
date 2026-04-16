@@ -36,6 +36,8 @@ export interface ProductResponse {
   length: number;
   width: number;
   height: number;
+  averageRating: number;
+  reviewCount: number;
 }
 
 export interface CategoryResponse {
@@ -63,6 +65,7 @@ export interface OrderResponse {
   totalAmount: number;
   createdAt: string;
   items: OrderItemResponse[];
+  deliveryMethod: string;
   shippingAddress: string;
   zipCode: string;
   shippingCost: number;

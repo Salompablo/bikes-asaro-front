@@ -26,6 +26,11 @@ export const API_ENDPOINTS = {
     ORDER_STATUS: (id: number) => `/admin/orders/${id}/status`,
     USERS: '/admin/users',
   },
+  REVIEWS: {
+    BASE: '/reviews',
+    BY_ID: (id: number) => `/reviews/${id}`,
+    BY_PRODUCT: (productId: number) => `/products/${productId}/reviews`,
+  },
   FILES: {
     UPLOAD: '/files/upload',
   },

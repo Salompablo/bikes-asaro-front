@@ -1,0 +1,324 @@
+@if (loading()) {
+<!-- Skeleton -->
+<section class="min-h-screen pt-28 pb-16">
+    <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
+            <div class="animate-pulse">
+                <div class="aspect-square rounded-2xl bg-gray-200"></div>
+                <div class="flex justify-center gap-2 mt-4">
+                    <div class="w-3 h-3 rounded-full bg-gray-200"></div>
+                    <div class="w-3 h-3 rounded-full bg-gray-200"></div>
+                    <div class="w-3 h-3 rounded-full bg-gray-200"></div>
+                </div>
+            </div>
+            <div class="animate-pulse flex flex-col gap-4 pt-4">
+                <div class="h-4 w-1/3 rounded bg-gray-200"></div>
+                <div class="h-8 w-3/4 rounded bg-gray-200"></div>
+                <div class="h-6 w-1/4 rounded bg-gray-200"></div>
+                <div class="h-20 w-full rounded bg-gray-200 mt-4"></div>
+                <div class="h-12 w-full rounded bg-gray-200 mt-8"></div>
+            </div>
+        </div>
+    </div>
+</section>
+} @else if (!product()) {
+<!-- Not found -->
+<section class="min-h-screen flex flex-col items-center justify-center text-center px-4">
+    <svg class="w-16 h-16 text-brand-silver mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+            d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
+    </svg>
+    <h2 class="text-2xl text-brand-black mb-2">Producto no encontrado</h2>
+    <p class="text-brand-gray mb-6">Es posible que haya sido eliminado o que la URL sea incorrecta.</p>
+    <a routerLink="/catalog"
+        class="inline-block px-6 py-3 bg-brand-black text-brand-white font-display uppercase tracking-widest text-sm rounded-lg hover:bg-brand-dark transition-colors">
+        Volver al catálogo
+    </a>
+</section>
+} @else {
+<section class="min-h-screen pt-28 pb-16">
+    <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+
+        <!-- Breadcrumb -->
+        <nav class="mb-8 flex items-center gap-2 text-sm text-brand-gray" aria-label="Breadcrumb">
+            <a routerLink="/catalog" class="hover:text-brand-black transition-colors">Catálogo</a>
+            <span>/</span>
+            <a routerLink="/catalog" [queryParams]="{ category: product()!.category.id }"
+                class="hover:text-brand-black transition-colors">
+                {{ product()!.category.name }}
+            </a>
+            <span>/</span>
+            <span class="text-brand-black font-medium truncate max-w-[200px]">{{ product()!.name }}</span>
+        </nav>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
+
+            <!-- ── Image carousel ── -->
+            <div class="relative">
+                <div class="aspect-square rounded-2xl overflow-hidden bg-brand-white relative group">
+                    <div class="relative w-full h-full">
+                        @for (img of images(); track $index) {
+                        <img [src]="img" [alt]="product()!.name" (error)="onImageError($event)"
+                            class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 ease-in-out"
+                            [style.transform]="$index === currentImageIndex()
+                                ? 'translateX(0)'
+                                : $index < currentImageIndex()
+                                    ? 'translateX(-100%)'
+                                    : 'translateX(100%)'" [class.z-10]="$index === currentImageIndex()" />
+                        }
+                    </div>
+
+                    @if (images().length > 1) {
+                    <!-- Prev arrow -->
+                    <button (click)="prevImage()" type="button" aria-label="Imagen anterior"
+                        class="absolute z-20 left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-brand-black/60 text-brand-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-brand-black/80">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <!-- Next arrow -->
+                    <button (click)="nextImage()" type="button" aria-label="Imagen siguiente"
+                        class="absolute z-20 right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-brand-black/60 text-brand-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-brand-black/80">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                    }
+                </div>
+
+                <!-- Dot indicators -->
+                @if (images().length > 1) {
+                <div class="flex justify-center gap-2 mt-4" role="tablist" aria-label="Navegación de imágenes">
+                    @for (img of images(); track $index) {
+                    <button (click)="goToImage($index)" type="button" role="tab"
+                        [attr.aria-selected]="currentImageIndex() === $index"
+                        [attr.aria-label]="'Imagen ' + ($index + 1)"
+                        class="w-2.5 h-2.5 rounded-full transition-all duration-200" [class]="currentImageIndex() === $index
+                            ? 'bg-brand-accent scale-125'
+                            : 'bg-brand-silver hover:bg-brand-gray'">
+                    </button>
+                    }
+                </div>
+                }
+            </div>
+
+            <!-- ── Product info ── -->
+            <div class="flex flex-col">
+
+                <!-- Category -->
+                <p class="text-xs text-brand-gray uppercase tracking-widest mb-2">
+                    {{ product()!.category.name }}
+                </p>
+
+                <!-- Name -->
+                <h1 class="text-3xl lg:text-4xl leading-tight mb-3">
+                    {{ product()!.name }}
+                </h1>
+
+                <!-- Rating summary -->
+                @if (product()!.reviewCount > 0) {
+                <div class="flex items-center gap-2 mb-4">
+                    <app-star-rating [rating]="product()!.averageRating" />
+                    <span class="text-sm font-medium text-brand-black tabular-nums">
+                        {{ product()!.averageRating | number: '1.1-1' }}
+                    </span>
+                    <span class="text-sm text-brand-gray">
+                        ({{ product()!.reviewCount }} {{ product()!.reviewCount === 1 ? 'reseña' : 'reseñas' }})
+                    </span>
+                </div>
+                }
+
+                <!-- Price -->
+                <p class="text-3xl font-bold tabular-nums text-brand-black mb-6">
+                    {{ product()!.price | currency: '' : '$' : '1.0-0' }}
+                </p>
+
+                <!-- Stock -->
+                @if (isOutOfStock()) {
+                <p class="inline-flex items-center gap-1.5 text-sm font-medium text-red-600 mb-6">
+                    <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                    Sin stock
+                </p>
+                } @else {
+                <p class="inline-flex items-center gap-1.5 text-sm font-medium text-green-700 mb-6">
+                    <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                    En stock
+                    @if (product()!.stock <= 5) { <span class="text-brand-gray font-normal">(¡Quedan {{ product()!.stock
+                        }}!)</span>
+                        }
+                </p>
+                }
+
+                <!-- Description -->
+                <div class="prose prose-sm text-brand-gray leading-relaxed mb-8">
+                    <p>{{ product()!.description }}</p>
+                </div>
+
+                <!-- Quantity selector + Add to cart -->
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mt-auto">
+                    <!-- Quantity -->
+                    <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden shrink-0">
+                        <button (click)="decrementQuantity()" type="button" aria-label="Reducir cantidad"
+                            class="w-11 h-11 flex items-center justify-center text-brand-gray hover:bg-gray-100 transition-colors"
+                            [disabled]="quantity() <= 1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                            </svg>
+                        </button>
+                        <span
+                            class="w-12 h-11 flex items-center justify-center text-sm font-bold tabular-nums border-x border-gray-200">
+                            {{ quantity() }}
+                        </span>
+                        <button (click)="incrementQuantity()" type="button" aria-label="Aumentar cantidad"
+                            class="w-11 h-11 flex items-center justify-center text-brand-gray hover:bg-gray-100 transition-colors"
+                            [disabled]="quantity() >= product()!.stock">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 4v16m8-8H4" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Add to cart button -->
+                    <button (click)="addToCart()" type="button" [disabled]="isOutOfStock()"
+                        class="flex-1 h-11 flex items-center justify-center gap-2 px-8 bg-brand-accent text-brand-black font-display uppercase tracking-widest text-sm font-bold rounded-lg transition-all duration-200 hover:brightness-110 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:brightness-100">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        Agregar al carrito
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Reviews section ── -->
+        <div class="mt-16 border-t border-gray-200 pt-12">
+            <h2 class="text-2xl mb-8">Reseñas</h2>
+
+            <!-- Review form (only for logged-in users) -->
+            @if (authService.isLoggedIn() && !authService.isAdmin()) {
+            <div #reviewFormEl class="mb-12 bg-brand-white rounded-2xl p-6 sm:p-8 border border-gray-200">
+                <h3 class="text-lg font-display uppercase tracking-widest font-bold mb-6">
+                    {{ isEditMode() ? 'Editar reseña' : 'Dejá tu reseña' }}
+                </h3>
+                <form [formGroup]="reviewForm" (ngSubmit)="submitReview()" class="space-y-5">
+                    <!-- Star selector -->
+                    <div>
+                        <label class="block text-sm font-medium text-brand-gray mb-2">Valoración</label>
+                        <app-star-rating [rating]="formRating()" [readonly]="false"
+                            (ratingChange)="setFormRating($event)" />
+                    </div>
+
+                    <!-- Comment -->
+                    <div>
+                        <label for="reviewComment" class="block text-sm font-medium text-brand-gray mb-2">
+                            Comentario
+                        </label>
+                        <textarea id="reviewComment" formControlName="comment" rows="4"
+                            placeholder="Contá tu experiencia con este producto..."
+                            class="w-full rounded-lg border border-gray-200 px-4 py-3 text-sm text-brand-black placeholder:text-brand-silver focus:outline-none focus:ring-2 focus:ring-brand-black/10 resize-none transition"></textarea>
+                        @if (reviewForm.get('comment')?.touched && reviewForm.get('comment')?.hasError('required')) {
+                        <p class="mt-1 text-xs text-red-600">El comentario es obligatorio</p>
+                        }
+                        @if (reviewForm.get('comment')?.touched && reviewForm.get('comment')?.hasError('minlength')) {
+                        <p class="mt-1 text-xs text-red-600">Mínimo 10 caracteres</p>
+                        }
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex items-center gap-3">
+                        <button type="submit" [disabled]="submittingReview()"
+                            class="px-6 py-2.5 bg-brand-black text-brand-white font-display uppercase tracking-widest text-sm font-bold rounded-lg transition-all duration-200 hover:bg-brand-dark active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed">
+                            {{ submittingReview() ? 'Enviando...' : (isEditMode() ? 'Actualizar' : 'Publicar') }}
+                        </button>
+                        @if (isEditMode()) {
+                        <button type="button" (click)="cancelEdit()"
+                            class="px-6 py-2.5 border border-gray-200 text-brand-gray font-display uppercase tracking-widest text-sm font-bold rounded-lg transition-colors hover:bg-gray-50">
+                            Cancelar
+                        </button>
+                        }
+                    </div>
+                </form>
+            </div>
+            }
+
+            <!-- Reviews list -->
+            @if (reviews().length === 0 && !reviewsLoading()) {
+            <div class="text-center py-12">
+                <svg class="w-12 h-12 text-brand-silver mx-auto mb-4" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                <p class="text-brand-gray text-sm">Aún no hay reseñas para este producto.</p>
+            </div>
+            } @else {
+            <div class="space-y-6">
+                @for (review of reviews(); track review.id) {
+                <div class="border-b border-gray-100 pb-6 last:border-0">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-3">
+                            <!-- Avatar -->
+                            <div
+                                class="w-9 h-9 rounded-full bg-brand-black text-brand-white flex items-center justify-center text-sm font-bold shrink-0">
+                                {{ review.userFirstName.charAt(0) }}{{ review.userLastName.charAt(0) }}
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-brand-black">
+                                    {{ review.userFirstName }} {{ review.userLastName }}
+                                </p>
+                                <p class="text-xs text-brand-silver">
+                                    {{ review.createdAt | date: 'd MMM y' }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            @if (isOwnReview(review)) {
+                            <!-- Edit button -->
+                            <button (click)="startEdit(review)" type="button" aria-label="Editar reseña"
+                                class="w-8 h-8 flex items-center justify-center rounded-lg text-brand-gray hover:text-brand-black hover:bg-gray-100 transition-colors"
+                                title="Editar reseña">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                            </button>
+                            <!-- Delete button -->
+                            <button (click)="confirmDeleteReview(review.id)" type="button" aria-label="Eliminar reseña"
+                                class="w-8 h-8 flex items-center justify-center rounded-lg text-brand-gray hover:text-red-600 hover:bg-red-50 transition-colors"
+                                title="Eliminar reseña">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                            }
+                            <app-star-rating [rating]="review.rating" />
+                        </div>
+                    </div>
+                    <p class="text-sm text-brand-gray leading-relaxed mt-3 pl-12">
+                        {{ review.comment }}
+                    </p>
+                </div>
+                }
+            </div>
+
+            <!-- Load more -->
+            @if (reviewPage() + 1 < reviewTotalPages()) { <div class="text-center mt-8">
+                <button (click)="loadMoreReviews()" type="button" [disabled]="reviewsLoading()"
+                    class="px-6 py-2.5 border border-gray-200 text-brand-gray font-display uppercase tracking-widest text-xs font-bold rounded-lg transition-colors hover:bg-gray-50 disabled:opacity-40">
+                    {{ reviewsLoading() ? 'Cargando...' : 'Ver más reseñas' }}
+                </button>
+        </div>
+        }
+        }
+    </div>
+    </div>
+</section>
+
+<!-- Delete review confirm modal -->
+<app-confirm-modal [visible]="showDeleteModal()" title="Eliminar reseña"
+    message="¿Estás seguro de que querés eliminar tu reseña? Esta acción no se puede deshacer." confirmText="Eliminar"
+    variant="destructive" (confirm)="deleteReview()" (cancel)="cancelDeleteReview()" />
+}
