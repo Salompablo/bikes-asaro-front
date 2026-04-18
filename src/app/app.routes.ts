@@ -22,6 +22,32 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'checkout',
+    loadComponent: () =>
+      import('./features/checkout/checkout.component').then((c) => c.CheckoutComponent),
+  },
+  {
+    path: 'checkout/success',
+    loadComponent: () =>
+      import('./features/checkout/checkout-success.component').then(
+        (c) => c.CheckoutSuccessComponent,
+      ),
+  },
+  {
+    path: 'checkout/failure',
+    loadComponent: () =>
+      import('./features/checkout/checkout-failure.component').then(
+        (c) => c.CheckoutFailureComponent,
+      ),
+  },
+  {
+    path: 'checkout/pending',
+    loadComponent: () =>
+      import('./features/checkout/checkout-pending.component').then(
+        (c) => c.CheckoutPendingComponent,
+      ),
+  },
+  {
     path: '',
     pathMatch: 'full',
     redirectTo: 'catalog',

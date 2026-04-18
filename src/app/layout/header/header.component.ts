@@ -45,6 +45,7 @@ export class HeaderComponent {
 
   logout(): void {
     this.authService.logout();
+    this.cartState.clearCart();
     this.isAccountMenuOpen = false;
     this.router.navigate(['/']);
   }

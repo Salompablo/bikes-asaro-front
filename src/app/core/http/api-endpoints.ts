@@ -34,4 +34,7 @@ export const API_ENDPOINTS = {
   FILES: {
     UPLOAD: '/files/upload',
   },
+  CHECKOUT: {
+    CREATE_PREFERENCE: '/checkout/create-preference',
+  },
 } as const;
