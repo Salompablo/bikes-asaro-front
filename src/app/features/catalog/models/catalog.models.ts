@@ -1,7 +1,8 @@
 export interface ProductFilterRequest {
   page: number;
   size: number;
-  sort: string;
+  sortField: string;
+  sortDirection: string;
   categoryId?: number;
   search?: string;
   minPrice?: number;
@@ -11,7 +12,7 @@ export interface ProductFilterRequest {
 
 export interface SortOption {
   label: string;
-  value: string;
+  value: string; // composite "sortField,sortDirection"
 }
 
 export const SORT_OPTIONS: SortOption[] = [
@@ -24,6 +25,6 @@ export const SORT_OPTIONS: SortOption[] = [
 export const DEFAULT_FILTERS: ProductFilterRequest = {
   page: 0,
   size: 12,
-  sort: 'createdAt,desc',
-  inStock: true,
+  sortField: 'createdAt',
+  sortDirection: 'desc',
 };

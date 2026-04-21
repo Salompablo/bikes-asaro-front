@@ -22,16 +22,25 @@
                             SKU
                         </th>
                         <th class="text-left px-4 py-3 font-display uppercase tracking-wider text-xs text-brand-gray">
-                            Nombre
+                            <button type="button" (click)="changeSort('name')" class="inline-flex items-center gap-1 hover:text-brand-black">
+                                Nombre
+                                <span>{{ sortIndicator('name') }}</span>
+                            </button>
                         </th>
                         <th class="text-left px-4 py-3 font-display uppercase tracking-wider text-xs text-brand-gray">
                             Categoría
                         </th>
                         <th class="text-right px-4 py-3 font-display uppercase tracking-wider text-xs text-brand-gray">
-                            Precio
+                            <button type="button" (click)="changeSort('price')" class="inline-flex items-center gap-1 hover:text-brand-black ml-auto">
+                                Precio
+                                <span>{{ sortIndicator('price') }}</span>
+                            </button>
                         </th>
                         <th class="text-right px-4 py-3 font-display uppercase tracking-wider text-xs text-brand-gray">
-                            Stock
+                            <button type="button" (click)="changeSort('stock')" class="inline-flex items-center gap-1 hover:text-brand-black ml-auto">
+                                Stock
+                                <span>{{ sortIndicator('stock') }}</span>
+                            </button>
                         </th>
                         <th class="text-center px-4 py-3 font-display uppercase tracking-wider text-xs text-brand-gray">
                             Estado
@@ -45,8 +54,8 @@
                     @for (product of products(); track product.id) {
                     <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                         <td class="px-4 py-3">
-                            <img [src]="product.images.length > 0 ? product.images[0] : product.category.defaultImageUrl"
-                                [alt]="product.name" class="w-10 h-10 rounded-lg object-cover border border-gray-200" />
+                            <img [src]="productImage(product)" [alt]="product.name" (error)="onImageError($event)"
+                                class="w-10 h-10 rounded-lg object-cover border border-gray-200" />
                         </td>
                         <td class="px-4 py-3 font-mono text-xs text-brand-gray">{{ product.sku }}</td>
                         <td class="px-4 py-3 font-medium text-brand-black">{{ product.name }}</td>

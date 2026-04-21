@@ -1,5 +1,5 @@
 import { Component, computed, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -30,6 +30,7 @@ import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/
 })
 export class ProductDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly productService = inject(ProductService);
   private readonly cartState = inject(CartStateService);
   private readonly toast = inject(ToastService);
@@ -44,6 +45,7 @@ export class ProductDetailComponent implements OnInit {
   quantity = signal(1);
   currentImageIndex = signal(0);
   slideDirection = signal<'left' | 'right' | null>(null);
+  fallbackCategoryImageInUse = signal(false);
 
   // Reviews
   reviews = signal<ReviewResponse[]>([]);
@@ -54,6 +56,7 @@ export class ProductDetailComponent implements OnInit {
   editingReviewId = signal<number | null>(null);
   formRating = signal(0);
   showDeleteModal = signal(false);
+  showLoginRequiredModal = signal(false);
   deletingReviewId = signal<number | null>(null);
 
   reviewForm = this.fb.group({
@@ -69,6 +72,16 @@ export class ProductDetailComponent implements OnInit {
 
   currentImage = computed(() => this.images()[this.currentImageIndex()]);
 
+  usesCategoryImage = computed(() => {
+    const p = this.product();
+    if (!p) return false;
+    return p.images.filter((img) => !!img?.trim()).length === 0 && !!p.category.defaultImageUrl;
+  });
+
+  showGenericImageNotice = computed(
+    () => this.usesCategoryImage() || this.fallbackCategoryImageInUse(),
+  );
+
   isOutOfStock = computed(() => {
     const p = this.product();
     return p ? p.stock <= 0 : true;
@@ -83,6 +96,7 @@ export class ProductDetailComponent implements OnInit {
     this.productService.getById(this.productId).subscribe({
       next: (product) => {
         this.product.set(product);
+        this.fallbackCategoryImageInUse.set(false);
         this.loading.set(false);
         this.loadReviews();
       },
@@ -245,16 +259,19 @@ export class ProductDetailComponent implements OnInit {
   }
 
   prevImage(): void {
+    this.fallbackCategoryImageInUse.set(false);
     this.slideDirection.set('right');
     this.currentImageIndex.update((i) => (i > 0 ? i - 1 : this.images().length - 1));
   }
 
   nextImage(): void {
+    this.fallbackCategoryImageInUse.set(false);
     this.slideDirection.set('left');
     this.currentImageIndex.update((i) => (i < this.images().length - 1 ? i + 1 : 0));
   }
 
   goToImage(index: number): void {
+    this.fallbackCategoryImageInUse.set(false);
     this.slideDirection.set(index > this.currentImageIndex() ? 'left' : 'right');
     this.currentImageIndex.set(index);
   }
@@ -272,14 +289,31 @@ export class ProductDetailComponent implements OnInit {
     const p = this.product();
     if (!p || this.isOutOfStock()) return;
 
+    if (!this.authService.isLoggedIn()) {
+      this.showLoginRequiredModal.set(true);
+      return;
+    }
+
     this.cartState.addItem({
       productId: p.id,
       name: p.name,
       price: p.price,
       image: this.images()[0],
       quantity: this.quantity(),
+      isGenericImage: this.usesCategoryImage(),
     });
     this.toast.success(`${p.name} agregado al carrito`);
+  }
+
+  cancelLoginRequired(): void {
+    this.showLoginRequiredModal.set(false);
+  }
+
+  goToLogin(): void {
+    this.showLoginRequiredModal.set(false);
+    this.router.navigate(['/auth/login'], {
+      queryParams: { returnUrl: this.router.url },
+    });
   }
 
   onImageError(event: Event): void {
@@ -288,6 +322,7 @@ export class ProductDetailComponent implements OnInit {
     const img = event.target as HTMLImageElement;
     const fallback = p.category.defaultImageUrl;
     if (img.src !== fallback) {
+      this.fallbackCategoryImageInUse.set(true);
       img.src = fallback;
     }
   }

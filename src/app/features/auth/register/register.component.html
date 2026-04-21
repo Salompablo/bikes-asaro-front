@@ -118,7 +118,8 @@
 
         <p class="text-sm text-brand-gray text-center mt-8">
             ¿Ya tenés cuenta?
-            <a routerLink="/auth/login" class="text-brand-accent hover:underline font-semibold">Iniciar sesión</a>
+            <a routerLink="/auth/login" [queryParams]="returnUrlQueryParams"
+                class="text-brand-accent hover:underline font-semibold">Iniciar sesión</a>
         </p>
     </div>
 </section>

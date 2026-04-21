@@ -80,16 +80,22 @@
 
             @if (form.images.length > 0) {
             <div class="flex flex-wrap gap-3">
-                @for (img of form.images; track img; let i = $index) {
-                <div class="relative group w-24 h-24 rounded-lg overflow-hidden border border-gray-200">
-                    <img [src]="img" alt="Producto" class="w-full h-full object-cover" />
+                @for (img of form.images; track $index; let i = $index) {
+                <div class="relative w-24 h-24 rounded-lg overflow-hidden border border-gray-200 bg-gray-50"
+                    draggable="true" (dragstart)="onImageDragStart(i)" (dragover)="onImageDragOver($event, i)"
+                    (drop)="onImageDrop(i)" (dragend)="onImageDragEnd()" [class.opacity-60]="draggedImageIndex() === i"
+                    [class.ring-2]="dragOverIndex() === i" [class.ring-brand-accent]="dragOverIndex() === i">
+                    <img [src]="normalizeImageUrl(img)" (error)="onPreviewImageError($event)" alt="Producto"
+                        class="w-full h-full object-cover" />
                     <button type="button" (click)="removeImage(i)"
-                        class="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs font-bold">
-                        ✕
+                        class="absolute top-1 right-1 w-6 h-6 rounded-full bg-brand-black/80 text-white text-[10px] font-bold flex items-center justify-center hover:bg-red-600 transition-colors"
+                        aria-label="Quitar imagen">
+                        X
                     </button>
                 </div>
                 }
             </div>
+            <p class="text-xs text-brand-gray">Arrastrá las miniaturas para cambiar su orden.</p>
             }
 
             <div class="flex items-center gap-3">

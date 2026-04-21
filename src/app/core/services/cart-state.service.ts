@@ -6,6 +6,7 @@ export interface CartItem {
   price: number;
   image: string;
   quantity: number;
+  isGenericImage?: boolean;
 }
 
 @Injectable({
@@ -29,7 +30,13 @@ export class CartStateService {
       const existing = items.find((i) => i.productId === item.productId);
       if (existing) {
         return items.map((i) =>
-          i.productId === item.productId ? { ...i, quantity: i.quantity + item.quantity } : i,
+          i.productId === item.productId
+            ? {
+                ...i,
+                quantity: i.quantity + item.quantity,
+                isGenericImage: i.isGenericImage || item.isGenericImage,
+              }
+            : i,
         );
       }
       return [...items, item];

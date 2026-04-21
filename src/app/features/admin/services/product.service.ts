@@ -13,7 +13,8 @@ export class ProductService {
     let params = new HttpParams()
       .set('page', filters.page)
       .set('size', filters.size)
-      .set('sort', filters.sort);
+      .set('sortField', filters.sortField)
+      .set('sortDirection', filters.sortDirection);
     if (filters.categoryId != null) params = params.set('categoryId', filters.categoryId);
     if (filters.search) params = params.set('search', filters.search);
     if (filters.minPrice != null) params = params.set('minPrice', filters.minPrice);
@@ -22,8 +23,12 @@ export class ProductService {
     return this.http.get<PageResponse<ProductResponse>>(API_ENDPOINTS.PRODUCTS.BASE, { params });
   }
 
-  getAllProducts(page = 0, size = 10): Observable<PageResponse<ProductResponse>> {
-    const params = new HttpParams().set('page', page).set('size', size);
+  getAllProducts(page = 0, size = 10, sortField = 'name', sortDirection = 'asc'): Observable<PageResponse<ProductResponse>> {
+    const params = new HttpParams()
+      .set('page', page)
+      .set('size', size)
+      .set('sortField', sortField)
+      .set('sortDirection', sortDirection);
     return this.http.get<PageResponse<ProductResponse>>(API_ENDPOINTS.PRODUCTS.ADMIN, { params });
   }
 

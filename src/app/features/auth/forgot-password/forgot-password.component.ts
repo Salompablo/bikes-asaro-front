@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../services/auth.service';
 import { ToastService } from '../../../shared/services/toast.service';
@@ -15,6 +15,7 @@ import { ErrorResponse } from '../models/auth.models';
 export class ForgotPasswordComponent {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
+  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
 
@@ -30,6 +31,14 @@ export class ForgotPasswordComponent {
     code: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]],
     newPassword: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(15)]],
   });
+
+  get returnUrlQueryParams(): { returnUrl: string } | undefined {
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+    if (!returnUrl || !returnUrl.startsWith('/')) {
+      return undefined;
+    }
+    return { returnUrl };
+  }
 
   onSendCode(): void {
     if (this.emailForm.invalid) {
@@ -69,7 +78,7 @@ export class ForgotPasswordComponent {
       .subscribe({
         next: (res) => {
           this.toast.success(res.message || 'Contraseña restablecida correctamente.');
-          this.router.navigate(['/auth/login']);
+          this.router.navigate(['/auth/login'], { queryParams: this.returnUrlQueryParams });
         },
         error: (err: HttpErrorResponse) => {
           this.loading.set(false);
