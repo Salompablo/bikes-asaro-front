@@ -44,7 +44,7 @@ export class CatalogComponent implements OnInit {
   );
 
   ngOnInit(): void {
-    this.categoryService.getActive().subscribe((cats) => this.categories.set(cats));
+    this.categoryService.getActive().subscribe((res) => this.categories.set(res.content));
 
     this.products$.subscribe((res: PageResponse<ProductResponse>) => {
       this.products.set(res.content);
@@ -58,8 +58,14 @@ export class CatalogComponent implements OnInit {
     this.filters.update((f) => ({ ...f, categoryId, page: 0 }));
   }
 
-  changeSort(sort: string): void {
-    this.filters.update((f) => ({ ...f, sort, page: 0 }));
+  changeSort(value: string): void {
+    const [sortField, sortDirection] = value.split(',');
+    this.filters.update((f) => ({ ...f, sortField, sortDirection, page: 0 }));
+  }
+
+  get currentSortValue(): string {
+    const f = this.filters();
+    return `${f.sortField},${f.sortDirection}`;
   }
 
   changeSearch(search: string): void {
@@ -77,6 +83,13 @@ export class CatalogComponent implements OnInit {
   productImage(product: ProductResponse): string {
     const firstImage = product.images.find((img) => !!img?.trim());
     return firstImage ?? product.category.defaultImageUrl;
+  }
+
+  usesCategoryImage(product: ProductResponse): boolean {
+    return (
+      product.images.filter((img) => !!img?.trim()).length === 0 &&
+      !!product.category.defaultImageUrl
+    );
   }
 
   onImageError(event: Event, product: ProductResponse): void {

@@ -54,6 +54,8 @@ export class ProductFormComponent implements OnInit {
   isEdit = signal(false);
   saving = signal(false);
   uploading = signal(false);
+  draggedImageIndex = signal<number | null>(null);
+  dragOverIndex = signal<number | null>(null);
   private productId = 0;
 
   form: ProductRequest = {
@@ -72,7 +74,7 @@ export class ProductFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.categoryService.getActive().subscribe({
-      next: (cats) => this.categories.set(cats),
+      next: (res) => this.categories.set(res.content),
       error: () => this.toast.error('Error al cargar categorías'),
     });
 
@@ -119,6 +121,74 @@ export class ProductFormComponent implements OnInit {
 
   removeImage(index: number): void {
     this.form.images = this.form.images.filter((_, i) => i !== index);
+  }
+
+  normalizeImageUrl(url: string): string {
+    if (!url) return this.placeholderImage();
+
+    const trimmed = url.trim();
+    if (!trimmed) return this.placeholderImage();
+
+    if (
+      trimmed.startsWith('http://') ||
+      trimmed.startsWith('https://') ||
+      trimmed.startsWith('data:') ||
+      trimmed.startsWith('blob:') ||
+      trimmed.startsWith('/')
+    ) {
+      return trimmed;
+    }
+
+    if (trimmed.startsWith('public/')) {
+      return `/${trimmed.replace(/^public\//, '')}`;
+    }
+
+    if (trimmed.startsWith('assets/')) {
+      return `/${trimmed}`;
+    }
+
+    return trimmed;
+  }
+
+  onPreviewImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    img.src = this.placeholderImage();
+  }
+
+  onImageDragStart(index: number): void {
+    this.draggedImageIndex.set(index);
+  }
+
+  onImageDragOver(event: DragEvent, index: number): void {
+    event.preventDefault();
+    this.dragOverIndex.set(index);
+  }
+
+  onImageDrop(index: number): void {
+    const from = this.draggedImageIndex();
+    if (from === null || from === index) {
+      this.clearDragState();
+      return;
+    }
+
+    const images = [...this.form.images];
+    const [moved] = images.splice(from, 1);
+    images.splice(index, 0, moved);
+    this.form.images = images;
+    this.clearDragState();
+  }
+
+  onImageDragEnd(): void {
+    this.clearDragState();
+  }
+
+  private clearDragState(): void {
+    this.draggedImageIndex.set(null);
+    this.dragOverIndex.set(null);
+  }
+
+  private placeholderImage(): string {
+    return 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"><rect width="120" height="120" fill="%23f3f4f6"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%236b7280" font-family="Arial" font-size="11">Sin imagen</text></svg>';
   }
 
   onSubmit(): void {

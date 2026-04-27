@@ -41,6 +41,9 @@
                         @if (isAccountMenuOpen) {
                         <div class="account-menu" role="menu" aria-label="Opciones de cuenta">
                             @if (authService.isLoggedIn()) {
+                            <div class="account-menu-header">
+                                Hola, {{ authService.firstName() ?? authService.userEmail() }}
+                            </div>
                             @if (authService.isAdmin()) {
                             <button type="button" class="account-menu-item" role="menuitem"
                                 (click)="logout()">Desconectar</button>
@@ -75,7 +78,7 @@
                     </a>
                     }
 
-                    <button routerLink="/carrito" type="button"
+                    <button routerLink="/checkout" type="button"
                         class="relative icon-button text-brand-silver hover:text-brand-accent transition-colors duration-200 group"
                         aria-label="Carrito">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"

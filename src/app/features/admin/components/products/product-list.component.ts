@@ -21,6 +21,8 @@ export class ProductListComponent implements OnInit {
   loading = signal(true);
   currentPage = signal(0);
   totalPages = signal(0);
+  sortField = signal<'name' | 'price' | 'stock' | 'createdAt'>('name');
+  sortDirection = signal<'asc' | 'desc'>('asc');
 
   showDeleteModal = signal(false);
   productToDelete = signal<ProductResponse | null>(null);
@@ -34,22 +36,40 @@ export class ProductListComponent implements OnInit {
 
   loadProducts(): void {
     this.loading.set(true);
-    this.productService.getAllProducts(this.currentPage()).subscribe({
-      next: (res) => {
-        this.products.set(res.content);
-        this.totalPages.set(res.page.totalPages);
-        this.loading.set(false);
-      },
-      error: () => {
-        this.toast.error('Error al cargar productos');
-        this.loading.set(false);
-      },
-    });
+    this.productService
+      .getAllProducts(this.currentPage(), 10, this.sortField(), this.sortDirection())
+      .subscribe({
+        next: (res) => {
+          this.products.set(res.content);
+          this.totalPages.set(res.page.totalPages);
+          this.loading.set(false);
+        },
+        error: () => {
+          this.toast.error('Error al cargar productos');
+          this.loading.set(false);
+        },
+      });
   }
 
   goToPage(page: number): void {
     this.currentPage.set(page);
     this.loadProducts();
+  }
+
+  changeSort(field: 'name' | 'price' | 'stock' | 'createdAt'): void {
+    if (this.sortField() === field) {
+      this.sortDirection.set(this.sortDirection() === 'asc' ? 'desc' : 'asc');
+    } else {
+      this.sortField.set(field);
+      this.sortDirection.set('asc');
+    }
+    this.currentPage.set(0);
+    this.loadProducts();
+  }
+
+  sortIndicator(field: 'name' | 'price' | 'stock' | 'createdAt'): string {
+    if (this.sortField() !== field) return '↕';
+    return this.sortDirection() === 'asc' ? '↑' : '↓';
   }
 
   openDeleteModal(product: ProductResponse): void {
@@ -102,5 +122,19 @@ export class ProductListComponent implements OnInit {
         this.toast.error(toast);
       },
     });
+  }
+
+  productImage(product: ProductResponse): string {
+    const firstImage = product.images.find((img) => !!img?.trim());
+    return firstImage ? firstImage.trim() : this.placeholderImage();
+  }
+
+  onImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    img.src = this.placeholderImage();
+  }
+
+  private placeholderImage(): string {
+    return 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"><rect width="120" height="120" fill="%23f3f4f6"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%236b7280" font-family="Arial" font-size="11">Sin imagen</text></svg>';
   }
 }

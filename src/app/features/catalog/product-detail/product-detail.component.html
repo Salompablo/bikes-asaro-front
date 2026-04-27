@@ -68,6 +68,13 @@
                         }
                     </div>
 
+                    @if (isOutOfStock()) {
+                    <span
+                        class="absolute right-3 top-3 z-20 rounded-full bg-red-600 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white">
+                        AGOTADO
+                    </span>
+                    }
+
                     @if (images().length > 1) {
                     <!-- Prev arrow -->
                     <button (click)="prevImage()" type="button" aria-label="Imagen anterior"
@@ -99,6 +106,12 @@
                     </button>
                     }
                 </div>
+                }
+
+                @if (showGenericImageNotice()) {
+                <p class="mt-3 text-xs text-brand-gray text-center">
+                    Foto de referencia de la categoría. El producto puede presentar variaciones.
+                </p>
                 }
             </div>
 
@@ -135,18 +148,31 @@
 
                 <!-- Stock -->
                 @if (isOutOfStock()) {
-                <p class="inline-flex items-center gap-1.5 text-sm font-medium text-red-600 mb-6">
+                <p class="inline-flex items-center gap-1.5 text-sm font-medium text-red-600 mb-2">
                     <span class="w-2 h-2 rounded-full bg-red-500"></span>
                     Sin stock
+                </p>
+                <p class="text-sm text-red-700 mb-6">
+                    Producto agotado. Sin stock hasta nuevo aviso.
                 </p>
                 } @else {
                 <p class="inline-flex items-center gap-1.5 text-sm font-medium text-green-700 mb-6">
                     <span class="w-2 h-2 rounded-full bg-green-500"></span>
                     En stock
-                    @if (product()!.stock <= 5) { <span class="text-brand-gray font-normal">(¡Quedan {{ product()!.stock
+                    @if (availableToReserveNow() <= 5) { <span class="text-brand-gray font-normal">(¡Quedan {{ availableToReserveNow()
                         }}!)</span>
                         }
                 </p>
+                @if (quantityInCart() > 0) {
+                <p class="text-sm text-brand-gray mb-6">
+                    Ya tenes {{ quantityInCart() }} en tu carrito.
+                    @if (remainingAvailableToAdd() > 0) {
+                    Podes agregar {{ remainingAvailableToAdd() }} mas.
+                    } @else {
+                    Ya alcanzaste el maximo disponible para este producto.
+                    }
+                </p>
+                }
                 }
 
                 <!-- Description -->
@@ -171,7 +197,7 @@
                         </span>
                         <button (click)="incrementQuantity()" type="button" aria-label="Aumentar cantidad"
                             class="w-11 h-11 flex items-center justify-center text-brand-gray hover:bg-gray-100 transition-colors"
-                            [disabled]="quantity() >= product()!.stock">
+                            [disabled]="quantity() >= remainingAvailableToAdd() || remainingAvailableToAdd() <= 0">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M12 4v16m8-8H4" />
@@ -180,7 +206,7 @@
                     </div>
 
                     <!-- Add to cart button -->
-                    <button (click)="addToCart()" type="button" [disabled]="isOutOfStock()"
+                    <button (click)="addToCart()" type="button" [disabled]="!canAddToCart()"
                         class="flex-1 h-12 sm:h-11 flex items-center justify-center gap-2 px-8 py-3 sm:py-2 bg-brand-accent text-brand-black font-display uppercase tracking-widest text-sm font-bold rounded-lg transition-all duration-200 hover:brightness-110 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:brightness-100">
                         <svg class="w-6 h-6 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -321,4 +347,9 @@
 <app-confirm-modal [visible]="showDeleteModal()" title="Eliminar reseña"
     message="¿Estás seguro de que querés eliminar tu reseña? Esta acción no se puede deshacer." confirmText="Eliminar"
     variant="destructive" (confirm)="deleteReview()" (cancel)="cancelDeleteReview()" />
+
+<!-- Login required modal for add-to-cart -->
+<app-confirm-modal [visible]="showLoginRequiredModal()" title="Iniciá sesión para continuar"
+    message="Para agregar productos al carrito necesitás iniciar sesión." confirmText="Iniciar sesión" variant="confirm"
+    (confirm)="goToLogin()" (cancel)="cancelLoginRequired()" />
 }

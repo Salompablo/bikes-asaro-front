@@ -1,6 +1,6 @@
 import { Component, afterNextRender, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../services/auth.service';
 import { ToastService } from '../../../shared/services/toast.service';
@@ -18,6 +18,7 @@ declare const google: any;
 export class LoginComponent {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
+  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
 
@@ -34,6 +35,22 @@ export class LoginComponent {
     afterNextRender(() => this.initGoogleSignIn());
   }
 
+  private get redirectUrl(): string {
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+    if (!returnUrl || !returnUrl.startsWith('/')) {
+      return '/';
+    }
+    return returnUrl;
+  }
+
+  get returnUrlQueryParams(): { returnUrl: string } | undefined {
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+    if (!returnUrl || !returnUrl.startsWith('/')) {
+      return undefined;
+    }
+    return { returnUrl };
+  }
+
   onSubmit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -44,7 +61,7 @@ export class LoginComponent {
     this.authService.login(this.form.getRawValue()).subscribe({
       next: () => {
         this.toast.success('Sesión iniciada correctamente');
-        this.router.navigate(['/']);
+        this.router.navigateByUrl(this.redirectUrl);
       },
       error: (err: HttpErrorResponse) => {
         this.loading.set(false);
@@ -90,7 +107,7 @@ export class LoginComponent {
     this.authService.googleLogin({ token: credential }).subscribe({
       next: () => {
         this.toast.success('Sesión iniciada con Google');
-        this.router.navigate(['/']);
+        this.router.navigateByUrl(this.redirectUrl);
       },
       error: (err: HttpErrorResponse) => {
         this.loading.set(false);

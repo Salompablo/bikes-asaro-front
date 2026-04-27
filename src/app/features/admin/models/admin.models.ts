@@ -29,6 +29,7 @@ export interface ProductResponse {
   description: string;
   price: number;
   stock: number;
+  availableToReserveNow?: number;
   category: CategoryResponse;
   images: string[];
   isActive: boolean;

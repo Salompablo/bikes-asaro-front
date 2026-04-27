@@ -40,8 +40,8 @@ export class CategoryListComponent implements OnInit {
   loadCategories(): void {
     this.loading.set(true);
     this.categoryService.getAll().subscribe({
-      next: (cats) => {
-        this.categories.set(cats);
+      next: (res) => {
+        this.categories.set(res.content);
         this.loading.set(false);
       },
       error: () => {

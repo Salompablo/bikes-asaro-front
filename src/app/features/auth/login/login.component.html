@@ -63,7 +63,8 @@
 
             <!-- Forgot password link -->
             <div class="flex justify-end mb-6">
-                <a routerLink="/auth/forgot-password" class="text-sm text-brand-accent hover:underline">
+                <a routerLink="/auth/forgot-password" [queryParams]="returnUrlQueryParams"
+                    class="text-sm text-brand-accent hover:underline">
                     ¿Te olvidaste la contraseña?
                 </a>
             </div>
@@ -116,7 +117,8 @@
         <!-- Footer -->
         <p class="text-sm text-brand-gray text-center mt-8">
             ¿No tenés cuenta?
-            <a routerLink="/auth/register" class="text-brand-accent hover:underline font-semibold">Crear cuenta</a>
+            <a routerLink="/auth/register" [queryParams]="returnUrlQueryParams"
+                class="text-brand-accent hover:underline font-semibold">Crear cuenta</a>
         </p>
     </div>
 </section>

@@ -1,19 +1,41 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { CategoryRequest, CategoryResponse } from '../models/admin.models';
+import { CategoryRequest, CategoryResponse, PageResponse } from '../models/admin.models';
 import { API_ENDPOINTS } from '../../../core/http/api-endpoints';
 
 @Injectable({ providedIn: 'root' })
 export class CategoryService {
   private readonly http = inject(HttpClient);
 
-  getAll(): Observable<CategoryResponse[]> {
-    return this.http.get<CategoryResponse[]>(API_ENDPOINTS.CATEGORIES.BASE);
+  getAll(
+    page = 0,
+    size = 100,
+    sortField = 'name',
+    sortDirection = 'asc',
+  ): Observable<PageResponse<CategoryResponse>> {
+    const params = new HttpParams()
+      .set('page', page)
+      .set('size', size)
+      .set('sortField', sortField)
+      .set('sortDirection', sortDirection);
+    return this.http.get<PageResponse<CategoryResponse>>(API_ENDPOINTS.CATEGORIES.BASE, { params });
   }
 
-  getActive(): Observable<CategoryResponse[]> {
-    return this.http.get<CategoryResponse[]>(API_ENDPOINTS.CATEGORIES.ACTIVE);
+  getActive(
+    page = 0,
+    size = 100,
+    sortField = 'name',
+    sortDirection = 'asc',
+  ): Observable<PageResponse<CategoryResponse>> {
+    const params = new HttpParams()
+      .set('page', page)
+      .set('size', size)
+      .set('sortField', sortField)
+      .set('sortDirection', sortDirection);
+    return this.http.get<PageResponse<CategoryResponse>>(API_ENDPOINTS.CATEGORIES.ACTIVE, {
+      params,
+    });
   }
 
   getById(id: number): Observable<CategoryResponse> {

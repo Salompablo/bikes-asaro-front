@@ -6,7 +6,7 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../services/auth.service';
 import { ToastService } from '../../../shared/services/toast.service';
@@ -27,6 +27,7 @@ function passwordMatchValidator(group: AbstractControl): ValidationErrors | null
 export class RegisterComponent {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
+  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
 
@@ -43,6 +44,14 @@ export class RegisterComponent {
     },
     { validators: passwordMatchValidator },
   );
+
+  get returnUrlQueryParams(): { returnUrl: string } | undefined {
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+    if (!returnUrl || !returnUrl.startsWith('/')) {
+      return undefined;
+    }
+    return { returnUrl };
+  }
 
   onSubmit(): void {
     if (this.form.invalid) {

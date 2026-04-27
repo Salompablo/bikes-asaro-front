@@ -1,5 +1,5 @@
 import { Component, computed, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -30,6 +30,7 @@ import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/
 })
 export class ProductDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly productService = inject(ProductService);
   private readonly cartState = inject(CartStateService);
   private readonly toast = inject(ToastService);
@@ -44,6 +45,7 @@ export class ProductDetailComponent implements OnInit {
   quantity = signal(1);
   currentImageIndex = signal(0);
   slideDirection = signal<'left' | 'right' | null>(null);
+  fallbackCategoryImageInUse = signal(false);
 
   // Reviews
   reviews = signal<ReviewResponse[]>([]);
@@ -54,6 +56,7 @@ export class ProductDetailComponent implements OnInit {
   editingReviewId = signal<number | null>(null);
   formRating = signal(0);
   showDeleteModal = signal(false);
+  showLoginRequiredModal = signal(false);
   deletingReviewId = signal<number | null>(null);
 
   reviewForm = this.fb.group({
@@ -69,9 +72,40 @@ export class ProductDetailComponent implements OnInit {
 
   currentImage = computed(() => this.images()[this.currentImageIndex()]);
 
-  isOutOfStock = computed(() => {
+  usesCategoryImage = computed(() => {
     const p = this.product();
-    return p ? p.stock <= 0 : true;
+    if (!p) return false;
+    return p.images.filter((img) => !!img?.trim()).length === 0 && !!p.category.defaultImageUrl;
+  });
+
+  showGenericImageNotice = computed(
+    () => this.usesCategoryImage() || this.fallbackCategoryImageInUse(),
+  );
+
+  availableToReserveNow = computed(() => {
+    const p = this.product();
+    if (!p) return 0;
+    return Math.max(0, p.availableToReserveNow ?? p.stock);
+  });
+
+  quantityInCart = computed(() => {
+    const p = this.product();
+    if (!p) return 0;
+
+    const existing = this.cartState.items().find((item) => item.productId === p.id);
+    return existing?.quantity ?? 0;
+  });
+
+  remainingAvailableToAdd = computed(() => {
+    return Math.max(0, this.availableToReserveNow() - this.quantityInCart());
+  });
+
+  canAddToCart = computed(() => {
+    return !this.isOutOfStock() && this.remainingAvailableToAdd() > 0;
+  });
+
+  isOutOfStock = computed(() => {
+    return this.availableToReserveNow() <= 0;
   });
 
   isEditMode = computed(() => this.editingReviewId() !== null);
@@ -83,6 +117,7 @@ export class ProductDetailComponent implements OnInit {
     this.productService.getById(this.productId).subscribe({
       next: (product) => {
         this.product.set(product);
+        this.fallbackCategoryImageInUse.set(false);
         this.loading.set(false);
         this.loadReviews();
       },
@@ -245,16 +280,19 @@ export class ProductDetailComponent implements OnInit {
   }
 
   prevImage(): void {
+    this.fallbackCategoryImageInUse.set(false);
     this.slideDirection.set('right');
     this.currentImageIndex.update((i) => (i > 0 ? i - 1 : this.images().length - 1));
   }
 
   nextImage(): void {
+    this.fallbackCategoryImageInUse.set(false);
     this.slideDirection.set('left');
     this.currentImageIndex.update((i) => (i < this.images().length - 1 ? i + 1 : 0));
   }
 
   goToImage(index: number): void {
+    this.fallbackCategoryImageInUse.set(false);
     this.slideDirection.set(index > this.currentImageIndex() ? 'left' : 'right');
     this.currentImageIndex.set(index);
   }
@@ -264,22 +302,53 @@ export class ProductDetailComponent implements OnInit {
   }
 
   incrementQuantity(): void {
-    const max = this.product()?.stock ?? 1;
+    const max = this.remainingAvailableToAdd();
     this.quantity.update((q) => (q < max ? q + 1 : q));
   }
 
   addToCart(): void {
     const p = this.product();
-    if (!p || this.isOutOfStock()) return;
+    if (!p || !this.canAddToCart()) return;
+
+    if (!this.authService.isLoggedIn()) {
+      this.showLoginRequiredModal.set(true);
+      return;
+    }
+
+    const requested = this.quantity();
+    const remaining = this.remainingAvailableToAdd();
+    const quantityToAdd = Math.min(requested, remaining);
+
+    if (quantityToAdd <= 0) {
+      this.toast.info('Ya agregaste la cantidad maxima disponible de este producto.');
+      return;
+    }
+
+    if (requested > remaining) {
+      this.toast.info(`Solo podes agregar ${remaining} unidad${remaining === 1 ? '' : 'es'} mas.`);
+    }
 
     this.cartState.addItem({
       productId: p.id,
       name: p.name,
       price: p.price,
       image: this.images()[0],
-      quantity: this.quantity(),
+      quantity: quantityToAdd,
+      isGenericImage: this.usesCategoryImage(),
     });
+    this.quantity.set(1);
     this.toast.success(`${p.name} agregado al carrito`);
+  }
+
+  cancelLoginRequired(): void {
+    this.showLoginRequiredModal.set(false);
+  }
+
+  goToLogin(): void {
+    this.showLoginRequiredModal.set(false);
+    this.router.navigate(['/auth/login'], {
+      queryParams: { returnUrl: this.router.url },
+    });
   }
 
   onImageError(event: Event): void {
@@ -288,6 +357,7 @@ export class ProductDetailComponent implements OnInit {
     const img = event.target as HTMLImageElement;
     const fallback = p.category.defaultImageUrl;
     if (img.src !== fallback) {
+      this.fallbackCategoryImageInUse.set(true);
       img.src = fallback;
     }
   }

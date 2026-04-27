@@ -1,0 +1,174 @@
+@if (cartService.items().length === 0) {
+<!-- Empty cart -->
+<section class="min-h-screen flex flex-col items-center justify-center text-center px-4">
+    <svg class="w-16 h-16 text-brand-silver mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+    </svg>
+    <h2 class="text-2xl text-brand-black mb-2">Tu carrito está vacío</h2>
+    <p class="text-brand-gray mb-6">Agregá productos antes de continuar con el pago.</p>
+    <a routerLink="/catalog"
+        class="inline-block px-6 py-3 bg-brand-black text-brand-white font-display uppercase tracking-widest text-sm rounded-lg hover:bg-brand-dark transition-colors">
+        Ir al catálogo
+    </a>
+</section>
+} @else {
+<section class="min-h-screen pt-28 pb-16">
+    <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+
+        <h1 class="text-3xl lg:text-4xl mb-8">Resumen de compra</h1>
+
+        <!-- Items list -->
+        <div class="divide-y divide-gray-200 border border-gray-200 rounded-xl overflow-hidden mb-8">
+            @for (item of cartService.items(); track item.productId) {
+            <div class="flex items-center gap-4 p-4 sm:p-5">
+                <div class="relative shrink-0">
+                    <img [src]="normalizeImageUrl(item.image)" [alt]="item.name" (error)="onItemImageError($event)"
+                        class="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-cover bg-gray-100" />
+                    @if (isGenericCheckoutImage(item)) {
+                    <span
+                        class="absolute -bottom-1 left-1 rounded bg-brand-black/70 px-1.5 py-0.5 text-[9px] text-brand-white">
+                        Referencia
+                    </span>
+                    }
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="font-medium text-brand-black truncate">{{ item.name }}</p>
+                    <p class="text-sm text-brand-gray mt-0.5">Cantidad: {{ item.quantity }}</p>
+                    @if (isGenericCheckoutImage(item)) {
+                    <p class="text-[11px] text-brand-gray mt-1">
+                        Imagen de referencia de la categoría. El modelo exacto puede variar.
+                    </p>
+                    }
+                </div>
+                <div class="flex items-center gap-3">
+                    <p class="text-brand-black font-bold tabular-nums whitespace-nowrap">
+                        {{ item.price * item.quantity | currency: '' : '$' : '1.0-0' }}
+                    </p>
+                    <button type="button" (click)="removeItem(item.productId)" aria-label="Quitar producto"
+                        class="w-8 h-8 rounded-lg flex items-center justify-center text-brand-gray hover:text-red-600 hover:bg-red-50 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            }
+        </div>
+
+        <!-- Delivery method -->
+        <div class="mb-8">
+            <h2 class="text-lg font-medium text-brand-black mb-4">Método de entrega</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button type="button" (click)="deliveryMethod.set('STORE_PICKUP')"
+                    class="flex items-center gap-3 p-4 rounded-xl border-2 transition-colors" [class]="deliveryMethod() === 'STORE_PICKUP'
+                        ? 'border-brand-accent bg-brand-accent/5'
+                        : 'border-gray-200 hover:border-gray-300'">
+                    <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    <div class="text-left">
+                        <p class="font-medium text-brand-black text-sm">Retiro en tienda</p>
+                        <p class="text-xs text-brand-gray">Gratis</p>
+                    </div>
+                </button>
+                <button type="button" (click)="deliveryMethod.set('SHIPPING')"
+                    class="flex items-center gap-3 p-4 rounded-xl border-2 transition-colors" [class]="deliveryMethod() === 'SHIPPING'
+                        ? 'border-brand-accent bg-brand-accent/5'
+                        : 'border-gray-200 hover:border-gray-300'">
+                    <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
+                    </svg>
+                    <div class="text-left">
+                        <p class="font-medium text-brand-black text-sm">Envío a domicilio</p>
+                        <p class="text-xs text-brand-gray">{{ shippingCost() | currency: '' : '$' : '1.0-0' }}</p>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Shipping fields -->
+            @if (isShipping()) {
+            <div class="mt-4 grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3">
+                <input type="text" placeholder="Dirección de envío" [ngModel]="shippingAddress()"
+                    (ngModelChange)="shippingAddress.set($event)"
+                    class="w-full h-11 px-4 rounded-lg border border-gray-200 text-sm text-brand-black placeholder:text-brand-gray/60 focus:outline-none focus:ring-2 focus:ring-brand-accent/40 focus:border-brand-accent transition-colors" />
+                <input type="text" placeholder="Código postal" [ngModel]="zipCode()"
+                    (ngModelChange)="zipCode.set($event)"
+                    class="w-full sm:w-36 h-11 px-4 rounded-lg border border-gray-200 text-sm text-brand-black placeholder:text-brand-gray/60 focus:outline-none focus:ring-2 focus:ring-brand-accent/40 focus:border-brand-accent transition-colors" />
+            </div>
+            }
+        </div>
+
+        <!-- Subtotals -->
+        <div class="space-y-2 mb-2 px-1">
+            <div class="flex items-center justify-between text-sm text-brand-gray">
+                <span>Subtotal</span>
+                <span class="tabular-nums">{{ cartService.totalPrice() | currency: '' : '$' : '1.0-0' }}</span>
+            </div>
+            @if (isShipping()) {
+            <div class="flex items-center justify-between text-sm text-brand-gray">
+                <span>Envío</span>
+                <span class="tabular-nums">{{ shippingCost() | currency: '' : '$' : '1.0-0' }}</span>
+            </div>
+            }
+        </div>
+
+        <!-- Total -->
+        <div class="flex items-center justify-between mb-8 px-1 pt-2 border-t border-gray-200">
+            <span class="text-lg text-brand-gray">Total</span>
+            <span class="text-2xl font-bold tabular-nums text-brand-black">
+                {{ orderTotal() | currency: '' : '$' : '1.0-0' }}
+            </span>
+        </div>
+
+        <!-- Stock error alert -->
+        @if (stockError()) {
+        <div class="mb-6 bg-brand-light border-l-4 border-brand-accent p-4 shadow-sm">
+            <div class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-brand-black mt-0.5 shrink-0" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <div>
+                    <p class="text-sm font-medium text-brand-black">{{ stockError() }}</p>
+                    <button (click)="goToAdjustProduct()" type="button"
+                        class="mt-2 text-sm font-bold text-brand-black hover:text-brand-accent underline transition-colors">
+                        {{ stockErrorActionLabel() }}
+                    </button>
+                </div>
+            </div>
+        </div>
+        }
+
+        <!-- Reservation notice -->
+        <p class="text-center text-sm text-brand-gray mb-4">
+            Tus productos están reservados. Tenes 10 minutos para completar el pago antes de que se libere el stock.
+        </p>
+
+        <!-- Pay button -->
+        <button (click)="pay()" type="button" [disabled]="loading() || !canPay()"
+            class="w-full h-14 flex items-center justify-center gap-3 rounded-lg text-white font-bold text-base transition-all duration-200 hover:brightness-110 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
+            style="background-color: #009EE3; font-family: 'Helvetica Neue', Arial, sans-serif;">
+            @if (loading()) {
+            <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                </path>
+            </svg>
+            Procesando…
+            } @else {
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                <path
+                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            Pagar con Mercado Pago
+            }
+        </button>
+    </div>
+</section>
+}
