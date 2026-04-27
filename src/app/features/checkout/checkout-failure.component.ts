@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { CheckoutService } from './services/checkout.service';
 
 @Component({
   selector: 'app-checkout-failure',
@@ -38,4 +40,24 @@ import { RouterLink } from '@angular/router';
     </section>
   `,
 })
-export class CheckoutFailureComponent {}
+export class CheckoutFailureComponent implements OnInit {
+  private readonly checkoutService = inject(CheckoutService);
+
+  ngOnInit(): void {
+    this.releasePendingOrderReservation();
+  }
+
+  private releasePendingOrderReservation(): void {
+    const orderId = this.checkoutService.getPendingOrderId();
+    if (!orderId) return;
+
+    this.checkoutService.cancelOrder(orderId).subscribe({
+      next: () => this.checkoutService.clearPendingOrderId(),
+      error: (error: HttpErrorResponse) => {
+        if ([400, 404, 409].includes(error.status)) {
+          this.checkoutService.clearPendingOrderId();
+        }
+      },
+    });
+  }
+}

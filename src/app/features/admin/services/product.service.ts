@@ -23,7 +23,12 @@ export class ProductService {
     return this.http.get<PageResponse<ProductResponse>>(API_ENDPOINTS.PRODUCTS.BASE, { params });
   }
 
-  getAllProducts(page = 0, size = 10, sortField = 'name', sortDirection = 'asc'): Observable<PageResponse<ProductResponse>> {
+  getAllProducts(
+    page = 0,
+    size = 10,
+    sortField = 'name',
+    sortDirection = 'asc',
+  ): Observable<PageResponse<ProductResponse>> {
     const params = new HttpParams()
       .set('page', page)
       .set('size', size)

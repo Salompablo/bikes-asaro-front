@@ -86,7 +86,10 @@ export class CatalogComponent implements OnInit {
   }
 
   usesCategoryImage(product: ProductResponse): boolean {
-    return product.images.filter((img) => !!img?.trim()).length === 0 && !!product.category.defaultImageUrl;
+    return (
+      product.images.filter((img) => !!img?.trim()).length === 0 &&
+      !!product.category.defaultImageUrl
+    );
   }
 
   onImageError(event: Event, product: ProductResponse): void {

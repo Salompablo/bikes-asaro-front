@@ -18,6 +18,7 @@ interface JwtPayload {
   sub?: string;
   userId?: number;
   role?: string;
+  firstName?: string;
   exp?: number;
 }
 
@@ -32,6 +33,7 @@ export class AuthService {
   readonly isAdmin = computed(() => this.role() === 'ADMIN');
   readonly userEmail = computed(() => this.decodeToken()?.sub ?? null);
   readonly userId = computed(() => this.decodeToken()?.userId ?? null);
+  readonly firstName = computed(() => this.decodeToken()?.firstName ?? null);
 
   getToken(): string | null {
     return this.tokenSignal();

@@ -37,4 +37,8 @@ export const API_ENDPOINTS = {
   CHECKOUT: {
     CREATE_PREFERENCE: '/checkout/create-preference',
   },
+  ORDERS: {
+    BY_ID: (id: number) => `/orders/${id}`,
+    MY_ORDERS: '/orders/my-orders',
+  },
 } as const;

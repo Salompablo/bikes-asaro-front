@@ -22,7 +22,8 @@
                             SKU
                         </th>
                         <th class="text-left px-4 py-3 font-display uppercase tracking-wider text-xs text-brand-gray">
-                            <button type="button" (click)="changeSort('name')" class="inline-flex items-center gap-1 hover:text-brand-black">
+                            <button type="button" (click)="changeSort('name')"
+                                class="inline-flex items-center gap-1 hover:text-brand-black">
                                 Nombre
                                 <span>{{ sortIndicator('name') }}</span>
                             </button>
@@ -31,13 +32,15 @@
                             Categoría
                         </th>
                         <th class="text-right px-4 py-3 font-display uppercase tracking-wider text-xs text-brand-gray">
-                            <button type="button" (click)="changeSort('price')" class="inline-flex items-center gap-1 hover:text-brand-black ml-auto">
+                            <button type="button" (click)="changeSort('price')"
+                                class="inline-flex items-center gap-1 hover:text-brand-black ml-auto">
                                 Precio
                                 <span>{{ sortIndicator('price') }}</span>
                             </button>
                         </th>
                         <th class="text-right px-4 py-3 font-display uppercase tracking-wider text-xs text-brand-gray">
-                            <button type="button" (click)="changeSort('stock')" class="inline-flex items-center gap-1 hover:text-brand-black ml-auto">
+                            <button type="button" (click)="changeSort('stock')"
+                                class="inline-flex items-center gap-1 hover:text-brand-black ml-auto">
                                 Stock
                                 <span>{{ sortIndicator('stock') }}</span>
                             </button>

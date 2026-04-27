@@ -36,17 +36,19 @@ export class ProductListComponent implements OnInit {
 
   loadProducts(): void {
     this.loading.set(true);
-    this.productService.getAllProducts(this.currentPage(), 10, this.sortField(), this.sortDirection()).subscribe({
-      next: (res) => {
-        this.products.set(res.content);
-        this.totalPages.set(res.page.totalPages);
-        this.loading.set(false);
-      },
-      error: () => {
-        this.toast.error('Error al cargar productos');
-        this.loading.set(false);
-      },
-    });
+    this.productService
+      .getAllProducts(this.currentPage(), 10, this.sortField(), this.sortDirection())
+      .subscribe({
+        next: (res) => {
+          this.products.set(res.content);
+          this.totalPages.set(res.page.totalPages);
+          this.loading.set(false);
+        },
+        error: () => {
+          this.toast.error('Error al cargar productos');
+          this.loading.set(false);
+        },
+      });
   }
 
   goToPage(page: number): void {

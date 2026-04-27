@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './features/auth/services/auth.guard';
 
 export const routes: Routes = [
   {
@@ -46,6 +47,12 @@ export const routes: Routes = [
       import('./features/checkout/checkout-pending.component').then(
         (c) => c.CheckoutPendingComponent,
       ),
+  },
+  {
+    path: 'orders',
+    loadComponent: () =>
+      import('./features/orders/my-orders.component').then((c) => c.MyOrdersComponent),
+    canActivate: [authGuard],
   },
   {
     path: '',

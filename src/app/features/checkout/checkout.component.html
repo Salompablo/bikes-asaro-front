@@ -26,7 +26,8 @@
                     <img [src]="normalizeImageUrl(item.image)" [alt]="item.name" (error)="onItemImageError($event)"
                         class="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-cover bg-gray-100" />
                     @if (isGenericCheckoutImage(item)) {
-                    <span class="absolute -bottom-1 left-1 rounded bg-brand-black/70 px-1.5 py-0.5 text-[9px] text-brand-white">
+                    <span
+                        class="absolute -bottom-1 left-1 rounded bg-brand-black/70 px-1.5 py-0.5 text-[9px] text-brand-white">
                         Referencia
                     </span>
                     }
@@ -125,17 +126,18 @@
 
         <!-- Stock error alert -->
         @if (stockError()) {
-        <div class="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
+        <div class="mb-6 bg-brand-light border-l-4 border-brand-accent p-4 shadow-sm">
             <div class="flex items-start gap-3">
-                <svg class="w-5 h-5 text-red-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 text-brand-black mt-0.5 shrink-0" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
                 <div>
-                    <p class="text-sm font-medium text-red-800">{{ stockError() }}</p>
+                    <p class="text-sm font-medium text-brand-black">{{ stockError() }}</p>
                     <button (click)="goToAdjustProduct()" type="button"
-                        class="mt-2 text-sm font-medium text-red-700 underline hover:text-red-900 transition-colors">
-                        Ajustar cantidad en el producto
+                        class="mt-2 text-sm font-bold text-brand-black hover:text-brand-accent underline transition-colors">
+                        {{ stockErrorActionLabel() }}
                     </button>
                 </div>
             </div>
@@ -144,7 +146,7 @@
 
         <!-- Reservation notice -->
         <p class="text-center text-sm text-brand-gray mb-4">
-            Tus productos están reservados. Tienes 15 minutos para completar el pago antes de que se libere el stock.
+            Tus productos están reservados. Tenes 10 minutos para completar el pago antes de que se libere el stock.
         </p>
 
         <!-- Pay button -->

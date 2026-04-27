@@ -82,9 +82,30 @@ export class ProductDetailComponent implements OnInit {
     () => this.usesCategoryImage() || this.fallbackCategoryImageInUse(),
   );
 
-  isOutOfStock = computed(() => {
+  availableToReserveNow = computed(() => {
     const p = this.product();
-    return p ? p.stock <= 0 : true;
+    if (!p) return 0;
+    return Math.max(0, p.availableToReserveNow ?? p.stock);
+  });
+
+  quantityInCart = computed(() => {
+    const p = this.product();
+    if (!p) return 0;
+
+    const existing = this.cartState.items().find((item) => item.productId === p.id);
+    return existing?.quantity ?? 0;
+  });
+
+  remainingAvailableToAdd = computed(() => {
+    return Math.max(0, this.availableToReserveNow() - this.quantityInCart());
+  });
+
+  canAddToCart = computed(() => {
+    return !this.isOutOfStock() && this.remainingAvailableToAdd() > 0;
+  });
+
+  isOutOfStock = computed(() => {
+    return this.availableToReserveNow() <= 0;
   });
 
   isEditMode = computed(() => this.editingReviewId() !== null);
@@ -281,17 +302,30 @@ export class ProductDetailComponent implements OnInit {
   }
 
   incrementQuantity(): void {
-    const max = this.product()?.stock ?? 1;
+    const max = this.remainingAvailableToAdd();
     this.quantity.update((q) => (q < max ? q + 1 : q));
   }
 
   addToCart(): void {
     const p = this.product();
-    if (!p || this.isOutOfStock()) return;
+    if (!p || !this.canAddToCart()) return;
 
     if (!this.authService.isLoggedIn()) {
       this.showLoginRequiredModal.set(true);
       return;
+    }
+
+    const requested = this.quantity();
+    const remaining = this.remainingAvailableToAdd();
+    const quantityToAdd = Math.min(requested, remaining);
+
+    if (quantityToAdd <= 0) {
+      this.toast.info('Ya agregaste la cantidad maxima disponible de este producto.');
+      return;
+    }
+
+    if (requested > remaining) {
+      this.toast.info(`Solo podes agregar ${remaining} unidad${remaining === 1 ? '' : 'es'} mas.`);
     }
 
     this.cartState.addItem({
@@ -299,9 +333,10 @@ export class ProductDetailComponent implements OnInit {
       name: p.name,
       price: p.price,
       image: this.images()[0],
-      quantity: this.quantity(),
+      quantity: quantityToAdd,
       isGenericImage: this.usesCategoryImage(),
     });
+    this.quantity.set(1);
     this.toast.success(`${p.name} agregado al carrito`);
   }
 

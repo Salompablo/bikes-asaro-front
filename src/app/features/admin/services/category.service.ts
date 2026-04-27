@@ -8,7 +8,12 @@ import { API_ENDPOINTS } from '../../../core/http/api-endpoints';
 export class CategoryService {
   private readonly http = inject(HttpClient);
 
-  getAll(page = 0, size = 100, sortField = 'name', sortDirection = 'asc'): Observable<PageResponse<CategoryResponse>> {
+  getAll(
+    page = 0,
+    size = 100,
+    sortField = 'name',
+    sortDirection = 'asc',
+  ): Observable<PageResponse<CategoryResponse>> {
     const params = new HttpParams()
       .set('page', page)
       .set('size', size)
@@ -17,13 +22,20 @@ export class CategoryService {
     return this.http.get<PageResponse<CategoryResponse>>(API_ENDPOINTS.CATEGORIES.BASE, { params });
   }
 
-  getActive(page = 0, size = 100, sortField = 'name', sortDirection = 'asc'): Observable<PageResponse<CategoryResponse>> {
+  getActive(
+    page = 0,
+    size = 100,
+    sortField = 'name',
+    sortDirection = 'asc',
+  ): Observable<PageResponse<CategoryResponse>> {
     const params = new HttpParams()
       .set('page', page)
       .set('size', size)
       .set('sortField', sortField)
       .set('sortDirection', sortDirection);
-    return this.http.get<PageResponse<CategoryResponse>>(API_ENDPOINTS.CATEGORIES.ACTIVE, { params });
+    return this.http.get<PageResponse<CategoryResponse>>(API_ENDPOINTS.CATEGORIES.ACTIVE, {
+      params,
+    });
   }
 
   getById(id: number): Observable<CategoryResponse> {

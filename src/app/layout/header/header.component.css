@@ -79,6 +79,19 @@
   z-index: 30;
 }
 
+.account-menu-header {
+  padding: 0.5rem 0.68rem 0.4rem;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.45);
+  letter-spacing: 0.03em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 0.2rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 14rem;
+}
+
 .account-menu-item {
   border: 0;
   border-radius: 0.45rem;

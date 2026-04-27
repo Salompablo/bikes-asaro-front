@@ -12,6 +12,12 @@ import { catchError } from 'rxjs/operators';
 
 const SHIPPING_COST = 15000;
 
+interface CheckoutConflictErrorBody {
+  message?: string;
+  errorCode?: string;
+  retryAfterSeconds?: number;
+}
+
 @Component({
   selector: 'app-checkout',
   standalone: true,
@@ -28,6 +34,7 @@ export class CheckoutComponent {
   readonly loading = signal(false);
   readonly stockError = signal<string | null>(null);
   readonly suggestedProductId = signal<number | null>(null);
+  readonly stockErrorActionLabel = signal('Ajustar cantidad en el producto');
 
   readonly deliveryMethod = signal<DeliveryMethod>('STORE_PICKUP');
   readonly shippingAddress = signal('');
@@ -50,6 +57,7 @@ export class CheckoutComponent {
 
     this.loading.set(true);
     this.stockError.set(null);
+    this.stockErrorActionLabel.set('Ajustar cantidad en el producto');
 
     this.checkoutService
       .createPreference(
@@ -61,14 +69,23 @@ export class CheckoutComponent {
       )
       .subscribe({
         next: (res) => {
+          this.checkoutService.storePendingOrderId(res.orderId);
           window.location.href = res.initPoint;
         },
         error: (err: HttpErrorResponse) => {
           this.loading.set(false);
           if (err.status === 409) {
-            const message = err.error?.message ?? 'Algunos productos no tienen stock suficiente.';
-            this.stockError.set(this.localizeStockMessage(message));
-            this.resolveSuggestedProduct();
+            const conflict = (err.error ?? {}) as CheckoutConflictErrorBody;
+            if (conflict.errorCode === 'RESERVED_TEMPORARILY') {
+              this.stockError.set(this.buildTemporarilyReservedMessage(conflict));
+              this.stockErrorActionLabel.set('Ver disponibilidad del producto');
+              this.resolveSuggestedProduct();
+            } else {
+              const message = conflict.message ?? 'Algunos productos no tienen stock suficiente.';
+              this.stockError.set(this.localizeStockMessage(message));
+              this.stockErrorActionLabel.set('Ajustar cantidad en el producto');
+              this.resolveSuggestedProduct();
+            }
           } else {
             this.toast.error('Ocurrió un error al procesar el pago. Intentá de nuevo.');
           }
@@ -160,6 +177,19 @@ export class CheckoutComponent {
     return translated.trim() || 'Algunos productos no tienen stock suficiente.';
   }
 
+  private buildTemporarilyReservedMessage(conflict: CheckoutConflictErrorBody): string {
+    const base =
+      'No hay unidades disponibles para compra inmediata. Las ultimas unidades estan temporalmente reservadas.';
+    const retryAfterSeconds = conflict.retryAfterSeconds;
+
+    if (!Number.isFinite(retryAfterSeconds) || !retryAfterSeconds || retryAfterSeconds <= 0) {
+      return `${base} Intenta nuevamente en unos minutos.`;
+    }
+
+    const minutes = Math.ceil(retryAfterSeconds / 60);
+    return `${base} Intenta nuevamente en aproximadamente ${minutes} minuto${minutes === 1 ? '' : 's'}.`;
+  }
+
   private resolveSuggestedProduct(): void {
     const items = this.cartService.items();
     if (items.length === 0) {
@@ -171,10 +201,23 @@ export class CheckoutComponent {
       items.map((item) =>
         this.productService
           .getById(item.productId)
-          .pipe(catchError(() => of({ id: item.productId, stock: 0 } as { id: number; stock: number }))),
+          .pipe(
+            catchError(() =>
+              of(
+                {
+                  id: item.productId,
+                  stock: 0,
+                  availableToReserveNow: 0,
+                } as { id: number; stock: number; availableToReserveNow?: number },
+              ),
+            ),
+          ),
       ),
     ).subscribe((products) => {
-      const insufficient = products.find((product, index) => product.stock < items[index].quantity);
+      const insufficient = products.find((product, index) => {
+        const available = product.availableToReserveNow ?? product.stock;
+        return available < items[index].quantity;
+      });
       this.suggestedProductId.set(insufficient?.id ?? items[0].productId ?? null);
     });
   }
