@@ -55,6 +55,12 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'orders/:id',
+    loadComponent: () =>
+      import('./features/orders/order-detail.component').then((c) => c.OrderDetailComponent),
+    canActivate: [authGuard],
+  },
+  {
     path: '',
     pathMatch: 'full',
     redirectTo: 'catalog',

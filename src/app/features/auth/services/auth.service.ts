@@ -28,12 +28,17 @@ export class AuthService {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly tokenSignal = signal<string | null>(this.loadToken());
 
+  readonly token = computed(() => this.tokenSignal());
   readonly isLoggedIn = computed(() => !!this.tokenSignal());
   readonly role = computed(() => this.decodeToken()?.role?.replace('ROLE_', '') ?? null);
   readonly isAdmin = computed(() => this.role() === 'ADMIN');
   readonly userEmail = computed(() => this.decodeToken()?.sub ?? null);
   readonly userId = computed(() => this.decodeToken()?.userId ?? null);
   readonly firstName = computed(() => this.decodeToken()?.firstName ?? null);
+  readonly tokenExpiresAt = computed(() => {
+    const exp = this.decodeToken()?.exp;
+    return typeof exp === 'number' ? exp * 1000 : null;
+  });
 
   getToken(): string | null {
     return this.tokenSignal();
@@ -108,9 +113,7 @@ export class AuthService {
     if (!token) return null;
     try {
       const payload = token.split('.')[1];
-      const decoded = JSON.parse(atob(payload));
-      console.log('[AuthService] JWT decoded:', decoded);
-      return decoded;
+      return JSON.parse(atob(payload));
     } catch {
       return null;
     }

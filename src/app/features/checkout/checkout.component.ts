@@ -199,19 +199,15 @@ export class CheckoutComponent {
 
     forkJoin(
       items.map((item) =>
-        this.productService
-          .getById(item.productId)
-          .pipe(
-            catchError(() =>
-              of(
-                {
-                  id: item.productId,
-                  stock: 0,
-                  availableToReserveNow: 0,
-                } as { id: number; stock: number; availableToReserveNow?: number },
-              ),
-            ),
+        this.productService.getById(item.productId).pipe(
+          catchError(() =>
+            of({
+              id: item.productId,
+              stock: 0,
+              availableToReserveNow: 0,
+            } as { id: number; stock: number; availableToReserveNow?: number }),
           ),
+        ),
       ),
     ).subscribe((products) => {
       const insufficient = products.find((product, index) => {

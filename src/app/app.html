@@ -8,4 +8,8 @@
 	<app-footer></app-footer>
 </div>
 
+<app-confirm-modal [visible]="sessionExpiry.modalVisible()" [title]="sessionExpiry.modalTitle()"
+	[message]="sessionExpiry.modalMessage()" confirmText="Iniciar sesión" variant="confirm"
+	(confirm)="sessionExpiry.goToLogin()" (cancel)="sessionExpiry.dismissModal()" />
+
 <app-toast />

@@ -78,6 +78,7 @@ export interface OrderItemResponse {
   productName: string;
   quantity: number;
   unitPrice: number;
+  imageUrl?: string;
 }
 
 export interface PageResponse<T> {
