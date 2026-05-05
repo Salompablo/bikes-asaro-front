@@ -14,32 +14,52 @@ export class HeaderComponent {
   readonly cartState = inject(CartStateService);
   readonly authService = inject(AuthService);
   private readonly router = inject(Router);
-  isSearchOpen = false;
   isAccountMenuOpen = false;
 
-  @ViewChild('searchInput') searchInput?: ElementRef<HTMLInputElement>;
-
-  openSearch(): void {
-    this.isSearchOpen = true;
-    this.isAccountMenuOpen = false;
-    setTimeout(() => this.searchInput?.nativeElement.focus(), 120);
-  }
-
-  closeSearch(): void {
-    this.isSearchOpen = false;
-  }
+  @ViewChild('accountMenuWrap') accountMenuWrap?: ElementRef<HTMLElement>;
 
   toggleAccountMenu(): void {
+    // On desktop (hover-capable devices) the menu is controlled by hover only.
+    if (this.isHoverCapableDevice()) {
+      return;
+    }
+
     this.isAccountMenuOpen = !this.isAccountMenuOpen;
+  }
+
+  openAccountMenu(): void {
+    this.isAccountMenuOpen = true;
+  }
+
+  closeAccountMenu(): void {
+    this.isAccountMenuOpen = false;
+  }
+
+  onAccountHoverLeave(): void {
+    this.isAccountMenuOpen = false;
   }
 
   @HostListener('document:keydown.escape')
   onEscapePress(): void {
-    if (this.isSearchOpen) {
-      this.closeSearch();
-    }
     if (this.isAccountMenuOpen) {
       this.isAccountMenuOpen = false;
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (!this.isAccountMenuOpen) {
+      return;
+    }
+
+    const target = event.target as Node | null;
+    const wrapper = this.accountMenuWrap?.nativeElement;
+    if (!target || !wrapper) {
+      return;
+    }
+
+    if (!wrapper.contains(target)) {
+      this.closeAccountMenu();
     }
   }
 
@@ -48,5 +68,9 @@ export class HeaderComponent {
     this.cartState.clearCart();
     this.isAccountMenuOpen = false;
     this.router.navigate(['/']);
+  }
+
+  private isHoverCapableDevice(): boolean {
+    return typeof window !== 'undefined' && window.matchMedia('(hover: hover)').matches;
   }
 }

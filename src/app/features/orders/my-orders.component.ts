@@ -5,11 +5,11 @@ import { OrderResponse, PageMetaData } from '../admin/models/admin.models';
 import { OrdersService } from './services/orders.service';
 
 const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
-  PENDING:          { label: 'Pendiente de confirmación', classes: 'bg-yellow-100 text-yellow-800' },
-  PAID:             { label: 'Pago confirmado',           classes: 'bg-blue-100 text-blue-800' },
-  READY_FOR_PICKUP: { label: 'Listo para retirar',        classes: 'bg-green-100 text-green-800' },
-  PICKED_UP:        { label: 'Retirado',                  classes: 'bg-gray-100 text-gray-700' },
-  CANCELLED:        { label: 'Cancelado',                 classes: 'bg-red-100 text-red-700' },
+  PENDING: { label: 'Pendiente de confirmación', classes: 'bg-yellow-100 text-yellow-800' },
+  PAID: { label: 'Pago confirmado', classes: 'bg-blue-100 text-blue-800' },
+  READY_FOR_PICKUP: { label: 'Listo para retirar', classes: 'bg-green-100 text-green-800' },
+  PICKED_UP: { label: 'Retirado', classes: 'bg-gray-100 text-gray-700' },
+  CANCELLED: { label: 'Cancelado', classes: 'bg-red-100 text-red-700' },
 };
 
 @Component({
@@ -19,12 +19,13 @@ const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
   template: `
     <div class="min-h-screen bg-brand-light pt-28 pb-16 px-4">
       <div class="max-w-3xl mx-auto">
-
         <h1 class="font-display uppercase tracking-widest text-2xl mb-8">Mis pedidos</h1>
 
         @if (loading()) {
           <div class="flex items-center justify-center py-24">
-            <div class="w-10 h-10 border-4 border-brand-accent border-t-transparent rounded-full animate-spin"></div>
+            <div
+              class="w-10 h-10 border-4 border-brand-accent border-t-transparent rounded-full animate-spin"
+            ></div>
           </div>
         } @else if (error()) {
           <div class="rounded-lg border border-red-200 bg-red-50 px-6 py-8 text-center">
@@ -39,10 +40,21 @@ const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
           </div>
         } @else if (orders().length === 0) {
           <div class="rounded-2xl border border-gray-200 bg-brand-white p-12 text-center shadow-sm">
-            <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-5">
-              <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            <div
+              class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-5"
+            >
+              <svg
+                class="w-8 h-8 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1.5"
+                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                />
               </svg>
             </div>
             <p class="text-lg font-display uppercase tracking-widest mb-2">Sin pedidos aún</p>
@@ -57,13 +69,19 @@ const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
         } @else {
           <div class="space-y-4">
             @for (order of orders(); track order.id) {
-              <div class="rounded-2xl border border-gray-200 bg-brand-white shadow-sm overflow-hidden">
-
+              <a
+                [routerLink]="['/orders', order.id]"
+                class="group block rounded-2xl border border-gray-200 bg-brand-white shadow-sm overflow-hidden transition-all hover:shadow-md hover:-translate-y-0.5"
+              >
                 <!-- Header del pedido -->
                 <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
                   <div>
-                    <span class="text-xs text-brand-gray font-display uppercase tracking-widest">Pedido #{{ order.id }}</span>
-                    <p class="text-sm text-brand-gray mt-0.5">{{ order.createdAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+                    <span class="text-xs text-brand-gray font-display uppercase tracking-widest"
+                      >Pedido #{{ order.id }}</span
+                    >
+                    <p class="text-sm text-brand-gray mt-0.5">
+                      {{ order.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+                    </p>
                   </div>
                   <span
                     class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
@@ -78,7 +96,9 @@ const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
                   @for (item of order.items; track item.productId) {
                     <div class="flex items-center justify-between">
                       <div class="flex items-center gap-3">
-                        <span class="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-600">
+                        <span
+                          class="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-600"
+                        >
                           {{ item.quantity }}
                         </span>
                         <span class="text-sm">{{ item.productName }}</span>
@@ -91,14 +111,24 @@ const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
                 </div>
 
                 <!-- Footer del pedido -->
-                <div class="flex items-center justify-between px-5 py-3 bg-gray-50 border-t border-gray-100">
-                  <span class="text-xs text-brand-gray uppercase tracking-widest font-display">Total</span>
-                  <span class="font-semibold">
-                    {{ order.totalAmount | currency: 'ARS' : '$' : '1.0-0' }}
+                <div
+                  class="flex items-center justify-between px-5 py-3 bg-gray-50 border-t border-gray-100"
+                >
+                  <div>
+                    <span class="text-xs text-brand-gray uppercase tracking-widest font-display"
+                      >Total</span
+                    >
+                    <span class="font-semibold ml-2">
+                      {{ order.totalAmount | currency: 'ARS' : '$' : '1.0-0' }}
+                    </span>
+                  </div>
+                  <span
+                    class="text-xs font-display uppercase tracking-widest text-brand-gray transition-colors group-hover:text-brand-black"
+                  >
+                    Ver detalle →
                   </span>
                 </div>
-
-              </div>
+              </a>
             }
           </div>
 
@@ -127,7 +157,6 @@ const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
             </div>
           }
         }
-
       </div>
     </div>
   `,

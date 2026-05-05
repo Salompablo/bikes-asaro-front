@@ -9,9 +9,18 @@ import { CheckoutService } from './services/checkout.service';
   imports: [RouterLink],
   template: `
     <section class="min-h-screen bg-brand-light flex items-center justify-center px-4 py-10">
-      <div class="w-full max-w-lg rounded-2xl bg-brand-white border border-gray-200 shadow-xl p-6 sm:p-8">
-        <div class="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6">
-          <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div
+        class="w-full max-w-lg rounded-2xl bg-brand-white border border-gray-200 shadow-xl p-6 sm:p-8"
+      >
+        <div
+          class="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6"
+        >
+          <svg
+            class="w-10 h-10 text-green-600"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
