@@ -114,13 +114,14 @@ const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
                 <div
                   class="flex items-center justify-between px-5 py-3 bg-gray-50 border-t border-gray-100"
                 >
-                  <div>
+                  <div class="space-y-1">
                     <span class="text-xs text-brand-gray uppercase tracking-widest font-display"
                       >Total</span
                     >
                     <span class="font-semibold ml-2">
                       {{ order.totalAmount | currency: 'ARS' : '$' : '1.0-0' }}
                     </span>
+                    <p class="text-xs text-brand-gray">Tel: {{ order.contactPhone || '-' }}</p>
                   </div>
                   <span
                     class="text-xs font-display uppercase tracking-widest text-brand-gray transition-colors group-hover:text-brand-black"

@@ -1,7 +1,7 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable, PLATFORM_ID, computed, inject, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { Observable, tap } from 'rxjs';
+import { Observable, catchError, of, tap, throwError } from 'rxjs';
 import {
   AuthResponse,
   ForgotPasswordRequest,
@@ -9,6 +9,7 @@ import {
   LoginRequest,
   RegisterRequest,
   ResetPasswordRequest,
+  UserProfile,
 } from '../models/auth.models';
 import { API_ENDPOINTS } from '../../../core/http/api-endpoints';
 
@@ -27,6 +28,7 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly tokenSignal = signal<string | null>(this.loadToken());
+  private readonly currentUserSignal = signal<UserProfile | null>(null);
 
   readonly token = computed(() => this.tokenSignal());
   readonly isLoggedIn = computed(() => !!this.tokenSignal());
@@ -35,10 +37,21 @@ export class AuthService {
   readonly userEmail = computed(() => this.decodeToken()?.sub ?? null);
   readonly userId = computed(() => this.decodeToken()?.userId ?? null);
   readonly firstName = computed(() => this.decodeToken()?.firstName ?? null);
+  readonly currentUser = computed(() => this.currentUserSignal());
   readonly tokenExpiresAt = computed(() => {
     const exp = this.decodeToken()?.exp;
     return typeof exp === 'number' ? exp * 1000 : null;
   });
+
+  constructor() {
+    if (this.tokenSignal()) {
+      this.loadCurrentUserProfile().subscribe({
+        error: () => {
+          this.currentUserSignal.set(null);
+        },
+      });
+    }
+  }
 
   getToken(): string | null {
     return this.tokenSignal();
@@ -89,9 +102,31 @@ export class AuthService {
 
   logout(): void {
     this.tokenSignal.set(null);
+    this.currentUserSignal.set(null);
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem(TOKEN_KEY);
     }
+  }
+
+  loadCurrentUserProfile(force = false): Observable<UserProfile | null> {
+    if (!this.tokenSignal()) {
+      this.currentUserSignal.set(null);
+      return of(null);
+    }
+
+    if (!force && this.currentUserSignal()) {
+      return of(this.currentUserSignal());
+    }
+
+    return this.http.get<UserProfile>(API_ENDPOINTS.USERS.ME).pipe(
+      tap((profile) => this.currentUserSignal.set(profile)),
+      catchError((error: unknown) => {
+        if (error instanceof HttpErrorResponse && (error.status === 401 || error.status === 403)) {
+          this.currentUserSignal.set(null);
+        }
+        return throwError(() => error);
+      }),
+    );
   }
 
   private storeToken(token: string): void {
@@ -99,6 +134,12 @@ export class AuthService {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.setItem(TOKEN_KEY, token);
     }
+
+    this.loadCurrentUserProfile(true).subscribe({
+      error: () => {
+        this.currentUserSignal.set(null);
+      },
+    });
   }
 
   private loadToken(): string | null {

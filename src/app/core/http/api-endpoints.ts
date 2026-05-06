@@ -42,4 +42,7 @@ export const API_ENDPOINTS = {
     MY_ORDERS: '/orders/my-orders',
     MY_ORDER_BY_ID: (id: number) => `/orders/my-orders/${id}`,
   },
+  USERS: {
+    ME: '/users/me',
+  },
 } as const;

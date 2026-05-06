@@ -58,6 +58,7 @@ export interface UserResponse {
   isActive: boolean;
   isEmailVerified: boolean;
   provider: string;
+  defaultPhone?: string | null;
 }
 
 export interface OrderResponse {
@@ -67,10 +68,11 @@ export interface OrderResponse {
   createdAt: string;
   items: OrderItemResponse[];
   deliveryMethod: string;
-  shippingAddress: string;
-  zipCode: string;
-  shippingCost: number;
-  trackingNumber: string;
+  shippingAddress: string | null;
+  zipCode: string | null;
+  shippingCost: number | null;
+  trackingNumber: string | null;
+  contactPhone: string | null;
 }
 
 export interface OrderItemResponse {

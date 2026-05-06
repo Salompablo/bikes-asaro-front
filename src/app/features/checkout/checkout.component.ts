@@ -9,6 +9,7 @@ import { ToastService } from '../../shared/services/toast.service';
 import { ProductService } from '../admin/services/product.service';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { AuthService } from '../auth/services/auth.service';
 
 const SHIPPING_COST = 15000;
 
@@ -30,6 +31,7 @@ export class CheckoutComponent {
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
   private readonly productService = inject(ProductService);
+  private readonly authService = inject(AuthService);
 
   readonly loading = signal(false);
   readonly stockError = signal<string | null>(null);
@@ -39,30 +41,59 @@ export class CheckoutComponent {
   readonly deliveryMethod = signal<DeliveryMethod>('STORE_PICKUP');
   readonly shippingAddress = signal('');
   readonly zipCode = signal('');
+  readonly contactPhone = signal('');
+  readonly savePhoneToProfile = signal(false);
+  readonly phoneError = signal<string | null>(null);
+
+  constructor() {
+    this.authService.loadCurrentUserProfile().subscribe({
+      next: (profile) => {
+        if (profile?.defaultPhone) {
+          this.contactPhone.set(profile.defaultPhone);
+        }
+      },
+      error: () => {
+        // Prefill is optional. Checkout must still be usable without this call.
+      },
+    });
+  }
 
   readonly isShipping = computed(() => this.deliveryMethod() === 'SHIPPING');
   readonly shippingCost = computed(() => (this.isShipping() ? SHIPPING_COST : 0));
   readonly orderTotal = computed(() => this.cartService.totalPrice() + this.shippingCost());
 
   readonly canPay = computed(() => {
+    const hasContactPhone = this.contactPhone().trim().length > 0;
     if (this.isShipping()) {
-      return this.shippingAddress().trim().length > 0 && this.zipCode().trim().length > 0;
+      return (
+        hasContactPhone &&
+        this.shippingAddress().trim().length > 0 &&
+        this.zipCode().trim().length > 0
+      );
     }
-    return true;
+    return hasContactPhone;
   });
 
   pay(): void {
     const items = this.cartService.items();
     if (items.length === 0 || !this.canPay()) return;
 
+    if (!this.contactPhone().trim()) {
+      this.phoneError.set('El telefono de contacto es obligatorio.');
+      return;
+    }
+
     this.loading.set(true);
     this.stockError.set(null);
     this.stockErrorActionLabel.set('Ajustar cantidad en el producto');
+    this.phoneError.set(null);
 
     this.checkoutService
       .createPreference(
         items,
         this.deliveryMethod(),
+        this.contactPhone().trim(),
+        this.savePhoneToProfile(),
         this.isShipping() ? this.shippingAddress() : undefined,
         this.isShipping() ? this.zipCode() : undefined,
         this.isShipping() ? this.shippingCost() : undefined,
@@ -87,10 +118,20 @@ export class CheckoutComponent {
               this.resolveSuggestedProduct();
             }
           } else {
+            if (err.status === 400) {
+              this.phoneError.set('Revisa el telefono de contacto e intenta nuevamente.');
+            }
             this.toast.error('Ocurrió un error al procesar el pago. Intentá de nuevo.');
           }
         },
       });
+  }
+
+  onContactPhoneChange(value: string): void {
+    this.contactPhone.set(value);
+    if (value.trim()) {
+      this.phoneError.set(null);
+    }
   }
 
   goToAdjustProduct(): void {

@@ -102,6 +102,49 @@
             }
         </div>
 
+        <!-- Contact phone -->
+        <div class="mb-8">
+            <div class="flex items-center gap-2 mb-2">
+                <h2 class="text-lg font-medium text-brand-black">Contacto</h2>
+                <span
+                    class="inline-flex items-center rounded-full bg-red-50 px-2 py-0.5 text-[11px] font-semibold text-red-700 border border-red-200">
+                    Obligatorio
+                </span>
+            </div>
+
+            <p class="text-sm text-brand-gray mb-4">
+                Te pedimos un teléfono de contacto por si necesitamos avisarte sobre tu pago, entrega o retiro.
+                No lo usamos para enviarte spam.
+            </p>
+
+            <div class="space-y-3">
+                <label class="block text-sm font-medium text-brand-black" for="checkout-contact-phone">
+                    Teléfono de contacto <span class="text-red-600">*</span>
+                </label>
+
+                <input id="checkout-contact-phone" type="tel" placeholder="Ej: +5492235551234" autocomplete="tel"
+                    required [ngModel]="contactPhone()" (ngModelChange)="onContactPhoneChange($event)"
+                    class="w-full h-11 px-4 rounded-lg border text-sm text-brand-black placeholder:text-brand-gray/60 focus:outline-none focus:ring-2 focus:ring-brand-accent/40 transition-colors"
+                    [class.border-red-300]="phoneError()" [class.focus:border-red-400]="phoneError()"
+                    [class.border-gray-200]="!phoneError()" [class.focus:border-brand-accent]="!phoneError()" />
+
+                <p class="text-xs text-brand-gray">
+                    Incluí código de país y área para contactarte rápido si surge alguna validación.
+                </p>
+
+                @if (phoneError()) {
+                <p class="text-sm text-red-600">{{ phoneError() }}</p>
+                }
+
+                <label class="inline-flex items-center gap-3 text-sm text-brand-gray cursor-pointer">
+                    <input type="checkbox" [ngModel]="savePhoneToProfile()"
+                        (ngModelChange)="savePhoneToProfile.set(!!$event)"
+                        class="h-4 w-4 rounded border-gray-300 text-brand-accent focus:ring-brand-accent/50" />
+                    Guardar este teléfono en mi perfil
+                </label>
+            </div>
+        </div>
+
         <!-- Subtotals -->
         <div class="space-y-2 mb-2 px-1">
             <div class="flex items-center justify-between text-sm text-brand-gray">

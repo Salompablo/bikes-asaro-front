@@ -16,6 +16,8 @@ export interface CheckoutPreferenceRequest {
   shippingAddress?: string;
   zipCode?: string;
   shippingCost?: number;
+  contactPhone: string;
+  savePhoneToProfile?: boolean;
 }
 
 export interface CheckoutPreferenceResponse {
@@ -31,6 +33,8 @@ export class CheckoutService {
   createPreference(
     cartItems: CartItem[],
     deliveryMethod: DeliveryMethod,
+    contactPhone: string,
+    savePhoneToProfile?: boolean,
     shippingAddress?: string,
     zipCode?: string,
     shippingCost?: number,
@@ -38,6 +42,8 @@ export class CheckoutService {
     const body: CheckoutPreferenceRequest = {
       items: cartItems.map((i) => ({ productId: i.productId, quantity: i.quantity })),
       deliveryMethod,
+      contactPhone,
+      ...(savePhoneToProfile !== undefined && { savePhoneToProfile }),
       ...(deliveryMethod === 'SHIPPING' && { shippingAddress, zipCode, shippingCost }),
     };
     return this.http.post<CheckoutPreferenceResponse>(
