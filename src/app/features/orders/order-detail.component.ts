@@ -175,6 +175,11 @@ const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
                 <h2 class="font-display uppercase tracking-widest text-sm mb-4">Entrega</h2>
                 <dl class="space-y-3 text-sm">
                   <div class="flex items-center justify-between gap-4">
+                    <dt class="text-brand-gray">Telefono de contacto</dt>
+                    <dd class="text-right">{{ order()!.contactPhone || '-' }}</dd>
+                  </div>
+
+                  <div class="flex items-center justify-between gap-4">
                     <dt class="text-brand-gray">Metodo</dt>
                     <dd class="text-right">{{ deliveryMethodLabel(order()!.deliveryMethod) }}</dd>
                   </div>

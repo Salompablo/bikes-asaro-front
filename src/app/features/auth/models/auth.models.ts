@@ -29,6 +29,18 @@ export interface AuthResponse {
   message: string;
 }
 
+export interface UserProfile {
+  id: number;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+  isActive: boolean;
+  isEmailVerified: boolean;
+  provider: string;
+  defaultPhone: string | null;
+}
+
 export interface ErrorResponse {
   status: number;
   error: string;

@@ -38,6 +38,8 @@
                             <button type="button" class="account-menu-item" role="menuitem"
                                 (click)="logout()">Desconectar</button>
                             } @else {
+                            <a routerLink="/profile" class="account-menu-item" role="menuitem"
+                                (click)="isAccountMenuOpen = false">Mi perfil</a>
                             <a routerLink="/orders" class="account-menu-item" role="menuitem"
                                 (click)="isAccountMenuOpen = false">Mis pedidos</a>
                             <button type="button" class="account-menu-item" role="menuitem" (click)="logout()">Cerrar
