@@ -23,7 +23,9 @@ export const API_ENDPOINTS = {
   },
   ADMIN: {
     ORDERS: '/admin/orders',
+    ORDER_BY_ID: (id: number) => `/admin/orders/${id}`,
     ORDER_STATUS: (id: number) => `/admin/orders/${id}/status`,
+    ORDER_SHIPPING_QUOTE: (id: number) => `/admin/orders/${id}/shipping-quote`,
     USERS: '/admin/users',
   },
   REVIEWS: {
@@ -36,6 +38,9 @@ export const API_ENDPOINTS = {
   },
   CHECKOUT: {
     CREATE_PREFERENCE: '/checkout/create-preference',
+  },
+  SHIPPING: {
+    QUOTE: '/shipping/quote',
   },
   ORDERS: {
     BY_ID: (id: number) => `/orders/${id}`,

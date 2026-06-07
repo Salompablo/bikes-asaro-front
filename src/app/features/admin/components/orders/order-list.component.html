@@ -16,7 +16,7 @@
                         <th class="text-right px-4 py-3 font-display uppercase tracking-wider text-xs text-brand-gray">
                             Total</th>
                         <th class="text-left px-4 py-3 font-display uppercase tracking-wider text-xs text-brand-gray">
-                            Dirección</th>
+                            Tipo de compra</th>
                         <th class="text-center px-4 py-3 font-display uppercase tracking-wider text-xs text-brand-gray">
                             Estado</th>
                         <th class="text-center px-4 py-3 font-display uppercase tracking-wider text-xs text-brand-gray">
@@ -40,12 +40,10 @@
                             </span>
                         </td>
                         <td class="px-4 py-3 text-center">
-                            <select [ngModel]="order.status" (ngModelChange)="updateStatus(order, $event)"
-                                class="text-xs border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:border-brand-black">
-                                @for (s of statuses; track s) {
-                                <option [value]="s">{{ statusLabel(s) }}</option>
-                                }
-                            </select>
+                            <a [routerLink]="['/admin/orders', order.id]"
+                                class="px-2 py-1 text-[11px] rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors">
+                                Ver detalle
+                            </a>
                         </td>
                     </tr>
                     } @empty {

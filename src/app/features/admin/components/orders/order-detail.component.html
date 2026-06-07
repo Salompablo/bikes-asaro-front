@@ -1,0 +1,178 @@
+<div class="space-y-6">
+  <a routerLink="/admin/orders"
+    class="inline-flex items-center gap-2 text-sm text-brand-gray hover:text-brand-black transition-colors">
+    <span aria-hidden="true">←</span>
+    Volver a pedidos
+  </a>
+
+  @if (loading()) {
+  <div class="text-center py-12 text-brand-gray">Cargando detalle de orden...</div>
+  } @else if (notFound()) {
+  <div class="rounded-lg border border-gray-200 bg-gray-50 px-6 py-10 text-center">
+    <p class="text-lg text-brand-black mb-2">Orden no encontrada</p>
+    <p class="text-sm text-brand-gray">No existe o fue eliminada.</p>
+  </div>
+  } @else if (errorMessage()) {
+  <div class="rounded-lg border border-red-200 bg-red-50 px-6 py-8 text-center">
+    <p class="text-red-700 mb-4">{{ errorMessage() }}</p>
+    <button type="button" (click)="load()"
+      class="px-5 py-2 bg-brand-black text-brand-white rounded-lg hover:bg-brand-dark transition-colors">
+      Reintentar
+    </button>
+  </div>
+  } @else if (order()) {
+  <div class="rounded-2xl border border-gray-200 bg-brand-white shadow-sm p-6">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+      <h2 class="text-2xl font-display tracking-tight text-brand-black">Detalle Pedido #{{ order()!.id }}</h2>
+      <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold uppercase"
+        [ngClass]="statusClass(order()!.status)">
+        {{ statusLabel(order()!.status) }}
+      </span>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 text-sm">
+      <div class="rounded-xl border border-gray-200 p-3">
+        <p class="text-xs uppercase tracking-widest text-brand-gray">Estado</p>
+        <p class="mt-1 font-medium">{{ statusLabel(order()!.status) }}</p>
+      </div>
+      <div class="rounded-xl border border-gray-200 p-3">
+        <p class="text-xs uppercase tracking-widest text-brand-gray">Estado de pago</p>
+        <p class="mt-1 font-medium">{{ order()!.paymentStatus ? statusLabel(order()!.paymentStatus!) : '-' }}</p>
+      </div>
+      <div class="rounded-xl border border-gray-200 p-3">
+        <p class="text-xs uppercase tracking-widest text-brand-gray">Metodo de entrega</p>
+        <p class="mt-1 font-medium">{{ deliveryMethodLabel(order()!.deliveryMethod) }}</p>
+      </div>
+      <div class="rounded-xl border border-gray-200 p-3">
+        <p class="text-xs uppercase tracking-widest text-brand-gray">Subtotal</p>
+        <p class="mt-1 font-medium">{{ order()!.subtotalAmount | currency: 'ARS' : '$' : '1.0-0' }}</p>
+      </div>
+      <div class="rounded-xl border border-gray-200 p-3">
+        <p class="text-xs uppercase tracking-widest text-brand-gray">Costo de envio</p>
+        <p class="mt-1 font-medium">{{ (order()!.shippingCost ?? 0) | currency: 'ARS' : '$' : '1.0-0' }}</p>
+      </div>
+      <div class="rounded-xl border border-gray-200 p-3">
+        <p class="text-xs uppercase tracking-widest text-brand-gray">Total</p>
+        <p class="mt-1 font-medium">{{ order()!.totalAmount | currency: 'ARS' : '$' : '1.0-0' }}</p>
+      </div>
+      <div class="rounded-xl border border-gray-200 p-3">
+        <p class="text-xs uppercase tracking-widest text-brand-gray">Correo del cliente</p>
+        <p class="mt-1 font-medium break-all">{{ order()!.customerEmail || '-' }}</p>
+      </div>
+      <div class="rounded-xl border border-gray-200 p-3">
+        <p class="text-xs uppercase tracking-widest text-brand-gray">Telefono de contacto</p>
+        <p class="mt-1 font-medium">{{ order()!.contactPhone || '-' }}</p>
+      </div>
+      <div class="rounded-xl border border-gray-200 p-3">
+        <p class="text-xs uppercase tracking-widest text-brand-gray">Direccion de envio</p>
+        <p class="mt-1 font-medium">{{ order()!.shippingAddress || '-' }}</p>
+      </div>
+      <div class="rounded-xl border border-gray-200 p-3">
+        <p class="text-xs uppercase tracking-widest text-brand-gray">Codigo postal</p>
+        <p class="mt-1 font-medium">{{ order()!.zipCode || '-' }}</p>
+      </div>
+      <div class="rounded-xl border border-gray-200 p-3">
+        <p class="text-xs uppercase tracking-widest text-brand-gray">Requiere cotizacion de envio</p>
+        <p class="mt-1 font-medium">{{ order()!.requiresShippingQuote ? 'Sí' : 'No' }}</p>
+      </div>
+      <div class="rounded-xl border border-gray-200 p-3">
+        <p class="text-xs uppercase tracking-widest text-brand-gray">Pago habilitado</p>
+        <p class="mt-1 font-medium">{{ order()!.payableNow ? 'Sí' : 'No' }}</p>
+      </div>
+    </div>
+
+    <div class="mt-6 rounded-2xl border border-gray-200 p-4">
+      <h3 class="font-display uppercase tracking-widest text-sm mb-3">Productos</h3>
+      <div class="space-y-3">
+        @for (item of order()!.items; track item.productId) {
+        <div class="flex items-center justify-between gap-4 border-b border-gray-100 pb-3 last:border-b-0 last:pb-0">
+          <div>
+            <p class="font-medium text-brand-black">{{ item.productName }}</p>
+            <p class="text-xs text-brand-gray">Cantidad: {{ item.quantity }}</p>
+          </div>
+          <p class="text-sm text-brand-gray">{{ item.unitPrice * item.quantity | currency: 'ARS' : '$' : '1.0-0' }}</p>
+        </div>
+        }
+      </div>
+    </div>
+
+    @if (order()!.requiresShippingQuote) {
+    <div class="mt-6 rounded-2xl border border-brand-accent/40 bg-brand-accent/5 p-4">
+      <h3 class="font-display uppercase tracking-widest text-sm text-brand-black mb-2">Publicar cotización de envío</h3>
+      <p class="text-sm text-brand-gray mb-4">Ingresá el costo final de envío para habilitar el pago del cliente.</p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-[220px_auto] gap-3 items-start">
+        <div>
+          <label for="shipping-cost" class="text-xs uppercase tracking-widest text-brand-gray">Costo de envío</label>
+          <input id="shipping-cost" type="number" min="1" step="0.01" [ngModel]="shippingCostInput()"
+            (ngModelChange)="onShippingCostInput($event)"
+            class="mt-1 w-full h-10 rounded-lg border border-gray-300 px-3 text-sm focus:outline-none focus:border-brand-black" />
+        </div>
+
+        <button type="button" (click)="publishQuote()" [disabled]="!canPublishQuote()"
+          class="h-10 px-4 rounded-lg bg-brand-black text-brand-white text-sm font-medium hover:bg-brand-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+          @if (submittingQuote()) {
+          Publicando...
+          } @else {
+          Publicar cotización
+          }
+        </button>
+      </div>
+
+      @if (quoteError()) {
+      <p class="mt-2 text-sm text-red-600">{{ quoteError() }}</p>
+      }
+    </div>
+    } @else {
+    <div class="mt-6 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-800">
+      Esta orden no requiere cotización pendiente. El cliente ya puede pagar o la orden avanzó de estado.
+    </div>
+    }
+
+    @if (nextAdminAction()) {
+    <div class="mt-6 rounded-2xl border border-indigo-200 bg-indigo-50 p-4">
+      <h3 class="font-display uppercase tracking-widest text-sm text-brand-black mb-2">Acción de seguimiento</h3>
+      <p class="text-sm text-brand-gray mb-4">Próxima acción sugerida para esta orden.</p>
+
+      <button type="button" (click)="openStatusActionConfirm()" [disabled]="submittingStatusAction()"
+        class="h-10 px-4 rounded-lg bg-brand-black text-brand-white text-sm font-medium hover:bg-brand-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+        @if (submittingStatusAction()) {
+        Actualizando...
+        } @else {
+        {{ nextAdminAction()!.buttonLabel }}
+        }
+      </button>
+
+      @if (statusActionError()) {
+      <p class="mt-2 text-sm text-red-600">{{ statusActionError() }}</p>
+      }
+    </div>
+    }
+  </div>
+
+  @if (confirmStatusModalVisible()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="closeStatusActionConfirm()"></div>
+
+    <div class="relative bg-brand-white rounded-2xl shadow-xl border border-gray-200 p-6 w-full max-w-md mx-4">
+      <h3 class="text-lg font-display tracking-tight text-brand-black">{{ nextAdminAction()?.title || 'Confirmar acción'
+        }}</h3>
+      <p class="mt-2 text-sm text-brand-gray leading-relaxed">
+        {{ nextAdminAction()?.message || '¿Estás seguro de que querés continuar?' }}
+      </p>
+
+      <div class="mt-6 flex items-center justify-end gap-3">
+        <button type="button" (click)="closeStatusActionConfirm()" [disabled]="submittingStatusAction()"
+          class="px-4 py-2 rounded-lg text-sm font-display uppercase tracking-wider border border-gray-300 text-brand-gray hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+          Cancelar
+        </button>
+        <button type="button" (click)="applyNextStatusAction()" [disabled]="submittingStatusAction()"
+          class="px-4 py-2 rounded-lg text-sm font-display uppercase tracking-wider text-white bg-green-600 hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+          Confirmar cambio
+        </button>
+      </div>
+    </div>
+  </div>
+  }
+  }
+</div>

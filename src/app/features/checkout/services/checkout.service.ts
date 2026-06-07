@@ -15,14 +15,25 @@ export interface CheckoutPreferenceRequest {
   deliveryMethod: DeliveryMethod;
   shippingAddress?: string;
   zipCode?: string;
-  shippingCost?: number;
   contactPhone: string;
   savePhoneToProfile?: boolean;
 }
 
 export interface CheckoutPreferenceResponse {
-  initPoint: string;
+  requiresShippingQuote: boolean;
+  payableNow: boolean;
+  flowStatus: string;
+  checkoutUrl?: string | null;
+  quoteExpiresAt?: string | null;
+  initPoint: string | null;
+  preferenceId: string | null;
   orderId: number;
+}
+
+export interface ShippingQuoteResponse {
+  provider: string;
+  cost: number;
+  estimatedDays: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -37,19 +48,27 @@ export class CheckoutService {
     savePhoneToProfile?: boolean,
     shippingAddress?: string,
     zipCode?: string,
-    shippingCost?: number,
   ): Observable<CheckoutPreferenceResponse> {
     const body: CheckoutPreferenceRequest = {
       items: cartItems.map((i) => ({ productId: i.productId, quantity: i.quantity })),
       deliveryMethod,
       contactPhone,
       ...(savePhoneToProfile !== undefined && { savePhoneToProfile }),
-      ...(deliveryMethod === 'SHIPPING' && { shippingAddress, zipCode, shippingCost }),
+      ...(deliveryMethod === 'SHIPPING' && { shippingAddress, zipCode }),
     };
     return this.http.post<CheckoutPreferenceResponse>(
       API_ENDPOINTS.CHECKOUT.CREATE_PREFERENCE,
       body,
     );
+  }
+
+  getShippingQuote(zipCode: string, totalWeight: number): Observable<ShippingQuoteResponse> {
+    return this.http.get<ShippingQuoteResponse>(API_ENDPOINTS.SHIPPING.QUOTE, {
+      params: {
+        zipCode,
+        totalWeight,
+      },
+    });
   }
 
   cancelOrder(orderId: number): Observable<void> {

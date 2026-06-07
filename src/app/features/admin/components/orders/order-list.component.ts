@@ -1,14 +1,14 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { AdminService } from '../../services/admin.service';
-import { OrderResponse, OrderStatus } from '../../models/admin.models';
+import { OrderResponse } from '../../models/admin.models';
 import { ToastService } from '../../../../shared/services/toast.service';
-import { FormsModule } from '@angular/forms';
 import { CurrencyPipe, DatePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-order-list',
   standalone: true,
-  imports: [FormsModule, CurrencyPipe, DatePipe],
+  imports: [CurrencyPipe, DatePipe, RouterLink],
   templateUrl: './order-list.component.html',
 })
 export class OrderListComponent implements OnInit {
@@ -19,8 +19,6 @@ export class OrderListComponent implements OnInit {
   loading = signal(true);
   currentPage = signal(0);
   totalPages = signal(0);
-
-  readonly statuses: OrderStatus[] = ['PENDING', 'PAID', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
 
   ngOnInit(): void {
     this.loadOrders();
@@ -46,31 +44,32 @@ export class OrderListComponent implements OnInit {
     this.loadOrders();
   }
 
-  updateStatus(order: OrderResponse, status: OrderStatus): void {
-    this.adminService.updateOrderStatus(order.id, status).subscribe({
-      next: (updated) => {
-        this.orders.update((list) => list.map((o) => (o.id === updated.id ? updated : o)));
-        this.toast.success(`Pedido #${order.id} actualizado a ${this.statusLabel(status)}`);
-      },
-      error: () => this.toast.error('Error al actualizar el estado'),
-    });
-  }
-
   statusLabel(status: string): string {
+    const normalizedStatus = (status ?? '').toUpperCase();
     const map: Record<string, string> = {
+      INITIATED: 'Iniciada',
+      QUOTE_REQUESTED: 'Cotización solicitada',
+      QUOTE_READY_PAYMENT_PENDING: 'Cotización publicada',
       PENDING: 'Pendiente',
       PAID: 'Pagado',
+      READY_FOR_PICKUP: 'Listo para retirar',
+      PICKED_UP: 'Recogido',
       SHIPPED: 'Enviado',
-      DELIVERED: 'Entregado',
+      DELIVERED: 'Recibido',
       CANCELLED: 'Cancelado',
     };
-    return map[status] ?? status;
+    return map[normalizedStatus] ?? status;
   }
 
   statusClass(status: string): string {
     const map: Record<string, string> = {
+      INITIATED: 'bg-slate-100 text-slate-700',
+      QUOTE_REQUESTED: 'bg-orange-100 text-orange-700',
+      QUOTE_READY_PAYMENT_PENDING: 'bg-cyan-100 text-cyan-700',
       PENDING: 'bg-yellow-100 text-yellow-700',
       PAID: 'bg-blue-100 text-blue-700',
+      READY_FOR_PICKUP: 'bg-emerald-100 text-emerald-700',
+      PICKED_UP: 'bg-green-100 text-green-700',
       SHIPPED: 'bg-purple-100 text-purple-700',
       DELIVERED: 'bg-green-100 text-green-700',
       CANCELLED: 'bg-red-100 text-red-700',

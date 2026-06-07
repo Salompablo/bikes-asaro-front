@@ -1,14 +1,22 @@
 import { CurrencyPipe, DatePipe, NgClass } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { OrderResponse, PageMetaData } from '../admin/models/admin.models';
 import { OrdersService } from './services/orders.service';
 
 const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
+  INITIATED: { label: 'Iniciado', classes: 'bg-slate-100 text-slate-700' },
+  QUOTE_REQUESTED: { label: 'Esperando cotización', classes: 'bg-orange-100 text-orange-800' },
+  QUOTE_READY_PAYMENT_PENDING: {
+    label: 'Cotización lista, falta pago',
+    classes: 'bg-cyan-100 text-cyan-800',
+  },
   PENDING: { label: 'Pendiente de confirmación', classes: 'bg-yellow-100 text-yellow-800' },
   PAID: { label: 'Pago confirmado', classes: 'bg-blue-100 text-blue-800' },
   READY_FOR_PICKUP: { label: 'Listo para retirar', classes: 'bg-green-100 text-green-800' },
   PICKED_UP: { label: 'Retirado', classes: 'bg-gray-100 text-gray-700' },
+  SHIPPED: { label: 'Enviado', classes: 'bg-indigo-100 text-indigo-800' },
+  DELIVERED: { label: 'Recibido', classes: 'bg-emerald-100 text-emerald-800' },
   CANCELLED: { label: 'Cancelado', classes: 'bg-red-100 text-red-700' },
 };
 
@@ -69,8 +77,7 @@ const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
         } @else {
           <div class="space-y-4">
             @for (order of orders(); track order.id) {
-              <a
-                [routerLink]="['/orders', order.id]"
+              <div
                 class="group block rounded-2xl border border-gray-200 bg-brand-white shadow-sm overflow-hidden transition-all hover:shadow-md hover:-translate-y-0.5"
               >
                 <!-- Header del pedido -->
@@ -122,14 +129,36 @@ const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
                       {{ order.totalAmount | currency: 'ARS' : '$' : '1.0-0' }}
                     </span>
                     <p class="text-xs text-brand-gray">Tel: {{ order.contactPhone || '-' }}</p>
+                    @if (order.requiresShippingQuote) {
+                      <p class="text-xs text-orange-700">Esperando cotización del vendedor</p>
+                    }
+                    @if (order.payableNow && order.status === 'QUOTE_READY_PAYMENT_PENDING') {
+                      <p class="text-xs text-cyan-700">Pago habilitado</p>
+                    }
+                    @if (showQuoteDeadline(order)) {
+                      <p class="text-xs text-brand-gray">Vence: {{ formatQuoteDeadline(order) }}</p>
+                      <p class="text-xs text-orange-700">{{ quoteCountdownLabel(order) }}</p>
+                    }
                   </div>
-                  <span
-                    class="text-xs font-display uppercase tracking-widest text-brand-gray transition-colors group-hover:text-brand-black"
-                  >
-                    Ver detalle →
-                  </span>
+                  <div class="flex items-center gap-2">
+                    @if (canRenderPayNow(order)) {
+                      <button
+                        type="button"
+                        (click)="payNow(order)"
+                        class="px-3 py-1.5 rounded-lg bg-[#009EE3] text-white text-xs font-semibold hover:brightness-110 transition"
+                      >
+                        Pagar ahora
+                      </button>
+                    }
+                    <a
+                      [routerLink]="['/orders', order.id]"
+                      class="text-xs font-display uppercase tracking-widest text-brand-gray transition-colors group-hover:text-brand-black"
+                    >
+                      Ver detalle →
+                    </a>
+                  </div>
                 </div>
-              </a>
+              </div>
             }
           </div>
 
@@ -162,17 +191,27 @@ const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
     </div>
   `,
 })
-export class MyOrdersComponent implements OnInit {
+export class MyOrdersComponent implements OnInit, OnDestroy {
   private readonly ordersService = inject(OrdersService);
+  private quoteCountdownTimer: ReturnType<typeof setInterval> | null = null;
 
   readonly orders = signal<OrderResponse[]>([]);
   readonly meta = signal<PageMetaData | null>(null);
   readonly loading = signal(true);
   readonly error = signal(false);
   readonly currentPage = signal(0);
+  readonly now = signal(Date.now());
 
   ngOnInit(): void {
+    this.quoteCountdownTimer = setInterval(() => this.now.set(Date.now()), 1000);
     this.load();
+  }
+
+  ngOnDestroy(): void {
+    if (this.quoteCountdownTimer) {
+      clearInterval(this.quoteCountdownTimer);
+      this.quoteCountdownTimer = null;
+    }
   }
 
   load(): void {
@@ -198,5 +237,62 @@ export class MyOrdersComponent implements OnInit {
 
   statusConfig(status: string): { label: string; classes: string } {
     return STATUS_CONFIG[status] ?? { label: status, classes: 'bg-gray-100 text-gray-600' };
+  }
+
+  canRenderPayNow(order: OrderResponse): boolean {
+    const allowedStatuses = new Set(['INITIATED', 'QUOTE_READY_PAYMENT_PENDING']);
+    return (
+      Boolean(order.payableNow) &&
+      allowedStatuses.has(order.status) &&
+      Boolean(this.resolvePaymentUrl(order))
+    );
+  }
+
+  resolvePaymentUrl(order: OrderResponse): string | null {
+    if (order.checkoutUrl) return order.checkoutUrl;
+    if (order.initPoint) return order.initPoint;
+    if (order.preferenceId) {
+      return `https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=${encodeURIComponent(order.preferenceId)}`;
+    }
+    return null;
+  }
+
+  showQuoteDeadline(order: OrderResponse): boolean {
+    return Boolean(order.quoteExpiresAt) && order.status === 'QUOTE_READY_PAYMENT_PENDING';
+  }
+
+  formatQuoteDeadline(order: OrderResponse): string {
+    if (!order.quoteExpiresAt) return '-';
+    const parsed = new Date(order.quoteExpiresAt);
+    if (!Number.isFinite(parsed.getTime())) return '-';
+    return parsed.toLocaleString('es-AR', { hour12: false });
+  }
+
+  quoteCountdownLabel(order: OrderResponse): string {
+    const now = this.now();
+    if (!order.quoteExpiresAt) return '';
+
+    const expiresAt = new Date(order.quoteExpiresAt).getTime();
+    if (!Number.isFinite(expiresAt)) return '';
+
+    const diffMs = expiresAt - now;
+    if (diffMs <= 0) return 'Cotización vencida';
+
+    const totalSeconds = Math.floor(diffMs / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    if (hours > 0) {
+      return `Vence en ${hours}h ${String(minutes).padStart(2, '0')}m ${String(seconds).padStart(2, '0')}s`;
+    }
+
+    return `Vence en ${minutes}m ${String(seconds).padStart(2, '0')}s`;
+  }
+
+  payNow(order: OrderResponse): void {
+    const url = this.resolvePaymentUrl(order);
+    if (!url) return;
+    window.location.href = url;
   }
 }

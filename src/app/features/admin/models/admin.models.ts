@@ -64,6 +64,14 @@ export interface UserResponse {
 export interface OrderResponse {
   id: number;
   status: string;
+  paymentStatus?: string | null;
+  flowStatus?: string | null;
+  requiresShippingQuote?: boolean;
+  payableNow?: boolean;
+  checkoutUrl?: string | null;
+  quoteExpiresAt?: string | null;
+  preferenceId?: string | null;
+  initPoint?: string | null;
   totalAmount: number;
   createdAt: string;
   items: OrderItemResponse[];
@@ -73,6 +81,26 @@ export interface OrderResponse {
   shippingCost: number | null;
   trackingNumber: string | null;
   contactPhone: string | null;
+}
+
+export interface AdminOrderDetailResponse extends OrderResponse {
+  subtotalAmount: number;
+  customerEmail: string;
+}
+
+export interface PublishShippingQuoteRequest {
+  shippingCost: number;
+}
+
+export interface CheckoutResponse {
+  requiresShippingQuote: boolean;
+  payableNow: boolean;
+  flowStatus: string;
+  checkoutUrl?: string | null;
+  quoteExpiresAt?: string | null;
+  initPoint: string | null;
+  preferenceId: string | null;
+  orderId: number;
 }
 
 export interface OrderItemResponse {
@@ -95,4 +123,14 @@ export interface PageMetaData {
   totalPages: number;
 }
 
-export type OrderStatus = 'PENDING' | 'PAID' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
+export type OrderStatus =
+  | 'INITIATED'
+  | 'QUOTE_REQUESTED'
+  | 'QUOTE_READY_PAYMENT_PENDING'
+  | 'PENDING'
+  | 'PAID'
+  | 'READY_FOR_PICKUP'
+  | 'PICKED_UP'
+  | 'SHIPPED'
+  | 'DELIVERED'
+  | 'CANCELLED';

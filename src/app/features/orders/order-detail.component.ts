@@ -1,10 +1,17 @@
 import { CurrencyPipe, DatePipe, NgClass } from '@angular/common';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { OrderResponse } from '../admin/models/admin.models';
 import { OrdersService } from './services/orders.service';
 
 const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
+  INITIATED: { label: 'Iniciado', classes: 'bg-slate-100 text-slate-700' },
+  QUOTE_REQUESTED: { label: 'Esperando cotización', classes: 'bg-orange-100 text-orange-800' },
+  QUOTE_READY_PAYMENT_PENDING: {
+    label: 'Cotización publicada',
+    classes: 'bg-cyan-100 text-cyan-800',
+  },
   PENDING: { label: 'Pendiente de confirmacion', classes: 'bg-yellow-100 text-yellow-800' },
   PAID: { label: 'Pago confirmado', classes: 'bg-blue-100 text-blue-800' },
   READY_FOR_PICKUP: { label: 'Listo para retirar', classes: 'bg-green-100 text-green-800' },
@@ -35,9 +42,37 @@ const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
               class="w-10 h-10 border-4 border-brand-accent border-t-transparent rounded-full animate-spin"
             ></div>
           </div>
+        } @else if (notFound()) {
+          <div class="mt-6 rounded-lg border border-gray-200 bg-gray-50 px-6 py-12 text-center">
+            <svg
+              class="w-12 h-12 text-gray-300 mx-auto mb-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1.5"
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+              />
+            </svg>
+            <p class="text-lg font-display uppercase tracking-widest text-brand-black mb-2">
+              Orden no encontrada
+            </p>
+            <p class="text-sm text-brand-gray mb-6">
+              Este pedido no existe o no pertenece a tu cuenta.
+            </p>
+            <a
+              routerLink="/orders"
+              class="inline-block px-5 py-2 bg-brand-black text-brand-white font-display uppercase tracking-widest text-sm rounded-lg hover:bg-brand-dark transition-colors"
+            >
+              Ver mis pedidos
+            </a>
+          </div>
         } @else if (error()) {
           <div class="mt-6 rounded-lg border border-red-200 bg-red-50 px-6 py-8 text-center">
-            <p class="text-red-700 mb-4">No pudimos cargar este pedido.</p>
+            <p class="text-red-700 mb-4">No pudimos cargar este pedido. Intentá de nuevo.</p>
             <button
               type="button"
               (click)="load()"
@@ -69,6 +104,34 @@ const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
                     {{ statusConfig(order()!.status).label }}
                   </span>
                 </div>
+
+                @if (order()!.requiresShippingQuote) {
+                  <div
+                    class="mt-4 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-800"
+                  >
+                    Esperando cotización del vendedor.
+                  </div>
+                }
+
+                @if (canRenderPayNow(order()!)) {
+                  <div class="mt-4">
+                    <button
+                      type="button"
+                      (click)="payNow()"
+                      class="h-11 px-4 rounded-lg bg-[#009EE3] text-white font-semibold hover:brightness-110 transition"
+                    >
+                      Pagar ahora
+                    </button>
+                    @if (showQuoteDeadline(order()!)) {
+                      <p class="mt-2 text-xs text-brand-gray">
+                        Fecha límite: {{ formatQuoteDeadline(order()!) }}
+                      </p>
+                      <p class="mt-1 text-xs font-semibold text-orange-700">
+                        {{ quoteCountdownLabel(order()!) }}
+                      </p>
+                    }
+                  </div>
+                }
 
                 @if (order()!.status === 'CANCELLED') {
                   <div
@@ -194,11 +257,6 @@ const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
                       <dd class="text-right">{{ order()!.zipCode || '-' }}</dd>
                     </div>
                   }
-
-                  <div class="flex items-center justify-between gap-4">
-                    <dt class="text-brand-gray">Tracking</dt>
-                    <dd class="text-right">{{ order()!.trackingNumber || '-' }}</dd>
-                  </div>
                 </dl>
               </div>
             </aside>
@@ -208,13 +266,17 @@ const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
     </div>
   `,
 })
-export class OrderDetailComponent implements OnInit {
+export class OrderDetailComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly ordersService = inject(OrdersService);
+  private quoteCountdownTimer: ReturnType<typeof setInterval> | null = null;
 
   readonly order = signal<OrderResponse | null>(null);
   readonly loading = signal(true);
   readonly error = signal(false);
+  readonly notFound = signal(false);
+  readonly now = signal(Date.now());
 
   readonly itemsSubtotal = computed(() => {
     const currentOrder = this.order();
@@ -223,9 +285,25 @@ export class OrderDetailComponent implements OnInit {
     return currentOrder.items.reduce((acc, item) => acc + item.unitPrice * item.quantity, 0);
   });
 
+  readonly paymentUrl = computed(() => {
+    const currentOrder = this.order();
+    if (!currentOrder || !currentOrder.payableNow) return null;
+
+    if (currentOrder.checkoutUrl) return currentOrder.checkoutUrl;
+    if (currentOrder.initPoint) return currentOrder.initPoint;
+    if (currentOrder.preferenceId) {
+      return `https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=${encodeURIComponent(currentOrder.preferenceId)}`;
+    }
+
+    return null;
+  });
+
   readonly currentStepIndex = computed(() => {
     const currentOrder = this.order();
     if (!currentOrder) return 0;
+
+    if (currentOrder.status === 'QUOTE_REQUESTED') return 0;
+    if (currentOrder.status === 'QUOTE_READY_PAYMENT_PENDING') return 1;
 
     const pickupStatusStepMap: Record<string, number> = {
       PENDING: 0,
@@ -251,42 +329,104 @@ export class OrderDetailComponent implements OnInit {
     if (!currentOrder) return [] as string[];
 
     if (currentOrder.deliveryMethod === 'SHIPPING') {
-      return ['Confirmado', 'Pago', 'Enviado', 'Entregado'];
+      return ['Cotización', 'Pago', 'Enviado', 'Entregado'];
     }
 
     return ['Confirmado', 'Pago', 'Listo para retirar', 'Retirado'];
   });
 
   ngOnInit(): void {
+    this.quoteCountdownTimer = setInterval(() => this.now.set(Date.now()), 1000);
     this.load();
+  }
+
+  ngOnDestroy(): void {
+    if (this.quoteCountdownTimer) {
+      clearInterval(this.quoteCountdownTimer);
+      this.quoteCountdownTimer = null;
+    }
   }
 
   load(): void {
     const orderId = Number(this.route.snapshot.paramMap.get('id'));
 
     if (!Number.isFinite(orderId) || orderId <= 0) {
-      this.error.set(true);
+      this.notFound.set(true);
       this.loading.set(false);
       return;
     }
 
     this.loading.set(true);
     this.error.set(false);
+    this.notFound.set(false);
 
-    this.ordersService.getOrderById(orderId).subscribe({
+    this.ordersService.getMyOrderById(orderId).subscribe({
       next: (order) => {
         this.order.set(order);
         this.loading.set(false);
       },
-      error: () => {
-        this.error.set(true);
+      error: (err: HttpErrorResponse) => {
         this.loading.set(false);
+
+        if (err.status === 401 || err.status === 403) {
+          this.router.navigate(['/auth/login'], {
+            queryParams: { returnUrl: `/orders/${orderId}` },
+          });
+          return;
+        }
+
+        if (err.status === 404) {
+          this.notFound.set(true);
+          return;
+        }
+
+        this.error.set(true);
       },
     });
   }
 
   statusConfig(status: string): { label: string; classes: string } {
     return STATUS_CONFIG[status] ?? { label: status, classes: 'bg-gray-100 text-gray-600' };
+  }
+
+  canRenderPayNow(order: OrderResponse): boolean {
+    const allowedStatuses = new Set(['INITIATED', 'QUOTE_READY_PAYMENT_PENDING']);
+    return (
+      Boolean(order.payableNow) && allowedStatuses.has(order.status) && Boolean(this.paymentUrl())
+    );
+  }
+
+  showQuoteDeadline(order: OrderResponse): boolean {
+    return Boolean(order.quoteExpiresAt) && order.status === 'QUOTE_READY_PAYMENT_PENDING';
+  }
+
+  formatQuoteDeadline(order: OrderResponse): string {
+    if (!order.quoteExpiresAt) return '-';
+    const parsed = new Date(order.quoteExpiresAt);
+    if (!Number.isFinite(parsed.getTime())) return '-';
+    return parsed.toLocaleString('es-AR', { hour12: false });
+  }
+
+  quoteCountdownLabel(order: OrderResponse): string {
+    const now = this.now();
+    if (!order.quoteExpiresAt) return '';
+
+    const expiresAt = new Date(order.quoteExpiresAt).getTime();
+    if (!Number.isFinite(expiresAt)) return '';
+
+    const diffMs = expiresAt - now;
+    if (diffMs <= 0) return 'Cotización vencida';
+
+    const totalSeconds = Math.floor(diffMs / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    if (hours > 0) {
+      return `Vence en ${hours}h ${String(minutes).padStart(2, '0')}m ${String(seconds).padStart(2, '0')}s`;
+    }
+
+    return `Vence en ${minutes}m ${String(seconds).padStart(2, '0')}s`;
   }
 
   deliveryMethodLabel(method: string): string {
@@ -298,5 +438,11 @@ export class OrderDetailComponent implements OnInit {
   onImageError(event: Event): void {
     const img = event.target as HTMLImageElement;
     img.src = '/assets/images/bikes-asaro-logo.png';
+  }
+
+  payNow(): void {
+    const url = this.paymentUrl();
+    if (!url) return;
+    window.location.href = url;
   }
 }

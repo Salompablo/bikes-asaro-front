@@ -39,7 +39,20 @@ export class VerifyEmailComponent {
       error: (err: HttpErrorResponse) => {
         this.loading.set(false);
         const body = err.error as ErrorResponse;
-        this.toast.error(body?.message ?? 'Código inválido o expirado. Intentá de nuevo.');
+
+        // Network error or connection failure
+        if (!err.status || err.status === 0) {
+          this.toast.error('No pudimos conectar con el servidor. Verificá tu conexión a internet.');
+          return;
+        }
+
+        if (err.status === 400) {
+          this.toast.error('Código inválido o expirado. Intentá de nuevo.');
+        } else if (err.status === 500 || err.status === 502 || err.status === 503) {
+          this.toast.error('El servidor está en mantenimiento. Intentá nuevamente en unos minutos.');
+        } else {
+          this.toast.error(body?.message ?? 'Código inválido o expirado. Intentá de nuevo.');
+        }
       },
     });
   }
