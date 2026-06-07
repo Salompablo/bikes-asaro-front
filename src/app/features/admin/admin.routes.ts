@@ -43,6 +43,13 @@ export const adminRoutes: Routes = [
           import('./components/orders/order-list.component').then((c) => c.OrderListComponent),
       },
       {
+        path: 'orders/:id',
+        loadComponent: () =>
+          import('./components/orders/order-detail.component').then(
+            (c) => c.AdminOrderDetailComponent,
+          ),
+      },
+      {
         path: 'users',
         loadComponent: () =>
           import('./components/users/user-list.component').then((c) => c.UserListComponent),

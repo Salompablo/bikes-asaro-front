@@ -56,7 +56,20 @@ export class ForgotPasswordComponent {
       error: (err: HttpErrorResponse) => {
         this.loading.set(false);
         const body = err.error as ErrorResponse;
-        this.toast.error(body?.message ?? 'No pudimos enviar el código. Intentá de nuevo.');
+
+        // Network error or connection failure
+        if (!err.status || err.status === 0) {
+          this.toast.error('No pudimos conectar con el servidor. Verificá tu conexión a internet.');
+          return;
+        }
+
+        if (err.status === 404) {
+          this.toast.error('No encontramos una cuenta con ese correo. Verificá e intentá de nuevo.');
+        } else if (err.status === 500 || err.status === 502 || err.status === 503) {
+          this.toast.error('El servidor está en mantenimiento. Intentá nuevamente en unos minutos.');
+        } else {
+          this.toast.error(body?.message ?? 'No pudimos enviar el código. Intentá de nuevo.');
+        }
       },
     });
   }
@@ -83,9 +96,24 @@ export class ForgotPasswordComponent {
         error: (err: HttpErrorResponse) => {
           this.loading.set(false);
           const body = err.error as ErrorResponse;
-          this.toast.error(
-            body?.message ?? 'Error al restablecer. Verificá el código e intentá de nuevo.',
-          );
+
+          // Network error or connection failure
+          if (!err.status || err.status === 0) {
+            this.toast.error('No pudimos conectar con el servidor. Verificá tu conexión a internet.');
+            return;
+          }
+
+          if (err.status === 400) {
+            this.toast.error(
+              body?.message ?? 'Código inválido o expirado. Solicitá un nuevo código.',
+            );
+          } else if (err.status === 500 || err.status === 502 || err.status === 503) {
+            this.toast.error('El servidor está en mantenimiento. Intentá nuevamente en unos minutos.');
+          } else {
+            this.toast.error(
+              body?.message ?? 'Error al restablecer. Verificá el código e intentá de nuevo.',
+            );
+          }
         },
       });
   }

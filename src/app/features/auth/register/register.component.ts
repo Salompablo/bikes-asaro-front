@@ -71,8 +71,18 @@ export class RegisterComponent {
         const body = err.error as ErrorResponse;
         const msg = body?.message ?? 'Error inesperado. Intentá de nuevo.';
 
+        // Network error or connection failure
+        if (!err.status || err.status === 0) {
+          this.toast.error('No pudimos conectar con el servidor. Verificá tu conexión a internet.');
+          return;
+        }
+
         if (err.status === 409) {
           this.toast.error('Este correo ya está registrado. Intentá iniciar sesión.');
+        } else if (err.status === 500 || err.status === 502 || err.status === 503) {
+          this.toast.error('El servidor está en mantenimiento. Intentá nuevamente en unos minutos.');
+        } else if (err.status === 400) {
+          this.toast.error(msg || 'Los datos ingresados no son válidos. Revisá e intentá de nuevo.');
         } else {
           this.toast.error(msg);
         }
