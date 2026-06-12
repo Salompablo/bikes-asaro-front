@@ -38,18 +38,18 @@
                             <button type="button" class="account-menu-item" role="menuitem"
                                 (click)="logout()">Desconectar</button>
                             } @else {
-                            <a routerLink="/profile" class="account-menu-item" role="menuitem"
-                                (click)="isAccountMenuOpen = false">Mi perfil</a>
-                            <a routerLink="/orders" class="account-menu-item" role="menuitem"
-                                (click)="isAccountMenuOpen = false">Mis pedidos</a>
+                            <a routerLink="/profile" class="account-menu-item" role="menuitem" (click)="closeMenus()">Mi
+                                perfil</a>
+                            <a routerLink="/orders" class="account-menu-item" role="menuitem" (click)="closeMenus()">Mis
+                                pedidos</a>
                             <button type="button" class="account-menu-item" role="menuitem" (click)="logout()">Cerrar
                                 sesión</button>
                             }
                             } @else {
                             <a routerLink="/auth/login" class="account-menu-item" role="menuitem"
-                                (click)="isAccountMenuOpen = false">Iniciar sesión</a>
+                                (click)="closeMenus()">Iniciar sesión</a>
                             <a routerLink="/auth/register" class="account-menu-item" role="menuitem"
-                                (click)="isAccountMenuOpen = false">Crear cuenta</a>
+                                (click)="closeMenus()">Crear cuenta</a>
                             }
                         </div>
                     </div>
@@ -87,15 +87,44 @@
                         }
                     </button>
 
-                    <button type="button"
-                        class="icon-button mobile-menu-toggle text-brand-silver hover:text-brand-accent transition-colors duration-200"
-                        aria-label="Abrir menu movil">
-                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 6h16M4 12h16m-7 6h7"></path>
-                        </svg>
-                    </button>
+                    <div #mobileMenuWrap class="mobile-menu-wrap">
+                        <button type="button"
+                            class="icon-button mobile-menu-toggle text-brand-silver hover:text-brand-accent transition-colors duration-200"
+                            (click)="toggleMobileMenu()" [attr.aria-expanded]="isMobileMenuOpen" aria-haspopup="menu"
+                            [attr.aria-label]="isMobileMenuOpen ? 'Cerrar menu movil' : 'Abrir menu movil'">
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    [attr.d]="isMobileMenuOpen ? 'M6 18L18 6M6 6l12 12' : 'M4 6h16M4 12h16m-7 6h7'">
+                                </path>
+                            </svg>
+                        </button>
+
+                        <div class="mobile-account-menu" [class.mobile-account-menu--open]="isMobileMenuOpen"
+                            role="menu" aria-label="Opciones de cuenta móvil">
+                            @if (authService.isLoggedIn()) {
+                            <div class="account-menu-header">
+                                Hola, {{ authService.firstName() ?? authService.userEmail() }}
+                            </div>
+                            @if (authService.isAdmin()) {
+                            <button type="button" class="account-menu-item" role="menuitem"
+                                (click)="logout()">Desconectar</button>
+                            } @else {
+                            <a routerLink="/profile" class="account-menu-item" role="menuitem" (click)="closeMenus()">Mi
+                                perfil</a>
+                            <a routerLink="/orders" class="account-menu-item" role="menuitem" (click)="closeMenus()">Mis
+                                pedidos</a>
+                            <button type="button" class="account-menu-item" role="menuitem" (click)="logout()">Cerrar
+                                sesión</button>
+                            }
+                            } @else {
+                            <a routerLink="/auth/login" class="account-menu-item" role="menuitem"
+                                (click)="closeMenus()">Iniciar sesión</a>
+                            <a routerLink="/auth/register" class="account-menu-item" role="menuitem"
+                                (click)="closeMenus()">Crear cuenta</a>
+                            }
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

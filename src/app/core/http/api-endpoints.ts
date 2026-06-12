@@ -49,5 +49,6 @@ export const API_ENDPOINTS = {
   },
   USERS: {
     ME: '/users/me',
+    ME_PASSWORD: '/users/me/password',
   },
 } as const;

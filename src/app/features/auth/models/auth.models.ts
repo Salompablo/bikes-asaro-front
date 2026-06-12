@@ -24,6 +24,17 @@ export interface ResetPasswordRequest {
   newPassword: string;
 }
 
+export interface UpdateProfileRequest {
+  firstName: string;
+  lastName: string;
+  phone: string;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
 export interface AuthResponse {
   token: string;
   message: string;
