@@ -1,100 +1,243 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject, signal } from '@angular/core';
+import {
+  AbstractControl,
+  FormBuilder,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import {
+  ChangePasswordRequest,
+  ErrorResponse,
+  UpdateProfileRequest,
+  UserProfile,
+} from './models/auth.models';
 import { AuthService } from './services/auth.service';
+import { ToastService } from '../../shared/services/toast.service';
+
+function trimmedRequiredValidator(control: AbstractControl): ValidationErrors | null {
+  const value = control.value;
+  return typeof value === 'string' && value.trim().length > 0 ? null : { notBlank: true };
+}
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [RouterLink],
-  template: `
-    <section class="min-h-screen bg-brand-light pt-28 pb-16 px-4">
-      <div class="max-w-2xl mx-auto">
-        <div class="rounded-2xl border border-gray-200 bg-brand-white p-6 sm:p-8 shadow-sm">
-          <div class="flex items-start justify-between gap-4 mb-6">
-            <div>
-              <p class="text-xs text-brand-gray font-display uppercase tracking-widest">Perfil</p>
-              <h1 class="text-2xl font-display uppercase tracking-widest mt-1">Mi cuenta</h1>
-            </div>
-            <a
-              routerLink="/orders"
-              class="text-sm text-brand-gray hover:text-brand-black transition-colors"
-            >
-              Ver pedidos
-            </a>
-          </div>
-
-          @if (loading()) {
-            <div class="flex items-center justify-center py-16">
-              <div
-                class="w-10 h-10 border-4 border-brand-accent border-t-transparent rounded-full animate-spin"
-              ></div>
-            </div>
-          } @else if (error()) {
-            <div class="rounded-lg border border-red-200 bg-red-50 px-4 py-4 text-sm text-red-700">
-              No pudimos cargar tu perfil. Intenta nuevamente.
-            </div>
-          } @else if (authService.currentUser(); as user) {
-            <dl class="space-y-4 text-sm">
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
-                <dt class="text-brand-gray">Nombre</dt>
-                <dd class="sm:col-span-2 text-brand-black">
-                  {{ user.firstName }} {{ user.lastName }}
-                </dd>
-              </div>
-
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
-                <dt class="text-brand-gray">Email</dt>
-                <dd class="sm:col-span-2 text-brand-black">{{ user.email }}</dd>
-              </div>
-
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
-                <dt class="text-brand-gray">Proveedor</dt>
-                <dd class="sm:col-span-2 text-brand-black">{{ user.provider }}</dd>
-              </div>
-
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
-                <dt class="text-brand-gray">Email verificado</dt>
-                <dd class="sm:col-span-2">
-                  <span
-                    class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold"
-                    [class.bg-emerald-100]="user.isEmailVerified"
-                    [class.text-emerald-800]="user.isEmailVerified"
-                    [class.bg-amber-100]="!user.isEmailVerified"
-                    [class.text-amber-800]="!user.isEmailVerified"
-                  >
-                    {{ user.isEmailVerified ? 'Verificado' : 'Pendiente' }}
-                  </span>
-                </dd>
-              </div>
-
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
-                <dt class="text-brand-gray">Telefono por defecto</dt>
-                <dd class="sm:col-span-2 text-brand-black">
-                  {{ user.defaultPhone || 'Sin telefono guardado' }}
-                </dd>
-              </div>
-            </dl>
-          }
-        </div>
-      </div>
-    </section>
-  `,
+  imports: [ReactiveFormsModule, RouterLink],
+  templateUrl: './profile.component.html',
 })
 export class ProfileComponent implements OnInit {
+  private readonly fb = inject(FormBuilder);
   readonly authService = inject(AuthService);
+  private readonly toast = inject(ToastService);
 
   readonly loading = signal(true);
-  readonly error = signal(false);
+  readonly profileLoadError = signal<string | null>(null);
+  readonly profileSubmitError = signal<string | null>(null);
+  readonly passwordSubmitError = signal<string | null>(null);
+  readonly savingProfile = signal(false);
+  readonly changingPassword = signal(false);
+
+  readonly profileForm = this.fb.nonNullable.group({
+    firstName: ['', [Validators.required, Validators.maxLength(50), trimmedRequiredValidator]],
+    lastName: ['', [Validators.required, Validators.maxLength(50), trimmedRequiredValidator]],
+    phone: ['', [Validators.maxLength(20)]],
+  });
+
+  readonly passwordForm = this.fb.nonNullable.group({
+    currentPassword: ['', [Validators.required, trimmedRequiredValidator]],
+    newPassword: ['', [Validators.required, Validators.minLength(8), trimmedRequiredValidator]],
+  });
 
   ngOnInit(): void {
-    this.authService.loadCurrentUserProfile().subscribe({
-      next: () => {
-        this.loading.set(false);
+    this.loadProfile();
+  }
+
+  reloadProfile(): void {
+    this.loadProfile(true);
+  }
+
+  saveProfile(): void {
+    if (this.profileForm.invalid || this.savingProfile()) {
+      this.profileForm.markAllAsTouched();
+      return;
+    }
+
+    this.savingProfile.set(true);
+    this.profileSubmitError.set(null);
+
+    const request: UpdateProfileRequest = {
+      firstName: this.profileForm.controls.firstName.value.trim(),
+      lastName: this.profileForm.controls.lastName.value.trim(),
+      phone: this.profileForm.controls.phone.value.trim(),
+    };
+
+    this.authService.updateProfile(request).subscribe({
+      next: (user) => {
+        this.savingProfile.set(false);
+        const profile = user ?? this.authService.currentUser();
+        if (profile) {
+          this.syncProfileForm(profile);
+        }
+        this.toast.success('Perfil actualizado correctamente');
       },
-      error: () => {
-        this.error.set(true);
-        this.loading.set(false);
+      error: (err: HttpErrorResponse) => {
+        this.savingProfile.set(false);
+        const message = this.resolveProfileError(err);
+        this.profileSubmitError.set(message);
+        this.toast.error(message);
       },
     });
+  }
+
+  resetProfile(): void {
+    const user = this.authService.currentUser();
+    if (user) {
+      this.syncProfileForm(user);
+    }
+  }
+
+  changePassword(): void {
+    if (this.passwordForm.invalid || this.changingPassword() || !this.isLocalAccount()) {
+      this.passwordForm.markAllAsTouched();
+      return;
+    }
+
+    this.changingPassword.set(true);
+    this.passwordSubmitError.set(null);
+
+    const request: ChangePasswordRequest = {
+      currentPassword: this.passwordForm.controls.currentPassword.value,
+      newPassword: this.passwordForm.controls.newPassword.value,
+    };
+
+    this.authService.changePassword(request).subscribe({
+      next: () => {
+        this.changingPassword.set(false);
+        this.passwordForm.reset({ currentPassword: '', newPassword: '' });
+        this.passwordForm.markAsPristine();
+        this.passwordForm.markAsUntouched();
+        this.toast.success('Contraseña actualizada correctamente');
+      },
+      error: (err: HttpErrorResponse) => {
+        this.changingPassword.set(false);
+        const message = this.resolvePasswordError(err);
+        this.passwordSubmitError.set(message);
+        this.toast.error(message);
+      },
+    });
+  }
+
+  isLocalAccount(): boolean {
+    return (this.authService.currentUser()?.provider ?? '').toUpperCase() === 'LOCAL';
+  }
+
+  providerLabel(provider: string | null | undefined): string {
+    if (!provider) {
+      return 'Desconocido';
+    }
+
+    return provider.toUpperCase() === 'LOCAL' ? 'Local' : provider;
+  }
+
+  private loadProfile(force = false): void {
+    this.loading.set(true);
+    this.profileLoadError.set(null);
+
+    this.authService.loadCurrentUserProfile(force).subscribe({
+      next: (profile) => {
+        const user = profile ?? this.authService.currentUser();
+        if (user) {
+          this.syncProfileForm(user);
+        }
+        this.loading.set(false);
+      },
+      error: (err: HttpErrorResponse) => {
+        this.loading.set(false);
+        this.profileLoadError.set(this.resolveLoadError(err));
+      },
+    });
+  }
+
+  private syncProfileForm(user: UserProfile): void {
+    this.profileForm.reset({
+      firstName: user.firstName ?? '',
+      lastName: user.lastName ?? '',
+      phone: user.defaultPhone ?? '',
+    });
+    this.profileForm.markAsPristine();
+    this.profileForm.markAsUntouched();
+    this.profileSubmitError.set(null);
+  }
+
+  private resolveLoadError(err: HttpErrorResponse): string {
+    if (!err.status || err.status === 0) {
+      return 'No pudimos conectar con el servidor. Verificá tu conexión e intentá otra vez.';
+    }
+
+    if (err.status === 401 || err.status === 403) {
+      return 'Tu sesión no pudo validarse. Volvé a iniciar sesión para ver tu perfil.';
+    }
+
+    if (err.status >= 500) {
+      return 'El servidor no respondió como esperaba. Intentá nuevamente en unos minutos.';
+    }
+
+    return 'No pudimos cargar tu perfil en este momento.';
+  }
+
+  private resolveProfileError(err: HttpErrorResponse): string {
+    const body = err.error as ErrorResponse;
+    const fallback = body?.message ?? 'No pudimos actualizar tu perfil. Intentá de nuevo.';
+
+    if (!err.status || err.status === 0) {
+      return 'No pudimos conectar con el servidor. Verificá tu conexión e intentá otra vez.';
+    }
+
+    if (err.status === 400 || err.status === 409) {
+      return fallback;
+    }
+
+    if (err.status === 401 || err.status === 403) {
+      return 'Tu sesión no pudo validarse. Volvé a iniciar sesión e intentá de nuevo.';
+    }
+
+    if (err.status >= 500) {
+      return 'El servidor no respondió como esperaba. Intentá nuevamente en unos minutos.';
+    }
+
+    return fallback;
+  }
+
+  private resolvePasswordError(err: HttpErrorResponse): string {
+    const body = err.error as ErrorResponse;
+
+    if (!err.status || err.status === 0) {
+      return 'No pudimos conectar con el servidor. Verificá tu conexión e intentá otra vez.';
+    }
+
+    if (err.status === 409) {
+      if (!this.isLocalAccount()) {
+        return 'Tu cuenta usa un proveedor externo. La contraseña no se cambia desde aquí.';
+      }
+
+      return 'La contraseña actual no es correcta.';
+    }
+
+    if (err.status === 400) {
+      return body?.message ?? 'Revisá los datos de la contraseña e intentá de nuevo.';
+    }
+
+    if (err.status === 401 || err.status === 403) {
+      return 'Tu sesión no pudo validarse. Volvé a iniciar sesión e intentá de nuevo.';
+    }
+
+    if (err.status >= 500) {
+      return 'El servidor no respondió como esperaba. Intentá nuevamente en unos minutos.';
+    }
+
+    return body?.message ?? 'No pudimos cambiar tu contraseña. Intentá de nuevo.';
   }
 }

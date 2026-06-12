@@ -1,14 +1,16 @@
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable, PLATFORM_ID, computed, inject, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { Observable, catchError, of, tap, throwError } from 'rxjs';
+import { Observable, catchError, of, switchMap, tap, throwError } from 'rxjs';
 import {
   AuthResponse,
+  ChangePasswordRequest,
   ForgotPasswordRequest,
   GoogleLoginRequest,
   LoginRequest,
   RegisterRequest,
   ResetPasswordRequest,
+  UpdateProfileRequest,
   UserProfile,
 } from '../models/auth.models';
 import { API_ENDPOINTS } from '../../../core/http/api-endpoints';
@@ -36,7 +38,9 @@ export class AuthService {
   readonly isAdmin = computed(() => this.role() === 'ADMIN');
   readonly userEmail = computed(() => this.decodeToken()?.sub ?? null);
   readonly userId = computed(() => this.decodeToken()?.userId ?? null);
-  readonly firstName = computed(() => this.decodeToken()?.firstName ?? null);
+  readonly firstName = computed(
+    () => this.currentUserSignal()?.firstName ?? this.decodeToken()?.firstName ?? null,
+  );
   readonly currentUser = computed(() => this.currentUserSignal());
   readonly tokenExpiresAt = computed(() => {
     const exp = this.decodeToken()?.exp;
@@ -86,6 +90,16 @@ export class AuthService {
 
   resetPassword(request: ResetPasswordRequest): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(API_ENDPOINTS.AUTH.RESET_PASSWORD, request);
+  }
+
+  updateProfile(request: UpdateProfileRequest): Observable<UserProfile | null> {
+    return this.http
+      .put<void>(API_ENDPOINTS.USERS.ME, request)
+      .pipe(switchMap(() => this.loadCurrentUserProfile(true)));
+  }
+
+  changePassword(request: ChangePasswordRequest): Observable<void> {
+    return this.http.put<void>(API_ENDPOINTS.USERS.ME_PASSWORD, request);
   }
 
   requestReactivation(email: string): Observable<void> {

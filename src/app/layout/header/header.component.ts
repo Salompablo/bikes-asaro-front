@@ -15,8 +15,10 @@ export class HeaderComponent {
   readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   isAccountMenuOpen = false;
+  isMobileMenuOpen = false;
 
   @ViewChild('accountMenuWrap') accountMenuWrap?: ElementRef<HTMLElement>;
+  @ViewChild('mobileMenuWrap') mobileMenuWrap?: ElementRef<HTMLElement>;
 
   toggleAccountMenu(): void {
     // On desktop (hover-capable devices) the menu is controlled by hover only.
@@ -25,6 +27,9 @@ export class HeaderComponent {
     }
 
     this.isAccountMenuOpen = !this.isAccountMenuOpen;
+    if (this.isAccountMenuOpen) {
+      this.isMobileMenuOpen = false;
+    }
   }
 
   openAccountMenu(): void {
@@ -44,29 +49,54 @@ export class HeaderComponent {
     if (this.isAccountMenuOpen) {
       this.isAccountMenuOpen = false;
     }
+
+    if (this.isMobileMenuOpen) {
+      this.isMobileMenuOpen = false;
+    }
   }
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
-    if (!this.isAccountMenuOpen) {
+    if (!this.isAccountMenuOpen && !this.isMobileMenuOpen) {
       return;
     }
 
     const target = event.target as Node | null;
-    const wrapper = this.accountMenuWrap?.nativeElement;
-    if (!target || !wrapper) {
+    const accountWrapper = this.accountMenuWrap?.nativeElement;
+    const mobileWrapper = this.mobileMenuWrap?.nativeElement;
+    if (!target) {
       return;
     }
 
-    if (!wrapper.contains(target)) {
+    if (this.isAccountMenuOpen && accountWrapper && !accountWrapper.contains(target)) {
       this.closeAccountMenu();
     }
+
+    if (this.isMobileMenuOpen && mobileWrapper && !mobileWrapper.contains(target)) {
+      this.closeMobileMenu();
+    }
+  }
+
+  toggleMobileMenu(): void {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+    if (this.isMobileMenuOpen) {
+      this.isAccountMenuOpen = false;
+    }
+  }
+
+  closeMobileMenu(): void {
+    this.isMobileMenuOpen = false;
+  }
+
+  closeMenus(): void {
+    this.isAccountMenuOpen = false;
+    this.isMobileMenuOpen = false;
   }
 
   logout(): void {
     this.authService.logout();
     this.cartState.clearCart();
-    this.isAccountMenuOpen = false;
+    this.closeMenus();
     this.router.navigate(['/']);
   }
 
