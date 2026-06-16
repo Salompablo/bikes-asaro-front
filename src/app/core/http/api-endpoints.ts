@@ -51,4 +51,7 @@ export const API_ENDPOINTS = {
     ME: '/users/me',
     ME_PASSWORD: '/users/me/password',
   },
+  CONTACT: {
+    BASE: '/contact',
+  },
 } as const;

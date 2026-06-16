@@ -102,6 +102,12 @@
 
                         <div class="mobile-account-menu" [class.mobile-account-menu--open]="isMobileMenuOpen"
                             role="menu" aria-label="Opciones de cuenta móvil">
+                            <a routerLink="/catalog" class="account-menu-item" role="menuitem" (click)="closeMenus()">
+                                Productos
+                            </a>
+                            <a routerLink="/contacto" class="account-menu-item" role="menuitem" (click)="closeMenus()">
+                                Contacto
+                            </a>
                             @if (authService.isLoggedIn()) {
                             <div class="account-menu-header">
                                 Hola, {{ authService.firstName() ?? authService.userEmail() }}

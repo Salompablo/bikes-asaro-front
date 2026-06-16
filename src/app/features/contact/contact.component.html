@@ -1,0 +1,163 @@
+<section
+    class="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(245,158,11,0.16),_transparent_34%),linear-gradient(180deg,_#faf7f1_0%,_#f5f1ea_42%,_#efebe4_100%)] px-4 pb-16 pt-28">
+    <div class="mx-auto max-w-6xl">
+        <div class="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+            <aside
+                class="relative overflow-hidden rounded-[2rem] border border-black/5 bg-brand-black p-6 text-brand-white shadow-[0_24px_80px_rgba(15,23,42,0.22)] sm:p-8 lg:p-10">
+                <div
+                    class="absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.08),transparent_36%),radial-gradient(circle_at_top_right,rgba(251,191,36,0.16),transparent_32%)]">
+                </div>
+
+                <div class="relative">
+                    <p class="text-xs uppercase tracking-[0.34em] text-brand-accent">Bikes Asaro</p>
+                    <h1 class="mt-4 text-3xl font-display uppercase tracking-[0.18em] sm:text-4xl">
+                        Contacto
+                    </h1>
+                    <p class="mt-5 text-sm leading-7 text-brand-silver/90 sm:text-base">
+                        Estamos para ayudarte con tus pedidos, envios, pagos y dudas tecnicas.
+                        Completando este formulario te responderemos a la brevedad.
+                    </p>
+
+                    <dl class="mt-8 space-y-4 text-sm text-brand-silver/90">
+                        <div class="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
+                            <dt class="text-xs uppercase tracking-[0.2em] text-brand-silver/70">Atencion</dt>
+                            <dd class="mt-2 font-semibold text-white">Lunes a Viernes, 9 a 18 hs</dd>
+                        </div>
+                        <div class="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
+                            <dt class="text-xs uppercase tracking-[0.2em] text-brand-silver/70">Respuesta</dt>
+                            <dd class="mt-2 font-semibold text-white">Normalmente dentro de 24 horas habiles</dd>
+                        </div>
+                    </dl>
+                </div>
+            </aside>
+
+            <section class="rounded-[2rem] border border-black/5 bg-brand-white p-6 shadow-sm sm:p-8 lg:p-10">
+                <div class="mb-7">
+                    <p class="text-xs uppercase tracking-[0.26em] text-brand-gray">Formulario</p>
+                    <h2 class="mt-2 text-2xl font-display uppercase tracking-[0.16em] text-brand-black sm:text-3xl">
+                        Enviar consulta
+                    </h2>
+                </div>
+
+                @if (successMessage()) {
+                <div
+                    class="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                    {{ successMessage() }}
+                </div>
+                }
+
+                @if (submitError()) {
+                <div class="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    {{ submitError() }}
+                </div>
+                }
+
+                <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-5" novalidate>
+                    <div class="grid gap-5 sm:grid-cols-2">
+                        <label class="block">
+                            <span class="text-sm font-semibold text-brand-black">Nombre y apellido</span>
+                            <input type="text" formControlName="name" autocomplete="name"
+                                class="mt-2 w-full rounded-2xl border border-gray-200 bg-brand-white px-4 py-3 text-sm text-brand-black outline-none transition placeholder:text-gray-400 focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/20"
+                                placeholder="Ej. Juan Perez" />
+                            @if (form.controls.name.touched && form.controls.name.errors?.['required']) {
+                            <p class="mt-2 text-xs text-red-600">El nombre es obligatorio.</p>
+                            }
+                        </label>
+
+                        <label class="block">
+                            <span class="text-sm font-semibold text-brand-black">Correo electronico</span>
+                            <input type="email" formControlName="email" autocomplete="email"
+                                class="mt-2 w-full rounded-2xl border border-gray-200 bg-brand-white px-4 py-3 text-sm text-brand-black outline-none transition placeholder:text-gray-400 focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/20"
+                                placeholder="tu@email.com" />
+                            @if (form.controls.email.touched && form.controls.email.errors) {
+                            <p class="mt-2 text-xs text-red-600">
+                                @if (form.controls.email.errors['required']) {
+                                El correo es obligatorio.
+                                } @else if (form.controls.email.errors['email']) {
+                                Ingresa un correo valido.
+                                }
+                            </p>
+                            }
+                        </label>
+                    </div>
+
+                    <div class="grid gap-5 sm:grid-cols-2">
+                        <label class="block">
+                            <span class="text-sm font-semibold text-brand-black">Telefono (opcional)</span>
+                            <input type="tel" formControlName="phone" autocomplete="tel"
+                                class="mt-2 w-full rounded-2xl border border-gray-200 bg-brand-white px-4 py-3 text-sm text-brand-black outline-none transition placeholder:text-gray-400 focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/20"
+                                placeholder="Ej. +54 9 11 1234-5678" />
+                        </label>
+
+                        <label class="block">
+                            <span class="text-sm font-semibold text-brand-black">Tema</span>
+                            <select formControlName="topic"
+                                class="mt-2 w-full rounded-2xl border border-gray-200 bg-brand-white px-4 py-3 text-sm text-brand-black outline-none transition focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/20">
+                                @for (topic of topicOptions; track topic.value) {
+                                <option [value]="topic.value">{{ topic.label }}</option>
+                                }
+                            </select>
+                            @if (form.controls.topic.touched && form.controls.topic.errors?.['required']) {
+                            <p class="mt-2 text-xs text-red-600">El tema es obligatorio.</p>
+                            }
+                        </label>
+                    </div>
+
+                    @if (isOrderIdVisible) {
+                    <label class="block">
+                        <span class="text-sm font-semibold text-brand-black">Numero de orden</span>
+                        <input type="number" min="1" formControlName="orderId"
+                            class="mt-2 w-full rounded-2xl border border-gray-200 bg-brand-white px-4 py-3 text-sm text-brand-black outline-none transition placeholder:text-gray-400 focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/20"
+                            placeholder="Ej. 1024" />
+                        @if (form.controls.orderId.touched && form.controls.orderId.errors) {
+                        <p class="mt-2 text-xs text-red-600">
+                            @if (form.controls.orderId.errors['required']) {
+                            El numero de orden es obligatorio para este tema.
+                            } @else if (form.controls.orderId.errors['min']) {
+                            El numero de orden debe ser mayor a 0.
+                            }
+                        </p>
+                        }
+                    </label>
+                    }
+
+                    <label class="block">
+                        <span class="text-sm font-semibold text-brand-black">Mensaje</span>
+                        <textarea formControlName="message" rows="6" maxlength="1000"
+                            class="mt-2 w-full rounded-2xl border border-gray-200 bg-brand-white px-4 py-3 text-sm text-brand-black outline-none transition placeholder:text-gray-400 focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/20"
+                            placeholder="Contanos en detalle tu consulta para poder ayudarte mejor."></textarea>
+
+                        <div class="mt-2 flex items-center justify-between gap-3">
+                            <p class="text-xs text-brand-gray">Maximo 1000 caracteres.</p>
+                            <p class="text-xs text-brand-gray">{{ form.controls.message.value?.length || 0 }}/1000</p>
+                        </div>
+
+                        @if (form.controls.message.touched && form.controls.message.errors) {
+                        <p class="mt-2 text-xs text-red-600">
+                            @if (form.controls.message.errors['required']) {
+                            El mensaje es obligatorio.
+                            } @else if (form.controls.message.errors['maxlength']) {
+                            El mensaje no puede superar los 1000 caracteres.
+                            }
+                        </p>
+                        }
+                    </label>
+
+                    <p class="text-xs leading-5 text-brand-gray">
+                        Este formulario esta protegido por reCAPTCHA v3 para prevenir spam.
+                    </p>
+
+                    <button type="submit"
+                        class="inline-flex w-full items-center justify-center rounded-full bg-brand-black px-6 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-brand-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-60"
+                        [disabled]="loading()">
+                        @if (loading()) {
+                        Cargando...
+                        } @else {
+                        Enviar consulta
+                        }
+                    </button>
+                </form>
+            </section>
+        </div>
+    </div>
+</section>

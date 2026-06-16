@@ -119,6 +119,17 @@ export class LoginComponent {
   private handleError(err: HttpErrorResponse): void {
     const body = err.error as ErrorResponse;
     const msg = body?.message ?? 'Error inesperado. Intentá de nuevo.';
+    const rawErrorText = this.extractErrorText(err).toLowerCase();
+    const hasBadCredentials =
+      rawErrorText.includes('bad credentials') ||
+      rawErrorText.includes('credenciales invalidas') ||
+      rawErrorText.includes('credenciales inválidas');
+    const isLoginRequest = (err.url ?? '').includes('/auth/login');
+    const hasServiceUnavailableHint =
+      rawErrorText.includes('mantenimiento') ||
+      rawErrorText.includes('maintenance') ||
+      rawErrorText.includes('service unavailable') ||
+      rawErrorText.includes('temporarily unavailable');
 
     // Network error or connection failure (status 0 = failed to fetch or offline)
     if (!err.status || err.status === 0) {
@@ -126,16 +137,38 @@ export class LoginComponent {
       return;
     }
 
-    if (err.status === 401) {
+    if (hasBadCredentials) {
+      this.toast.error('Credenciales incorrectas. Verificá tu email y contraseña.');
+    } else if (err.status === 401) {
       this.toast.error('Credenciales incorrectas. Verificá tu email y contraseña.');
     } else if (err.status === 404 || err.status === 400) {
       this.toast.error('Email o contraseña incorrectos. Revisá los datos e intentá de nuevo.');
     } else if (err.status === 403) {
       this.toast.error(msg);
     } else if (err.status === 500 || err.status === 502 || err.status === 503) {
-      this.toast.error('El servidor está en mantenimiento. Intentá nuevamente en unos minutos.');
+      if (isLoginRequest && !hasServiceUnavailableHint) {
+        this.toast.error('Credenciales incorrectas. Verificá tu email y contraseña.');
+      } else {
+        this.toast.error('El servidor está en mantenimiento. Intentá nuevamente en unos minutos.');
+      }
     } else {
       this.toast.error(msg);
     }
+  }
+
+  private extractErrorText(err: HttpErrorResponse): string {
+    if (typeof err.error === 'string') {
+      return err.error;
+    }
+
+    if (typeof err.error?.message === 'string') {
+      return err.error.message;
+    }
+
+    if (typeof err.error?.error === 'string') {
+      return err.error.error;
+    }
+
+    return err.message ?? '';
   }
 }
