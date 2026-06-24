@@ -77,12 +77,13 @@
             @if (form.images.length > 0) {
             <div class="flex flex-wrap gap-3">
                 @for (img of form.images; track $index; let i = $index) {
-                <div class="relative w-24 h-24 rounded-lg overflow-hidden border border-gray-200 bg-gray-50"
+                <div class="relative w-24 h-24 rounded-lg overflow-hidden border border-gray-200"
+                    style="background-image:linear-gradient(45deg,#e0e0e0 25%,transparent 25%),linear-gradient(-45deg,#e0e0e0 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#e0e0e0 75%),linear-gradient(-45deg,transparent 75%,#e0e0e0 75%);background-size:16px 16px;background-position:0 0,0 8px,8px -8px,-8px 0px;background-color:#fff;"
                     draggable="true" (dragstart)="onImageDragStart(i)" (dragover)="onImageDragOver($event, i)"
                     (drop)="onImageDrop(i)" (dragend)="onImageDragEnd()" [class.opacity-60]="draggedImageIndex() === i"
                     [class.ring-2]="dragOverIndex() === i" [class.ring-brand-accent]="dragOverIndex() === i">
                     <img [src]="normalizeImageUrl(img)" (error)="onPreviewImageError($event)" alt="Producto"
-                        class="w-full h-full object-cover" />
+                        class="w-full h-full object-contain" />
                     <button type="button" (click)="removeImage(i)"
                         class="absolute top-1 right-1 w-6 h-6 rounded-full bg-brand-black/80 text-white text-[10px] font-bold flex items-center justify-center hover:bg-red-600 transition-colors"
                         aria-label="Quitar imagen">
@@ -94,21 +95,32 @@
             <p class="text-xs text-brand-gray">Arrastrá las miniaturas para cambiar su orden.</p>
             }
 
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3 flex-wrap">
                 <label
-                    class="cursor-pointer bg-gray-100 hover:bg-gray-200 text-brand-gray px-4 py-2 rounded-lg text-sm font-display uppercase tracking-wider transition-colors">
-                    {{ uploading() ? 'Subiendo...' : 'Subir imagen' }}
+                    class="cursor-pointer bg-gray-100 hover:bg-gray-200 text-brand-gray px-4 py-2 rounded-lg text-sm font-display uppercase tracking-wider transition-colors"
+                    [class.pointer-events-none]="removingBackground() || uploading()"
+                    [class.opacity-60]="removingBackground() || uploading()">
+                    {{ removingBackground() ? 'Procesando IA...' : uploading() ? 'Subiendo...' : 'Subir imagen' }}
                     <input type="file" accept="image/*" class="hidden" (change)="onFileSelected($event)"
-                        [disabled]="uploading()" />
+                        [disabled]="removingBackground() || uploading()" />
                 </label>
-                @if (uploading()) {
-                <span class="text-sm text-brand-gray">Subiendo archivo...</span>
+
+                @if (removingBackground()) {
+                <span class="flex items-center gap-1.5 text-sm text-brand-gray animate-pulse">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                    Extrayendo silueta con IA… Esto puede tomar unos segundos.
+                </span>
+                } @else if (uploading()) {
+                <span class="text-sm text-brand-gray">Subiendo imagen...</span>
                 }
             </div>
         </div>
 
         <div class="flex items-center gap-3 pt-2">
-            <button type="submit" [disabled]="saving()"
+            <button type="submit" [disabled]="saving() || uploading() || removingBackground()"
                 class="bg-brand-black text-brand-white px-6 py-2.5 rounded-lg font-display text-sm uppercase tracking-wider hover:bg-brand-dark disabled:opacity-50 transition-colors">
                 {{ saving() ? 'Guardando...' : (isEdit() ? 'Actualizar' : 'Crear producto') }}
             </button>

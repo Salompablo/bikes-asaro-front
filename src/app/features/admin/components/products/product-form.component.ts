@@ -53,6 +53,7 @@ export class ProductFormComponent implements OnInit {
   categories = signal<CategoryResponse[]>([]);
   isEdit = signal(false);
   saving = signal(false);
+  removingBackground = signal(false);
   uploading = signal(false);
   draggedImageIndex = signal<number | null>(null);
   dragOverIndex = signal<number | null>(null);
@@ -103,11 +104,36 @@ export class ProductFormComponent implements OnInit {
     }
   }
 
-  onFileSelected(event: Event): void {
-    const file = (event.target as HTMLInputElement).files?.[0];
+  async onFileSelected(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
     if (!file) return;
+
+    input.value = '';
+
+    // ── Step 1: Remove background with AI & Resize ──────────────────────────
+    let processedFile: File;
+    try {
+      this.removingBackground.set(true);
+      const { removeBackground } = await import('@imgly/background-removal');
+
+      const rawResultBlob = await removeBackground(file);
+
+      const resizedBlob = await this.resizeImage(rawResultBlob, 1000);
+
+      const pngName = file.name.replace(/\.[^.]+$/, '.png');
+      processedFile = new File([resizedBlob], pngName, { type: 'image/png' });
+    } catch (error) {
+      console.error(error);
+      this.toast.error('Error al extraer la silueta con IA. Se subirá la imagen original.');
+      processedFile = file;
+    } finally {
+      this.removingBackground.set(false);
+    }
+
+    // ── Step 2: Upload to server ────────────────────────────────────────────
     this.uploading.set(true);
-    this.fileService.upload(file).subscribe({
+    this.fileService.upload(processedFile).subscribe({
       next: (url) => {
         this.form.images = [...this.form.images, url];
         this.uploading.set(false);
@@ -118,7 +144,6 @@ export class ProductFormComponent implements OnInit {
       },
     });
   }
-
   removeImage(index: number): void {
     this.form.images = this.form.images.filter((_, i) => i !== index);
   }
@@ -193,6 +218,10 @@ export class ProductFormComponent implements OnInit {
 
   onSubmit(): void {
     this.saving.set(true);
+    this.saveProduct();
+  }
+
+  private saveProduct(): void {
     const request$ = this.isEdit()
       ? this.productService.update(this.productId, this.form)
       : this.productService.create(this.form);
@@ -210,6 +239,55 @@ export class ProductFormComponent implements OnInit {
         }
         this.saving.set(false);
       },
+    });
+  }
+
+  private resizeImage(blob: Blob, maxDimension: number): Promise<Blob> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const objectUrl = URL.createObjectURL(blob);
+
+      img.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+
+        let { width, height } = img;
+
+        if (width > maxDimension || height > maxDimension) {
+          if (width > height) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+          } else {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+
+        if (!ctx) {
+          return reject(new Error('No se pudo obtener el contexto del canvas'));
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob((resizedBlob) => {
+          if (resizedBlob) {
+            resolve(resizedBlob);
+          } else {
+            reject(new Error('Fallo al exportar el canvas a Blob'));
+          }
+        }, 'image/png');
+      };
+
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error('Error al cargar la imagen en memoria'));
+      };
+
+      img.src = objectUrl;
     });
   }
 }
