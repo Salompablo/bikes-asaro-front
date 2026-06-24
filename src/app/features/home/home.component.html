@@ -1,0 +1,230 @@
+<section class="relative overflow-hidden bg-brand-light text-brand-black">
+    <div
+        class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,214,0,0.2),transparent_45%)]">
+    </div>
+
+    <div class="relative mx-auto max-w-7xl px-4 pb-14 pt-4 sm:px-6 lg:px-8 lg:pb-20 lg:pt-8">
+        <section
+            class="relative min-h-[720px] overflow-hidden rounded-[2rem] border border-black/10 bg-brand-black shadow-[0_24px_80px_rgba(15,23,42,0.35)] sm:min-h-[500px] lg:min-h-[560px]">
+            <img src="assets/images/Bikes-Asaro-Frente.jpg" alt="Frente del local Bikes Asaro"
+                class="absolute inset-0 h-full w-full object-cover object-[62%_center] sm:object-center"
+                fetchpriority="high" decoding="async" />
+            <div
+                class="absolute inset-0 bg-[linear-gradient(100deg,rgba(0,0,0,0.82)_0%,rgba(0,0,0,0.62)_45%,rgba(0,0,0,0.2)_100%)]">
+            </div>
+            <div
+                class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_15%,rgba(255,214,0,0.26),transparent_35%)]">
+            </div>
+
+            <div class="absolute inset-0 flex items-start sm:items-center">
+                <div class="max-w-2xl px-6 pb-8 pt-10 text-brand-white sm:px-10 sm:py-8 lg:px-14">
+                    <p class="text-[0.72rem] font-semibold uppercase tracking-[0.33em] text-brand-accent">Bikes Asaro
+                    </p>
+                    <h1
+                        class="mt-4 text-4xl font-display uppercase leading-[0.95] tracking-[0.08em] sm:text-5xl lg:text-6xl">
+                        Tu bici ideal, en una tienda real
+                    </h1>
+                    <p class="mt-5 max-w-xl text-sm leading-7 text-brand-silver/90 sm:text-base">
+                        Venta, repuestos y servicio especializado en Mar del Plata. Comprá online con respaldo de local
+                        fisico y asesoria personalizada.
+                    </p>
+
+                    <div class="mt-7 flex flex-wrap items-center gap-3">
+                        <a routerLink="/catalog"
+                            class="inline-flex items-center justify-center rounded-full bg-brand-accent px-6 py-3 text-xs font-black uppercase tracking-[0.2em] text-brand-black transition hover:bg-yellow-400">
+                            Ver catalogo
+                        </a>
+                        <a routerLink="/contacto"
+                            class="inline-flex items-center justify-center rounded-full border border-white/35 bg-white/5 px-6 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-brand-white transition hover:bg-white/12">
+                            Hablar con el equipo
+                        </a>
+                    </div>
+
+                    <div class="mt-8 grid w-full max-w-xl grid-cols-1 gap-3 sm:grid-cols-3">
+                        <div class="rounded-2xl border border-white/20 bg-white/8 px-4 py-3 backdrop-blur-sm">
+                            <p class="text-[0.65rem] uppercase tracking-[0.24em] text-brand-silver/70">Local fisico</p>
+                            <p class="mt-1 text-sm font-semibold text-white">Mar del Plata</p>
+                        </div>
+                        <div class="rounded-2xl border border-white/20 bg-white/8 px-4 py-3 backdrop-blur-sm">
+                            <p class="text-[0.65rem] uppercase tracking-[0.24em] text-brand-silver/70">Especialidad</p>
+                            <p class="mt-1 text-sm font-semibold text-white">Bicis y repuestos</p>
+                        </div>
+                        <div class="rounded-2xl border border-white/20 bg-white/8 px-4 py-3 backdrop-blur-sm">
+                            <p class="text-[0.65rem] uppercase tracking-[0.24em] text-brand-silver/70">Atencion</p>
+                            <p class="mt-1 text-sm font-semibold text-white">Asesoria real</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mt-10 lg:mt-14">
+            <div class="mb-6 flex items-end justify-between gap-4">
+                <div>
+                    <p class="text-xs uppercase tracking-[0.26em] text-brand-gray">Explorar</p>
+                    <h2 class="mt-2 text-3xl font-display uppercase tracking-[0.12em]">Categorias destacadas</h2>
+                </div>
+                <a routerLink="/catalog"
+                    class="hidden rounded-full border border-black/15 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-brand-black transition hover:border-brand-black/40 hover:bg-black hover:text-white md:inline-flex">
+                    Ver todo
+                </a>
+            </div>
+
+            @if (loadingCategories()) {
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                @for (item of [1, 2, 3, 4, 5, 6]; track item) {
+                <div class="h-40 animate-pulse rounded-3xl bg-black/10"></div>
+                }
+            </div>
+            } @else {
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                @for (category of categories(); track category.id; let index = $index) {
+                <a routerLink="/catalog" class="group relative overflow-hidden rounded-3xl border border-black/10">
+                    <img [src]="categoryImage(category, index)" [alt]="'Categoria ' + category.name"
+                        (error)="onImageError($event, 'assets/images/Bikes-Asaro-Frente.jpg')"
+                        class="h-40 w-full object-cover object-center transition duration-500 group-hover:scale-105"
+                        loading="lazy" decoding="async" />
+                    <div class="absolute inset-0 bg-[linear-gradient(180deg,transparent_5%,rgba(0,0,0,0.82)_100%)]">
+                    </div>
+                    <div class="absolute inset-x-0 bottom-0 p-4">
+                        <p class="text-xs uppercase tracking-[0.22em] text-brand-accent">Categoria</p>
+                        <p class="mt-1 text-lg font-display uppercase tracking-[0.08em] text-white">{{ category.name }}
+                        </p>
+                    </div>
+                </a>
+                }
+            </div>
+            }
+        </section>
+
+        <section class="mt-12 grid gap-5 lg:mt-16 lg:grid-cols-[1.05fr_0.95fr]">
+            <article class="relative overflow-hidden rounded-[1.75rem] border border-black/10 bg-brand-white shadow-sm">
+                <img src="assets/images/Bikes-Asaro-Bici.jpg" alt="Bicicletas exhibidas en el local"
+                    class="h-[300px] w-full object-cover object-center lg:h-full" loading="lazy" decoding="async" />
+                <div class="absolute inset-0 bg-[linear-gradient(180deg,transparent_20%,rgba(0,0,0,0.85)_100%)]"></div>
+                <div class="absolute inset-x-0 bottom-0 p-6 text-white">
+                    <p class="text-xs uppercase tracking-[0.25em] text-brand-accent">Showroom</p>
+                    <h3 class="mt-2 text-2xl font-display uppercase tracking-[0.12em]">Stock real para entrega inmediata
+                    </h3>
+                    <p class="mt-3 text-sm leading-6 text-brand-silver/90">Modelos urbanos, MTB y opciones para cada
+                        presupuesto, con asistencia para elegir bien antes de comprar.</p>
+                </div>
+            </article>
+
+            <article class="relative overflow-hidden rounded-[1.75rem] border border-black/10 bg-brand-white shadow-sm">
+                <img src="assets/images/Bikes-Asaro-Mural.jpg" alt="Mural y bicicletas del local Bikes Asaro"
+                    class="h-[300px] w-full object-cover object-center lg:h-full" loading="lazy" decoding="async" />
+                <div class="absolute inset-0 bg-[linear-gradient(180deg,transparent_18%,rgba(0,0,0,0.86)_100%)]"></div>
+                <div class="absolute inset-x-0 bottom-0 p-6 text-white">
+                    <p class="text-xs uppercase tracking-[0.25em] text-brand-accent">Taller</p>
+                    <h3 class="mt-2 text-2xl font-display uppercase tracking-[0.12em]">Servicio tecnico y repuestos</h3>
+                    <p class="mt-3 text-sm leading-6 text-brand-silver/90">Mantenimiento, reparaciones y puesta a punto
+                        con atencion personalizada para que ruedes sin preocupaciones.</p>
+                </div>
+            </article>
+        </section>
+
+        <section class="mt-12 lg:mt-16">
+            <div class="mb-6 flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <p class="text-xs uppercase tracking-[0.26em] text-brand-gray">Novedades</p>
+                    <h2 class="mt-2 text-3xl font-display uppercase tracking-[0.12em]">Productos destacados</h2>
+                </div>
+                <a routerLink="/catalog"
+                    class="inline-flex w-full items-center justify-center rounded-full border border-black/15 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-brand-black transition hover:border-brand-black/40 hover:bg-black hover:text-white sm:w-auto">
+                    Ir al catalogo
+                </a>
+            </div>
+
+            @if (loadingFeatured()) {
+            <div class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
+                @for (item of [1, 2, 3, 4]; track item) {
+                <div class="overflow-hidden rounded-3xl border border-black/10 bg-white">
+                    <div class="aspect-square animate-pulse bg-black/10"></div>
+                    <div class="space-y-2 p-4">
+                        <div class="h-3 w-24 animate-pulse rounded bg-black/10"></div>
+                        <div class="h-4 w-full animate-pulse rounded bg-black/10"></div>
+                        <div class="h-4 w-20 animate-pulse rounded bg-black/10"></div>
+                    </div>
+                </div>
+                }
+            </div>
+            } @else if (featuredProducts().length === 0) {
+            <div class="rounded-3xl border border-black/10 bg-white px-6 py-10 text-center">
+                <p class="text-lg font-display uppercase tracking-[0.12em] text-brand-black">Todavia no hay destacados
+                </p>
+                <p class="mt-2 text-sm text-brand-gray">Mientras tanto, podes explorar todo nuestro catalogo.</p>
+                <a routerLink="/catalog"
+                    class="mt-5 inline-flex rounded-full bg-brand-black px-6 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-black/85">
+                    Ver productos
+                </a>
+            </div>
+            } @else {
+            <div class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
+                @for (product of featuredProducts(); track product.id) {
+                <a [routerLink]="['/products', product.id]"
+                    class="group block overflow-hidden rounded-3xl border border-black/10 bg-brand-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
+                    <div
+                        class="relative w-full aspect-square flex items-center justify-center overflow-hidden bg-white rounded-t-3xl">
+                        <img [src]="productImage(product)" [alt]="product.name"
+                            (error)="onImageError($event, 'assets/images/Bikes-Asaro-Bici.jpg')"
+                            class="w-full h-full object-contain" loading="lazy" decoding="async" />
+                        @if ((product.availableToReserveNow ?? product.stock) <= 0) { <span
+                            class="absolute right-3 top-3 rounded-full bg-red-600 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
+                            Agotado
+                            </span>
+                            }
+                    </div>
+                    <div class="p-4">
+                        <p class="text-[0.68rem] uppercase tracking-[0.2em] text-brand-gray">{{ product.category.name }}
+                        </p>
+                        <h3
+                            class="mt-2 line-clamp-2 text-lg font-display uppercase leading-tight tracking-[0.06em] text-brand-black">
+                            {{ product.name }}
+                        </h3>
+                        <p class="mt-3 text-xl font-semibold tabular-nums text-brand-black">
+                            {{ product.price | currency : '' : '$' : '1.0-0' }}
+                        </p>
+                    </div>
+                </a>
+                }
+            </div>
+            }
+        </section>
+
+        <section
+            class="mt-12 rounded-[2rem] border border-black/10 bg-brand-black px-6 py-10 text-brand-white lg:mt-16 lg:px-10">
+            <div class="grid gap-6 md:grid-cols-3">
+                <article class="rounded-2xl border border-white/12 bg-white/5 p-5">
+                    <p class="text-xs uppercase tracking-[0.22em] text-brand-accent">Compra segura</p>
+                    <p class="mt-2 text-sm leading-6 text-brand-silver/90">Proceso de checkout simple con asistencia
+                        humana cuando la necesites.</p>
+                </article>
+                <article class="rounded-2xl border border-white/12 bg-white/5 p-5">
+                    <p class="text-xs uppercase tracking-[0.22em] text-brand-accent">Atencion real</p>
+                    <p class="mt-2 text-sm leading-6 text-brand-silver/90">Te asesoramos por
+                        contacto directo y seguimiento post compra.</p>
+                </article>
+                <article class="rounded-2xl border border-white/12 bg-white/5 p-5">
+                    <p class="text-xs uppercase tracking-[0.22em] text-brand-accent">Servicio tecnico</p>
+                    <p class="mt-2 text-sm leading-6 text-brand-silver/90">Reparacion, mantenimiento y repuestos para
+                        que tu bici siempre rinda al maximo.</p>
+                </article>
+            </div>
+
+            <div class="mt-8 flex flex-wrap items-center justify-between gap-4">
+                <h2 class="text-2xl font-display uppercase tracking-[0.1em]">Listo para rodar con Bikes Asaro?</h2>
+                <div class="flex flex-wrap gap-3">
+                    <a routerLink="/catalog"
+                        class="inline-flex items-center justify-center rounded-full bg-brand-accent px-6 py-3 text-xs font-black uppercase tracking-[0.2em] text-brand-black transition hover:bg-yellow-400">
+                        Comprar ahora
+                    </a>
+                    <a routerLink="/contacto"
+                        class="inline-flex items-center justify-center rounded-full border border-white/35 bg-white/5 px-6 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-brand-white transition hover:bg-white/12">
+                        Contacto
+                    </a>
+                </div>
+            </div>
+        </section>
+    </div>
+</section>

@@ -3,6 +3,10 @@ import { authGuard } from './features/auth/services/auth.guard';
 
 export const routes: Routes = [
   {
+    path: '',
+    loadComponent: () => import('./features/home/home.component').then((c) => c.HomeComponent),
+  },
+  {
     path: 'auth',
     loadChildren: () => import('./features/auth/auth.routes').then((r) => r.authRoutes),
   },
@@ -70,10 +74,5 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/auth/profile.component').then((c) => c.ProfileComponent),
     canActivate: [authGuard],
-  },
-  {
-    path: '',
-    pathMatch: 'full',
-    redirectTo: 'catalog',
   },
 ];
