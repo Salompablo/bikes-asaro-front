@@ -5,6 +5,8 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "sync:onnx-assets": "node scripts/sync-onnx-assets.mjs",
+    "prestart": "npm run sync:onnx-assets",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:bikes-asaro-front": "node dist/bikes-asaro-front/server/server.mjs"
