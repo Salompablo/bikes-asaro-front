@@ -44,3 +44,7 @@ Thumbs.db
 
 # Environment files
 /.env
+
+# AI models and binaries downloaded automatically
+public/models/
+public/wasm/

@@ -118,7 +118,8 @@ export class ProductFormComponent implements OnInit {
       const { removeBackground } = await import('@imgly/background-removal');
 
       const rawResultBlob = await removeBackground(file, {
-        publicPath: '/models/',
+        publicPath: window.location.origin + '/models/',
+        model: 'isnet_fp16',
       });
 
       const resizedBlob = await this.resizeImage(rawResultBlob, 1000);

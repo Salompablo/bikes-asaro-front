@@ -5,8 +5,11 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "prebuild": "npm run download:imgly-assets",
+    "download:imgly-assets": "node scripts/download-imgly-assets.mjs",
+    "postinstall": "npm run download:imgly-assets",
+    "prestart": "npm run download:imgly-assets",
     "sync:onnx-assets": "node scripts/sync-onnx-assets.mjs",
-    "prestart": "npm run sync:onnx-assets",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:bikes-asaro-front": "node dist/bikes-asaro-front/server/server.mjs"
