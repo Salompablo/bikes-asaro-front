@@ -1,6 +1,6 @@
 import { Component, computed, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { catchError, EMPTY } from 'rxjs';
@@ -18,7 +18,6 @@ import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/
   selector: 'app-product-detail',
   standalone: true,
   imports: [
-    CurrencyPipe,
     DatePipe,
     DecimalPipe,
     RouterLink,
@@ -81,6 +80,12 @@ export class ProductDetailComponent implements OnInit {
   showGenericImageNotice = computed(
     () => this.usesCategoryImage() || this.fallbackCategoryImageInUse(),
   );
+
+  formattedPrice = computed(() => {
+    const p = this.product();
+    if (!p) return '';
+    return `$${Math.round(p.price).toLocaleString('en-US').replace(/,/g, '.')}`;
+  });
 
   availableToReserveNow = computed(() => {
     const p = this.product();

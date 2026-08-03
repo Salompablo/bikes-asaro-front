@@ -3,14 +3,13 @@ import { RouterLink } from '@angular/router';
 import { ProductService } from '../../services/product.service';
 import { ProductResponse, PageResponse } from '../../models/admin.models';
 import { ToastService } from '../../../../shared/services/toast.service';
-import { CurrencyPipe } from '@angular/common';
 import { ConfirmModalComponent } from '../../../../shared/components/confirm-modal/confirm-modal.component';
 import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-product-list',
   standalone: true,
-  imports: [RouterLink, CurrencyPipe, ConfirmModalComponent],
+  imports: [RouterLink, ConfirmModalComponent],
   templateUrl: './product-list.component.html',
 })
 export class ProductListComponent implements OnInit {
@@ -132,6 +131,10 @@ export class ProductListComponent implements OnInit {
   onImageError(event: Event): void {
     const img = event.target as HTMLImageElement;
     img.src = this.placeholderImage();
+  }
+
+  formatPrice(price: number): string {
+    return `$${Math.round(price).toLocaleString('en-US').replace(/,/g, '.')}`;
   }
 
   private placeholderImage(): string {
