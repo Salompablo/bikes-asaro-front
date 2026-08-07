@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { ParamMap } from '@angular/router';
 import { Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../../../core/http/api-endpoints';
 import { CartItem } from '../../../core/services/cart-state.service';
@@ -97,6 +98,21 @@ export class CheckoutService {
     if (!raw) return null;
 
     const parsed = Number(raw);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  getReturnOrderId(queryParamMap?: Pick<ParamMap, 'get'>): number | null {
+    const storedOrderId = this.getPendingOrderId();
+    if (storedOrderId !== null) {
+      return storedOrderId;
+    }
+
+    const externalReference = queryParamMap?.get('external_reference')?.trim();
+    if (!externalReference) {
+      return null;
+    }
+
+    const parsed = Number(externalReference);
     return Number.isFinite(parsed) ? parsed : null;
   }
 

@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CartStateService } from '../../core/services/cart-state.service';
 import { CheckoutService } from './services/checkout.service';
 import { OrdersService } from '../orders/services/orders.service';
@@ -135,6 +135,7 @@ export class CheckoutSuccessComponent implements OnInit, OnDestroy {
   private readonly cartService = inject(CartStateService);
   private readonly checkoutService = inject(CheckoutService);
   private readonly ordersService = inject(OrdersService);
+  private readonly route = inject(ActivatedRoute);
 
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
@@ -231,7 +232,7 @@ export class CheckoutSuccessComponent implements OnInit, OnDestroy {
   }
 
   private refreshOrderState(): void {
-    const orderId = this.checkoutService.getPendingOrderId();
+    const orderId = this.checkoutService.getReturnOrderId(this.route.snapshot.queryParamMap);
     if (!orderId) {
       this.loading.set(false);
       this.error.set('No encontramos una orden asociada a este retorno de pago.');

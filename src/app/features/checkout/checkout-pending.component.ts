@@ -1,5 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CheckoutService } from './services/checkout.service';
 import { OrdersService } from '../orders/services/orders.service';
 import { OrderResponse } from '../admin/models/admin.models';
@@ -95,6 +95,7 @@ import { OrderResponse } from '../admin/models/admin.models';
 export class CheckoutPendingComponent implements OnInit {
   private readonly checkoutService = inject(CheckoutService);
   private readonly ordersService = inject(OrdersService);
+  private readonly route = inject(ActivatedRoute);
 
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
@@ -123,7 +124,7 @@ export class CheckoutPendingComponent implements OnInit {
   }
 
   private refreshOrderState(): void {
-    const orderId = this.checkoutService.getPendingOrderId();
+    const orderId = this.checkoutService.getReturnOrderId(this.route.snapshot.queryParamMap);
     if (!orderId) {
       this.loading.set(false);
       this.error.set('No encontramos una orden pendiente para validar este pago.');
