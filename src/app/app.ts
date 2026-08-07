@@ -42,7 +42,10 @@ export class App implements OnInit {
     const currentPath = url.pathname;
     if (currentPath.endsWith(targetRoute)) return;
 
-    this.router.navigate([targetRoute], { replaceUrl: true });
+    this.router.navigate([targetRoute], {
+      replaceUrl: true,
+      queryParamsHandling: 'preserve',
+    });
   }
 
   private mapPaymentStatusToRoute(status: string): string | null {
