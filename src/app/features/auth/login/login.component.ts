@@ -57,15 +57,17 @@ export class LoginComponent {
       return;
     }
 
+    const payload = this.form.getRawValue();
     this.loading.set(true);
-    this.authService.login(this.form.getRawValue()).subscribe({
+    this.authService.login(payload).subscribe({
       next: () => {
+        this.authService.clearPendingVerificationEmail();
         this.toast.success('Sesión iniciada correctamente');
         this.router.navigateByUrl(this.redirectUrl);
       },
       error: (err: HttpErrorResponse) => {
         this.loading.set(false);
-        this.handleError(err);
+        this.handleError(err, payload.email);
       },
     });
   }
@@ -116,10 +118,13 @@ export class LoginComponent {
     });
   }
 
-  private handleError(err: HttpErrorResponse): void {
-    const body = err.error as ErrorResponse;
+  private handleError(err: HttpErrorResponse, email?: string): void {
+    const body = err.error as ErrorResponse & { errorCode?: string };
     const msg = body?.message ?? 'Error inesperado. Intentá de nuevo.';
     const rawErrorText = this.extractErrorText(err).toLowerCase();
+    const isPendingVerification =
+      err.status === 409 &&
+      (body?.errorCode === 'EMAIL_NOT_VERIFIED' || rawErrorText.includes('verify your email'));
     const hasBadCredentials =
       rawErrorText.includes('bad credentials') ||
       rawErrorText.includes('credenciales invalidas') ||
@@ -137,7 +142,13 @@ export class LoginComponent {
       return;
     }
 
-    if (hasBadCredentials) {
+    if (isPendingVerification) {
+      if (email) {
+        this.authService.savePendingVerificationEmail(email);
+      }
+      this.toast.info('Tu cuenta aún no fue verificada. Completá el proceso para continuar.');
+      void this.router.navigate(['/auth/verify-email']);
+    } else if (hasBadCredentials) {
       this.toast.error('Credenciales incorrectas. Verificá tu email y contraseña.');
     } else if (err.status === 401) {
       this.toast.error('Credenciales incorrectas. Verificá tu email y contraseña.');

@@ -19,10 +19,19 @@ export class VerifyEmailComponent {
   private readonly toast = inject(ToastService);
 
   readonly loading = signal(false);
+  readonly resendLoading = signal(false);
 
   readonly form = this.fb.nonNullable.group({
     code: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]],
+    email: ['' as string, []],
   });
+
+  constructor() {
+    const pendingEmail = this.authService.getPendingVerificationEmail();
+    if (pendingEmail) {
+      this.form.patchValue({ email: pendingEmail });
+    }
+  }
 
   onSubmit(): void {
     if (this.form.invalid) {
@@ -33,6 +42,7 @@ export class VerifyEmailComponent {
     this.loading.set(true);
     this.authService.verifyEmail(this.form.getRawValue().code).subscribe({
       next: () => {
+        this.authService.clearPendingVerificationEmail();
         this.toast.success('Correo verificado correctamente');
         this.router.navigate(['/']);
       },
@@ -40,7 +50,6 @@ export class VerifyEmailComponent {
         this.loading.set(false);
         const body = err.error as ErrorResponse;
 
-        // Network error or connection failure
         if (!err.status || err.status === 0) {
           this.toast.error('No pudimos conectar con el servidor. Verificá tu conexión a internet.');
           return;
@@ -49,10 +58,37 @@ export class VerifyEmailComponent {
         if (err.status === 400) {
           this.toast.error('Código inválido o expirado. Intentá de nuevo.');
         } else if (err.status === 500 || err.status === 502 || err.status === 503) {
-          this.toast.error('El servidor está en mantenimiento. Intentá nuevamente en unos minutos.');
+          this.toast.error(
+            'El servidor está en mantenimiento. Intentá nuevamente en unos minutos.',
+          );
         } else {
           this.toast.error(body?.message ?? 'Código inválido o expirado. Intentá de nuevo.');
         }
+      },
+    });
+  }
+
+  resendCode(): void {
+    const email = this.form.get('email')?.value || this.authService.getPendingVerificationEmail();
+    if (!email) {
+      this.toast.error('No encontramos el correo para reenvíar el código.');
+      return;
+    }
+
+    this.resendLoading.set(true);
+    this.authService.resendVerification({ email }).subscribe({
+      next: () => {
+        this.resendLoading.set(false);
+        this.toast.success('Se reenvió el código a tu correo.');
+      },
+      error: (err: HttpErrorResponse) => {
+        this.resendLoading.set(false);
+        const body = err.error as ErrorResponse;
+        if (!err.status || err.status === 0) {
+          this.toast.error('No pudimos conectar con el servidor. Verificá tu conexión a internet.');
+          return;
+        }
+        this.toast.error(body?.message ?? 'No se pudo reenviar el código.');
       },
     });
   }

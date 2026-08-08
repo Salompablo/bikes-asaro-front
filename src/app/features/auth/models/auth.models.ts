@@ -40,6 +40,16 @@ export interface AuthResponse {
   message: string;
 }
 
+export interface AccountStatusResponse {
+  isActive: boolean;
+  isEmailVerified: boolean;
+  pendingVerification: boolean;
+}
+
+export interface ResendVerificationRequest {
+  email: string;
+}
+
 export interface UserProfile {
   id: number;
   email: string;

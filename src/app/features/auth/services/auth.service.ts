@@ -3,12 +3,14 @@ import { Injectable, PLATFORM_ID, computed, inject, signal } from '@angular/core
 import { isPlatformBrowser } from '@angular/common';
 import { Observable, catchError, of, switchMap, tap, throwError } from 'rxjs';
 import {
+  AccountStatusResponse,
   AuthResponse,
   ChangePasswordRequest,
   ForgotPasswordRequest,
   GoogleLoginRequest,
   LoginRequest,
   RegisterRequest,
+  ResendVerificationRequest,
   ResetPasswordRequest,
   UpdateProfileRequest,
   UserProfile,
@@ -16,6 +18,7 @@ import {
 import { API_ENDPOINTS } from '../../../core/http/api-endpoints';
 
 const TOKEN_KEY = 'auth_token';
+const PENDING_VERIFICATION_EMAIL_KEY = 'pending_verification_email';
 
 interface JwtPayload {
   sub?: string;
@@ -69,6 +72,34 @@ export class AuthService {
     return this.http
       .post<AuthResponse>(API_ENDPOINTS.AUTH.LOGIN, request)
       .pipe(tap((res) => this.storeToken(res.token)));
+  }
+
+  getAccountStatus(request: ResendVerificationRequest): Observable<AccountStatusResponse> {
+    return this.http.post<AccountStatusResponse>(API_ENDPOINTS.AUTH.ACCOUNT_STATUS, request);
+  }
+
+  resendVerification(request: ResendVerificationRequest): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(API_ENDPOINTS.AUTH.RESEND_VERIFICATION, request);
+  }
+
+  savePendingVerificationEmail(email: string): void {
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem(PENDING_VERIFICATION_EMAIL_KEY, email);
+    }
+  }
+
+  getPendingVerificationEmail(): string | null {
+    if (isPlatformBrowser(this.platformId)) {
+      return localStorage.getItem(PENDING_VERIFICATION_EMAIL_KEY);
+    }
+
+    return null;
+  }
+
+  clearPendingVerificationEmail(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.removeItem(PENDING_VERIFICATION_EMAIL_KEY);
+    }
   }
 
   googleLogin(request: GoogleLoginRequest): Observable<AuthResponse> {

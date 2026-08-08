@@ -42,6 +42,15 @@
             </button>
         </form>
 
+        <button type="button" class="mt-4 text-sm text-brand-accent hover:underline font-semibold"
+            [disabled]="resendLoading()" (click)="resendCode()">
+            @if (resendLoading()) {
+            Reenviando...
+            } @else {
+            Reenviar código
+            }
+        </button>
+
         <p class="text-sm text-brand-gray mt-8">
             <a routerLink="/auth/login" class="text-brand-accent hover:underline font-semibold">Volver a iniciar
                 sesión</a>

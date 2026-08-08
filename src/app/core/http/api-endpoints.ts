@@ -4,6 +4,8 @@ export const API_ENDPOINTS = {
     LOGIN: '/auth/login',
     GOOGLE: '/auth/google',
     VERIFY: '/auth/verify',
+    RESEND_VERIFICATION: '/auth/resend-verification',
+    ACCOUNT_STATUS: '/auth/account-status',
     FORGOT_PASSWORD: '/auth/forgot-password',
     RESET_PASSWORD: '/auth/reset-password',
     REQUEST_REACTIVATION: '/auth/request-reactivation',
