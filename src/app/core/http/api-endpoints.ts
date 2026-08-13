@@ -40,6 +40,7 @@ export const API_ENDPOINTS = {
   },
   CHECKOUT: {
     CREATE_PREFERENCE: '/checkout/create-preference',
+    CONFIRM: '/checkout/confirm',
   },
   SHIPPING: {
     QUOTE: '/shipping/quote',

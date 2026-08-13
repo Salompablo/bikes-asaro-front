@@ -66,6 +66,7 @@ export interface OrderResponse {
   status: string;
   paymentStatus?: string | null;
   flowStatus?: string | null;
+  subtotalAmount?: number | null;
   requiresShippingQuote?: boolean;
   payableNow?: boolean;
   checkoutUrl?: string | null;
@@ -84,7 +85,7 @@ export interface OrderResponse {
 }
 
 export interface AdminOrderDetailResponse extends OrderResponse {
-  subtotalAmount: number;
+  subtotalAmount: number | null;
   customerEmail: string;
 }
 
