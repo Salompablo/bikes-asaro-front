@@ -2,7 +2,7 @@
   <img src="public/assets/images/bikes-asaro-logo.png" alt="Bikes Asaro logo" width="220" />
 </p>
 
-# Bikes Asaro Front
+# Bikes Asaro
 
 Angular client for **Bikes Asaro**, a full-stack e-commerce platform focused on bicycle sales, catalog management, secure checkout, and operational administration, integrated with the custom **bikestore-api** backend built with Java and Spring Boot.
 
@@ -53,7 +53,7 @@ The Angular client is tightly integrated with the backend security model exposed
 - **JWT session state:** after email/password or Google authentication, the backend-issued JWT is stored on the client and exposed through reactive authentication state for logged-in user, role, and token-expiration tracking.
 - **HTTP interceptors:** one interceptor prefixes relative requests with the configured backend API base URL, while the authentication interceptor attaches the bearer token to protected API requests and reacts to unauthorized responses.
 - **Route guards:** authenticated customer routes use an auth guard, and the admin area is protected with an admin guard that enforces **Role-Based Access Control (RBAC)** based on the role encoded in the JWT.
-- **Session-expiry handling:** expired or invalid sessions trigger controlled logout and redirect flows to preserve secure access to checkout, orders, profile, and admin views.
+- **Session-expiry handling:** expired or invalid sessions trigger controlled logout and redirect flows that protect sensitive customer and admin areas, including orders, profile, admin views, and active checkout journeys.
 - **Additional protection:** the contact flow integrates **reCAPTCHA v3** to reduce abuse and spam submissions.
 
 ## Tech Stack & Architecture
@@ -66,7 +66,7 @@ The Angular client is tightly integrated with the backend security model exposed
 - **Commerce integrations:** Mercado Pago checkout flow and shipping quote support
 - **Rendering/runtime:** Angular SSR support with Express runtime artifacts
 
-The codebase is organized around feature modules such as `auth`, `catalog`, `checkout`, `orders`, `contact`, and `admin`, with shared services and core HTTP infrastructure. The overall approach emphasizes **clean architecture, modularity, and maintainable separation of concerns** between presentation, state, routing, and API integration.
+The codebase is organized around feature areas such as `auth`, `catalog`, `checkout`, `orders`, `contact`, and `admin`, with shared services and core HTTP infrastructure. The overall approach emphasizes **clean architecture, modularity, and maintainable separation of concerns** between presentation, state, routing, and API integration.
 
 ## Getting Started / Installation
 
