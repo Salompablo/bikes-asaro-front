@@ -117,7 +117,12 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     return 'Pagar con Mercado Pago';
   });
 
+  // TODO: re-enable once official Mercado Pago credentials are configured
+  readonly paymentsTemporarilyDisabled = true;
+
   readonly canTriggerPayment = computed(() => {
+    if (this.paymentsTemporarilyDisabled) return false;
+
     const hasContactPhone = this.contactPhone().trim().length > 0;
     if (!hasContactPhone || this.loading()) return false;
 

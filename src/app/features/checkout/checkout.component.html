@@ -281,6 +281,14 @@
             Tus productos están reservados. Tenes 10 minutos para completar el pago antes de que se libere el stock.
         </p>
 
+        <!-- Payments temporarily disabled notice -->
+        @if (paymentsTemporarilyDisabled) {
+        <div class="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 text-center">
+            Los pagos y las cotizaciones de envío están deshabilitados temporalmente. Muy pronto vas a poder
+            completar tu compra.
+        </div>
+        }
+
         <!-- Pay button -->
         <button (click)="pay()" type="button" [disabled]="!canTriggerPayment()"
             class="w-full h-14 flex items-center justify-center gap-3 rounded-lg text-white font-bold text-base transition-all duration-200 hover:brightness-110 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
