@@ -117,6 +117,9 @@ export class ProductFormComponent implements OnInit {
     let processedFile: File;
     try {
       this.removingBackground.set(true);
+      // Loaded on demand so the ~390 kB ONNX runtime stays out of the storefront bundle.
+      const { env } = await import('onnxruntime-web');
+      env.wasm.wasmPaths = '/models/';
       const { removeBackground } = await import('@imgly/background-removal');
 
       const rawResultBlob = await removeBackground(file, {
