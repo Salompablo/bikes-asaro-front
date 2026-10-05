@@ -82,8 +82,8 @@
                         <span class="text-left">
                             <span class="block font-semibold">Envío a domicilio</span>
                             <span class="block text-sm text-brand-gray">
-                                @if (shippingQuote()) {
-                                {{ shippingCost() | currency: 'ARS' : '$' : '1.0-0' }} estimado
+                                @if (hasShippingCost()) {
+                                {{ shippingCost() | currency: 'ARS' : '$' : '1.0-0' }} {{ quotedShippingCost() !== null ? 'cotizado' : 'estimado' }}
                                 } @else {
                                 Te pasamos el costo antes de pagar
                                 }
@@ -169,7 +169,7 @@
                         <dd>
                             @if (!isShipping()) {
                             Gratis
-                            } @else if (shippingQuote()) {
+                            } @else if (hasShippingCost()) {
                             {{ shippingCost() | currency: 'ARS' : '$' : '1.0-0' }}
                             } @else {
                             A cotizar

@@ -82,6 +82,8 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
   readonly shippingQuoteLoading = signal(false);
   readonly shippingQuote = signal<ShippingQuoteResponse | null>(null);
+  // Cost the admin published for a resumed order (no live quote object in that case).
+  readonly quotedShippingCost = signal<number | null>(null);
   readonly shippingQuoteError = signal<string | null>(null);
 
   constructor() {
@@ -98,7 +100,12 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   }
 
   readonly isShipping = computed(() => this.deliveryMethod() === 'SHIPPING');
-  readonly shippingCost = computed(() => this.shippingQuote()?.cost ?? 0);
+  readonly shippingCost = computed(
+    () => this.shippingQuote()?.cost ?? this.quotedShippingCost() ?? 0,
+  );
+  readonly hasShippingCost = computed(
+    () => this.shippingQuote() !== null || this.quotedShippingCost() !== null,
+  );
   readonly orderTotal = computed(() => this.cartService.totalPrice() + this.shippingCost());
   // Mercado Pago blue only when the button actually opens the payment.
   readonly isPaymentStep = computed(
@@ -244,6 +251,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
   selectDeliveryMethod(method: DeliveryMethod): void {
     this.deliveryMethod.set(method);
+    this.quotedShippingCost.set(null);
     this.stockError.set(null);
     this.resumedOrderNotice.set(null);
     this.stopOrderPolling();
@@ -290,6 +298,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
   onShippingAddressChange(value: string): void {
     this.shippingAddress.set(value);
+    this.quotedShippingCost.set(null);
     this.shippingAddressError.set(this.validateShippingAddress(value));
     if (this.checkoutState() === 'QUOTE_READY_PAYMENT_PENDING') {
       this.checkoutState.set('CHECKOUT_READY');
@@ -302,6 +311,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   onZipCodeChange(value: string): void {
     this.zipCode.set(value);
     this.shippingQuote.set(null);
+    this.quotedShippingCost.set(null);
     this.shippingQuoteError.set(null);
     this.zipCodeError.set(this.validateZipCode(value));
 
@@ -511,6 +521,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
         }
 
         this.deliveryMethod.set(order.deliveryMethod === 'SHIPPING' ? 'SHIPPING' : 'STORE_PICKUP');
+        this.restoreOrderDetails(order);
         this.resumedOrderNotice.set(
           `Reanudamos tu checkout pendiente de la orden #${order.id}. Si querés iniciar una solicitud nueva, cambiá el método de entrega.`,
         );
@@ -526,6 +537,24 @@ export class CheckoutComponent implements OnInit, OnDestroy {
         this.resumedOrderNotice.set(null);
       },
     });
+  }
+
+  // Without these the resumed form looks empty and "Pagar ahora" stays disabled.
+  private restoreOrderDetails(order: OrderResponse): void {
+    if (order.contactPhone && !this.contactPhone().trim()) {
+      this.contactPhone.set(order.contactPhone);
+    }
+
+    if (order.deliveryMethod !== 'SHIPPING') return;
+
+    this.shippingAddress.set(order.shippingAddress ?? '');
+    this.zipCode.set(order.zipCode ?? '');
+    this.shippingAddressError.set(null);
+    this.zipCodeError.set(null);
+
+    if (!order.requiresShippingQuote && order.shippingCost != null) {
+      this.quotedShippingCost.set(order.shippingCost);
+    }
   }
 
   private applyOrderStatus(order: OrderResponse): void {
