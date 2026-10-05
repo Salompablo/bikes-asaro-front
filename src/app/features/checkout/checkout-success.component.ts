@@ -12,128 +12,98 @@ import { CheckoutService, MercadoPagoReturnParams } from './services/checkout.se
   standalone: true,
   imports: [CurrencyPipe, DatePipe, RouterLink],
   template: `
-    <section class="min-h-screen bg-brand-light flex items-center justify-center px-4 py-10">
-      <div
-        class="w-full max-w-2xl rounded-2xl bg-brand-white border border-gray-200 shadow-xl p-6 sm:p-8"
-      >
-        @if (loading()) {
-          <div class="flex flex-col items-center justify-center py-14 text-center gap-4">
-            <div
-              class="w-10 h-10 border-4 border-brand-accent border-t-transparent rounded-full animate-spin"
-            ></div>
-            <p class="text-brand-gray">Confirmando tu pago...</p>
+    <div class="page page--narrow">
+      @if (loading()) {
+        <div class="panel state" aria-live="polite">
+          <span class="spinner spinner--lg"></span>
+          <p class="text-lg font-semibold">Estamos confirmando tu pago...</p>
+          <p class="text-brand-gray">No cierres esta pestaña, tarda unos segundos.</p>
+        </div>
+      } @else if (error()) {
+        <div class="panel state">
+          <h1 class="text-3xl">No pudimos confirmar el pago</h1>
+          <div class="notice notice--error w-full">
+            <p>{{ error() }}</p>
           </div>
-        } @else if (error()) {
-          <div class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 mb-6">
-            <p class="text-sm text-red-700 text-center">{{ error() }}</p>
-          </div>
-          <div class="flex justify-center">
-            <a
-              routerLink="/"
-              class="inline-flex items-center justify-center px-6 py-3 bg-brand-black text-brand-white font-display uppercase tracking-widest text-sm rounded-lg hover:bg-brand-dark transition-colors"
-            >
-              Ir al inicio
-            </a>
-          </div>
-        } @else if (order()) {
-          <div
-            class="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6"
-          >
-            <svg
-              class="w-10 h-10 text-green-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
-          </div>
-          <h1 class="text-3xl text-center mb-3">Pago confirmado</h1>
-          <p class="text-brand-gray text-center mb-4">
-            Confirmamos tu pago y actualizamos el estado de la orden.
+          <p class="text-brand-gray">
+            Si el dinero se debitó, no te preocupes: revisá tus pedidos o escribinos y lo resolvemos.
           </p>
-
-          <div class="rounded-2xl border border-gray-200 bg-gray-50 p-5 mb-8 space-y-5">
-            <div class="grid gap-4 sm:grid-cols-2">
-              <div>
-                <p class="text-xs uppercase tracking-[0.2em] text-brand-gray mb-1">Orden</p>
-                <p class="text-xl font-semibold text-brand-black">#{{ order()!.id }}</p>
-              </div>
-              <div class="sm:text-right">
-                <p class="text-xs uppercase tracking-[0.2em] text-brand-gray mb-1">Estado</p>
-                <p class="text-xl font-semibold text-brand-black">
-                  {{ statusLabel(order()!.status) }}
-                </p>
-              </div>
-              <div>
-                <p class="text-xs uppercase tracking-[0.2em] text-brand-gray mb-1">Pago</p>
-                <p class="text-sm text-brand-black">
-                  {{ paymentStatusLabel(order()!.paymentStatus) }}
-                </p>
-              </div>
-              <div class="sm:text-right">
-                <p class="text-xs uppercase tracking-[0.2em] text-brand-gray mb-1">Entrega</p>
-                <p class="text-sm text-brand-black">
-                  {{ deliveryMethodLabel(order()!.deliveryMethod) }}
-                </p>
-              </div>
-            </div>
-
-            <div class="grid gap-4 sm:grid-cols-2 text-sm text-brand-gray">
-              <p>Creada: {{ order()!.createdAt | date: 'dd/MM/yyyy HH:mm' }}</p>
-              <p>
-                Subtotal:
-                {{ order()!.subtotalAmount ?? 0 | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}
-              </p>
-              <p>Total: {{ order()!.totalAmount | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}</p>
-              <p>
-                Envío:
-                {{ order()!.shippingCost ?? 0 | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}
-              </p>
-            </div>
-
-            <div class="space-y-3">
-              <p class="text-xs uppercase tracking-[0.2em] text-brand-gray">Items</p>
-              <div class="space-y-3">
-                @for (item of order()!.items; track item.productId) {
-                  <div class="rounded-xl border border-gray-200 bg-white px-4 py-3">
-                    <div class="flex items-start justify-between gap-4">
-                      <div>
-                        <p class="font-medium text-brand-black">{{ item.productName }}</p>
-                        <p class="text-sm text-brand-gray">Cantidad: {{ item.quantity }}</p>
-                      </div>
-                      <p class="text-sm text-brand-black">
-                        {{ item.unitPrice | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}
-                      </p>
-                    </div>
-                  </div>
-                }
-              </div>
-            </div>
+          <div class="mt-2 flex flex-wrap gap-3">
+            <a routerLink="/orders" class="btn btn--dark">Ver mis pedidos</a>
+            <a routerLink="/contacto" class="btn btn--outline">Escribirnos</a>
           </div>
-
-          <div class="flex flex-col sm:flex-row gap-3">
-            <a
-              routerLink="/catalog"
-              class="flex-1 inline-flex items-center justify-center px-6 py-3 bg-brand-black text-brand-white font-display uppercase tracking-widest text-sm rounded-lg hover:bg-brand-dark transition-colors"
-            >
-              Seguir comprando
-            </a>
-            <a
-              routerLink="/orders"
-              class="flex-1 inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-brand-black font-display uppercase tracking-widest text-sm rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              Ver mis pedidos
-            </a>
+        </div>
+      } @else if (order()) {
+        <div class="result-head">
+          <span class="result-mark result-mark--ok" aria-hidden="true">
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+            </svg>
+          </span>
+          <div>
+            <h1 class="page-title">Pago confirmado</h1>
+            <p class="page-lede">
+              Tu pedido #{{ order()!.id }} ya está en marcha. Te avisamos cuando esté listo.
+            </p>
           </div>
-        }
-      </div>
-    </section>
+        </div>
+
+        <div class="panel panel-pad mt-8">
+          <dl>
+            <div class="data-row">
+              <dt>Pedido</dt>
+              <dd>#{{ order()!.id }}</dd>
+            </div>
+            <div class="data-row">
+              <dt>Estado</dt>
+              <dd>{{ statusLabel(order()!.status) }}</dd>
+            </div>
+            <div class="data-row">
+              <dt>Pago</dt>
+              <dd>{{ paymentStatusLabel(order()!.paymentStatus) }}</dd>
+            </div>
+            <div class="data-row">
+              <dt>Entrega</dt>
+              <dd>{{ deliveryMethodLabel(order()!.deliveryMethod) }}</dd>
+            </div>
+            <div class="data-row">
+              <dt>Fecha</dt>
+              <dd>{{ order()!.createdAt | date: 'dd/MM/yyyy HH:mm' }}</dd>
+            </div>
+          </dl>
+
+          <h2 class="panel-title mt-8">Productos</h2>
+          <ul class="mt-3">
+            @for (item of order()!.items; track item.productId) {
+              <li class="data-row">
+                <span>{{ item.quantity }} × {{ item.productName }}</span>
+                <span>{{ item.unitPrice * item.quantity | currency: 'ARS' : '$' : '1.0-0' }}</span>
+              </li>
+            }
+          </ul>
+
+          <dl class="mt-4 border-t-2 border-brand-black pt-2">
+            <div class="data-row">
+              <dt>Subtotal</dt>
+              <dd>{{ order()!.subtotalAmount ?? 0 | currency: 'ARS' : '$' : '1.0-0' }}</dd>
+            </div>
+            <div class="data-row">
+              <dt>Envío</dt>
+              <dd>{{ order()!.shippingCost ?? 0 | currency: 'ARS' : '$' : '1.0-0' }}</dd>
+            </div>
+            <div class="data-row text-lg">
+              <dt class="!text-brand-black font-bold">Total</dt>
+              <dd>{{ order()!.totalAmount | currency: 'ARS' : '$' : '1.0-0' }}</dd>
+            </div>
+          </dl>
+        </div>
+
+        <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+          <a [routerLink]="['/orders', order()!.id]" class="btn btn--primary btn--lg">Seguir mi pedido</a>
+          <a routerLink="/catalog" class="btn btn--outline btn--lg">Seguir comprando</a>
+        </div>
+      }
+    </div>
   `,
 })
 export class CheckoutSuccessComponent implements OnInit, OnDestroy {

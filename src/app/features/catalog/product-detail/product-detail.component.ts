@@ -26,6 +26,7 @@ import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/
     ConfirmModalComponent,
   ],
   templateUrl: './product-detail.component.html',
+  styleUrl: './product-detail.component.css',
 })
 export class ProductDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
@@ -84,7 +85,7 @@ export class ProductDetailComponent implements OnInit {
   formattedPrice = computed(() => {
     const p = this.product();
     if (!p) return '';
-    return `$${Math.round(p.price).toLocaleString('en-US').replace(/,/g, '.')}`;
+    return `$ ${Math.round(p.price).toLocaleString('es-AR')}`;
   });
 
   availableToReserveNow = computed(() => {

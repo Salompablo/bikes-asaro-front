@@ -1,7 +1,7 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { CurrencyPipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { catchError, debounceTime, EMPTY, switchMap } from 'rxjs';
 import { ProductService } from '../admin/services/product.service';
 import { CategoryService } from '../admin/services/category.service';
@@ -14,11 +14,13 @@ import { DEFAULT_FILTERS, ProductFilterRequest, SORT_OPTIONS } from './models/ca
   standalone: true,
   imports: [CurrencyPipe, RouterLink],
   templateUrl: './catalog.component.html',
+  styleUrl: './catalog.component.css',
 })
 export class CatalogComponent implements OnInit {
   private readonly productService = inject(ProductService);
   private readonly categoryService = inject(CategoryService);
   private readonly toast = inject(ToastService);
+  private readonly route = inject(ActivatedRoute);
 
   readonly sortOptions = SORT_OPTIONS;
 
@@ -28,6 +30,11 @@ export class CatalogComponent implements OnInit {
   totalPages = signal(0);
   totalElements = signal(0);
   loading = signal(true);
+
+  readonly activeCategoryName = computed(() => {
+    const id = this.filters().categoryId;
+    return id ? (this.categories().find((c) => c.id === id)?.name ?? null) : null;
+  });
 
   private readonly products$ = toObservable(this.filters).pipe(
     debounceTime(300),
@@ -44,6 +51,11 @@ export class CatalogComponent implements OnInit {
   );
 
   ngOnInit(): void {
+    const categoryParam = Number(this.route.snapshot.queryParamMap.get('category'));
+    if (Number.isInteger(categoryParam) && categoryParam > 0) {
+      this.filters.update((f) => ({ ...f, categoryId: categoryParam, page: 0 }));
+    }
+
     this.categoryService.getActive().subscribe((res) => this.categories.set(res.content));
 
     this.products$.subscribe((res: PageResponse<ProductResponse>) => {
@@ -74,6 +86,13 @@ export class CatalogComponent implements OnInit {
 
   goToPage(page: number): void {
     this.filters.update((f) => ({ ...f, page }));
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  resetFilters(): void {
+    this.filters.set({ ...DEFAULT_FILTERS });
   }
 
   get currentPage(): number {

@@ -1,125 +1,127 @@
-<section class="min-h-[60vh] flex items-center justify-center px-4 py-12">
-    <div class="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 sm:p-10">
-        <h1 class="text-2xl font-display font-black text-brand-black text-center">
-            Creá tu cuenta
-        </h1>
-        <p class="text-sm text-brand-gray text-center mt-2 mb-8">
-            Registrate para empezar a comprar
-        </p>
-
-        <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
-            <!-- First & Last Name -->
-            <div class="grid grid-cols-2 gap-4 mb-5">
-                <div>
-                    <label for="reg-first" class="block text-sm font-semibold text-brand-dark mb-1.5">Nombre</label>
-                    <input id="reg-first" type="text" formControlName="firstName" class="form-input"
-                        [class.form-input--error]="form.controls.firstName.touched && form.controls.firstName.invalid"
-                        placeholder="Juan" autocomplete="given-name" />
-                    @if (form.controls.firstName.touched && form.controls.firstName.errors?.['required']) {
-                    <p class="form-error">El nombre es obligatorio</p>
-                    }
-                </div>
-                <div>
-                    <label for="reg-last" class="block text-sm font-semibold text-brand-dark mb-1.5">Apellido</label>
-                    <input id="reg-last" type="text" formControlName="lastName" class="form-input"
-                        [class.form-input--error]="form.controls.lastName.touched && form.controls.lastName.invalid"
-                        placeholder="Pérez" autocomplete="family-name" />
-                    @if (form.controls.lastName.touched && form.controls.lastName.errors?.['required']) {
-                    <p class="form-error">El apellido es obligatorio</p>
-                    }
-                </div>
-            </div>
-
-            <!-- Email -->
-            <div class="mb-5">
-                <label for="reg-email" class="block text-sm font-semibold text-brand-dark mb-1.5">Correo
-                    electrónico</label>
-                <input id="reg-email" type="email" formControlName="email" class="form-input"
-                    [class.form-input--error]="form.controls.email.touched && form.controls.email.invalid"
-                    placeholder="tu@email.com" autocomplete="email" />
-                @if (form.controls.email.touched && form.controls.email.errors) {
-                <p class="form-error">
-                    @if (form.controls.email.errors['required']) {
-                    El correo es obligatorio
-                    } @else if (form.controls.email.errors['email']) {
-                    Ingresá un correo válido
-                    }
-                </p>
-                }
-            </div>
-
-            <!-- Password -->
-            <div class="mb-5">
-                <label for="reg-password" class="block text-sm font-semibold text-brand-dark mb-1.5">Contraseña</label>
-                <div class="relative">
-                    <input id="reg-password" [type]="showPassword() ? 'text' : 'password'" formControlName="password"
-                        class="form-input pr-11"
-                        [class.form-input--error]="form.controls.password.touched && form.controls.password.invalid"
-                        placeholder="6 a 15 caracteres" autocomplete="new-password" />
-                    <button type="button"
-                        class="absolute right-3 top-1/2 -translate-y-1/2 text-brand-gray hover:text-brand-accent transition-colors"
-                        (click)="showPassword.set(!showPassword())"
-                        [attr.aria-label]="showPassword() ? 'Ocultar contraseñas' : 'Mostrar contraseñas'">
-                        @if (showPassword()) {
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                        </svg>
-                        } @else {
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                        }
-                    </button>
-                </div>
-                @if (form.controls.password.touched && form.controls.password.errors) {
-                <p class="form-error">
-                    @if (form.controls.password.errors['required']) {
-                    La contraseña es obligatoria
-                    } @else if (form.controls.password.errors['minlength']) {
-                    Mínimo 6 caracteres
-                    } @else if (form.controls.password.errors['maxlength']) {
-                    Máximo 15 caracteres
-                    }
-                </p>
-                }
-            </div>
-
-            <!-- Confirm Password -->
-            <div class="mb-6">
-                <label for="reg-confirm" class="block text-sm font-semibold text-brand-dark mb-1.5">Confirmar
-                    contraseña</label>
-                <input id="reg-confirm" [type]="showPassword() ? 'text' : 'password'" formControlName="confirmPassword"
-                    class="form-input"
-                    [class.form-input--error]="form.controls.confirmPassword.touched && (form.controls.confirmPassword.invalid || form.errors?.['passwordMismatch'])"
-                    placeholder="Repetí tu contraseña" autocomplete="new-password" />
-                @if (form.controls.confirmPassword.touched) {
-                @if (form.controls.confirmPassword.errors?.['required']) {
-                <p class="form-error">Confirmá tu contraseña</p>
-                } @else if (form.errors?.['passwordMismatch']) {
-                <p class="form-error">Las contraseñas no coinciden</p>
-                }
-                }
-            </div>
-
-            <!-- Submit -->
-            <button type="submit" class="btn-primary" [disabled]="loading()">
-                @if (loading()) {
-                <span class="spinner"></span>
-                Creando cuenta...
-                } @else {
-                Crear cuenta
-                }
-            </button>
-        </form>
-
-        <p class="text-sm text-brand-gray text-center mt-8">
-            ¿Ya tenés cuenta?
-            <a routerLink="/auth/login" [queryParams]="returnUrlQueryParams"
-                class="text-brand-accent hover:underline font-semibold">Iniciar sesión</a>
-        </p>
+<div class="auth">
+    <div class="auth__photo" aria-hidden="true">
+        <img src="assets/images/Bikes-Asaro-Mural.jpg" alt="" decoding="async"
+            class="object-[center_30%]" />
+        <p class="auth__quote">Creá tu cuenta y llevate la bici del local a tu casa.</p>
     </div>
-</section>
+
+    <div class="auth__main">
+        <div class="auth__card">
+            <h1 class="auth__title">Creá tu cuenta</h1>
+            <p class="auth__lede">Te pedimos lo justo para que puedas comprar y seguir tus pedidos.</p>
+
+            <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="mt-8 space-y-5">
+                <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                    <div>
+                        <label for="reg-first" class="field-label">Nombre</label>
+                        <input id="reg-first" type="text" formControlName="firstName" class="form-input"
+                            [class.form-input--error]="form.controls.firstName.touched && form.controls.firstName.invalid"
+                            autocomplete="given-name" />
+                        @if (form.controls.firstName.touched && form.controls.firstName.errors?.['required']) {
+                        <p class="form-error">Escribí tu nombre.</p>
+                        }
+                    </div>
+                    <div>
+                        <label for="reg-last" class="field-label">Apellido</label>
+                        <input id="reg-last" type="text" formControlName="lastName" class="form-input"
+                            [class.form-input--error]="form.controls.lastName.touched && form.controls.lastName.invalid"
+                            autocomplete="family-name" />
+                        @if (form.controls.lastName.touched && form.controls.lastName.errors?.['required']) {
+                        <p class="form-error">Escribí tu apellido.</p>
+                        }
+                    </div>
+                </div>
+
+                <div>
+                    <label for="reg-email" class="field-label">Correo electrónico</label>
+                    <input id="reg-email" type="email" formControlName="email" class="form-input"
+                        [class.form-input--error]="form.controls.email.touched && form.controls.email.invalid"
+                        placeholder="tu@email.com" autocomplete="email" aria-describedby="reg-email-hint" />
+                    @if (form.controls.email.touched && form.controls.email.errors) {
+                    <p class="form-error">
+                        @if (form.controls.email.errors['required']) {
+                        Escribí tu correo.
+                        } @else if (form.controls.email.errors['email']) {
+                        Ese correo no parece válido. Revisá que tenga @ y dominio.
+                        }
+                    </p>
+                    } @else {
+                    <p id="reg-email-hint" class="field-hint">Te vamos a mandar un código para verificarlo.</p>
+                    }
+                </div>
+
+                <div>
+                    <label for="reg-password" class="field-label">Contraseña</label>
+                    <div class="relative">
+                        <input id="reg-password" [type]="showPassword() ? 'text' : 'password'"
+                            formControlName="password" class="form-input pr-12"
+                            [class.form-input--error]="form.controls.password.touched && form.controls.password.invalid"
+                            autocomplete="new-password" aria-describedby="reg-password-hint" />
+                        <button type="button" class="pw-toggle" (click)="showPassword.set(!showPassword())"
+                            [attr.aria-label]="showPassword() ? 'Ocultar contraseñas' : 'Mostrar contraseñas'"
+                            [attr.aria-pressed]="showPassword()">
+                            @if (showPassword()) {
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                            </svg>
+                            } @else {
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            }
+                        </button>
+                    </div>
+                    @if (form.controls.password.touched && form.controls.password.errors) {
+                    <p class="form-error">
+                        @if (form.controls.password.errors['required']) {
+                        Elegí una contraseña.
+                        } @else if (form.controls.password.errors['minlength']) {
+                        Tiene que tener al menos 6 caracteres.
+                        } @else if (form.controls.password.errors['maxlength']) {
+                        Puede tener como máximo 15 caracteres.
+                        }
+                    </p>
+                    } @else {
+                    <p id="reg-password-hint" class="field-hint">Entre 6 y 15 caracteres.</p>
+                    }
+                </div>
+
+                <div>
+                    <label for="reg-confirm" class="field-label">Repetí la contraseña</label>
+                    <input id="reg-confirm" [type]="showPassword() ? 'text' : 'password'"
+                        formControlName="confirmPassword" class="form-input"
+                        [class.form-input--error]="form.controls.confirmPassword.touched && (form.controls.confirmPassword.invalid || form.errors?.['passwordMismatch'])"
+                        autocomplete="new-password" />
+                    @if (form.controls.confirmPassword.touched) {
+                    @if (form.controls.confirmPassword.errors?.['required']) {
+                    <p class="form-error">Repetí la contraseña para confirmarla.</p>
+                    } @else if (form.errors?.['passwordMismatch']) {
+                    <p class="form-error">Las contraseñas no coinciden.</p>
+                    }
+                    }
+                </div>
+
+                <button type="submit" class="btn-primary" [disabled]="loading()">
+                    @if (loading()) {
+                    <span class="spinner" aria-hidden="true"></span>
+                    Creando cuenta...
+                    } @else {
+                    Crear cuenta
+                    }
+                </button>
+            </form>
+
+            <p class="auth__foot">
+                ¿Ya tenés cuenta?
+                <a routerLink="/auth/login" [queryParams]="returnUrlQueryParams" class="text-link">Iniciá
+                    sesión</a>
+            </p>
+        </div>
+    </div>
+</div>

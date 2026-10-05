@@ -7,16 +7,22 @@ import { Component, input, output } from '@angular/core';
   styles: [
     `
       .animate-modal-in {
-        animation: modalIn 150ms ease-out;
+        animation: modalIn 180ms cubic-bezier(0.19, 1, 0.22, 1);
+      }
+      .modal-top-danger {
+        border-top: 4px solid var(--red);
+      }
+      .modal-top-confirm {
+        border-top: 4px solid var(--yellow);
       }
       @keyframes modalIn {
         from {
           opacity: 0;
-          transform: scale(0.95);
+          transform: translateY(12px);
         }
         to {
           opacity: 1;
-          transform: scale(1);
+          transform: translateY(0);
         }
       }
     `,

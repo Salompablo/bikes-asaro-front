@@ -17,27 +17,29 @@ import { HttpErrorResponse } from '@angular/common/http';
     `
       .admin-label {
         display: block;
-        font-size: 0.7rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        color: #4a4a4a;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--ink);
         margin-bottom: 0.35rem;
       }
       .admin-input {
         display: block;
         width: 100%;
-        padding: 0.55rem 0.75rem;
-        border: 1px solid #e5e7eb;
-        border-radius: 0.5rem;
-        font-size: 0.875rem;
-        color: #0b0b0b;
+        min-height: 2.75rem;
+        padding: 0.6rem 0.85rem;
+        border: 1px solid #b9bec2;
+        border-radius: 4px;
+        font-size: 0.9375rem;
+        color: var(--ink);
         background: #fff;
-        transition: border-color 160ms ease;
+        transition:
+          border-color 150ms ease,
+          box-shadow 150ms ease;
       }
       .admin-input:focus {
         outline: none;
-        border-color: #0b0b0b;
+        border-color: var(--ink);
+        box-shadow: 0 0 0 3px rgba(255, 212, 0, 0.75);
       }
     `,
   ],

@@ -13,6 +13,7 @@ import { ToastService } from '../../shared/services/toast.service';
   standalone: true,
   imports: [RouterLink, CurrencyPipe],
   templateUrl: './home.component.html',
+  styleUrl: './home.component.css',
 })
 export class HomeComponent implements OnInit {
   private readonly productService = inject(ProductService);

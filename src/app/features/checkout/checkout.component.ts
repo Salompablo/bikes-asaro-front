@@ -39,6 +39,7 @@ interface CheckoutConflictErrorBody {
   standalone: true,
   imports: [CurrencyPipe, DatePipe, RouterLink, FormsModule],
   templateUrl: './checkout.component.html',
+  styleUrl: './checkout.component.css',
 })
 export class CheckoutComponent implements OnInit, OnDestroy {
   readonly cartService = inject(CartStateService);

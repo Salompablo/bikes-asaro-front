@@ -25,169 +25,107 @@ const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
   standalone: true,
   imports: [RouterLink, CurrencyPipe, DatePipe, NgClass],
   template: `
-    <div class="min-h-screen bg-brand-light pt-28 pb-16 px-4">
-      <div class="max-w-3xl mx-auto">
-        <h1 class="font-display uppercase tracking-widest text-2xl mb-8">Mis pedidos</h1>
+    <div class="page page--narrow">
+      <h1 class="page-title">Mis pedidos</h1>
 
-        @if (loading()) {
-          <div class="flex items-center justify-center py-24">
-            <div
-              class="w-10 h-10 border-4 border-brand-accent border-t-transparent rounded-full animate-spin"
-            ></div>
+      @if (loading()) {
+        <div class="mt-8 space-y-4">
+          @for (i of [1, 2, 3]; track i) {
+            <div class="skeleton h-40"></div>
+          }
+        </div>
+      } @else if (error()) {
+        <div class="notice notice--error mt-8" role="alert">
+          <div class="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p>No pudimos cargar tus pedidos. Revisá tu conexión y probá de nuevo.</p>
+            <button type="button" (click)="load()" class="btn btn--outline btn--sm">Reintentar</button>
           </div>
-        } @else if (error()) {
-          <div class="rounded-lg border border-red-200 bg-red-50 px-6 py-8 text-center">
-            <p class="text-red-700 mb-4">No pudimos cargar tus pedidos. Intentá de nuevo.</p>
-            <button
-              type="button"
-              (click)="load()"
-              class="px-5 py-2 bg-brand-black text-brand-white font-display uppercase tracking-widest text-sm rounded-lg hover:bg-brand-dark transition-colors"
-            >
-              Reintentar
-            </button>
-          </div>
-        } @else if (orders().length === 0) {
-          <div class="rounded-2xl border border-gray-200 bg-brand-white p-12 text-center shadow-sm">
-            <div
-              class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-5"
-            >
-              <svg
-                class="w-8 h-8 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="1.5"
-                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-                />
-              </svg>
-            </div>
-            <p class="text-lg font-display uppercase tracking-widest mb-2">Sin pedidos aún</p>
-            <p class="text-brand-gray text-sm mb-6">Cuando realices una compra, aparecerá acá.</p>
-            <a
-              routerLink="/catalog"
-              class="inline-block px-6 py-3 bg-brand-black text-brand-white font-display uppercase tracking-widest text-sm rounded-lg hover:bg-brand-dark transition-colors"
-            >
-              Ver productos
-            </a>
-          </div>
-        } @else {
-          <div class="space-y-4">
-            @for (order of orders(); track order.id) {
-              <div
-                class="group block rounded-2xl border border-gray-200 bg-brand-white shadow-sm overflow-hidden transition-all hover:shadow-md hover:-translate-y-0.5"
-              >
-                <!-- Header del pedido -->
-                <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-                  <div>
-                    <span class="text-xs text-brand-gray font-display uppercase tracking-widest"
-                      >Pedido #{{ order.id }}</span
-                    >
-                    <p class="text-sm text-brand-gray mt-0.5">
-                      {{ order.createdAt | date: 'dd/MM/yyyy HH:mm' }}
-                    </p>
-                  </div>
-                  <span
-                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
-                    [ngClass]="statusConfig(order.status).classes"
-                  >
-                    {{ statusConfig(order.status).label }}
-                  </span>
+        </div>
+      } @else if (orders().length === 0) {
+        <div class="panel state mt-8">
+          <span class="state__icon" aria-hidden="true">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            </svg>
+          </span>
+          <p class="text-xl font-semibold">Todavía no hiciste ningún pedido</p>
+          <p class="text-brand-gray">Cuando compres algo, vas a poder seguirlo desde acá.</p>
+          <a routerLink="/catalog" class="btn btn--primary mt-2">Ver el catálogo</a>
+        </div>
+      } @else {
+        <ul class="mt-8 space-y-4">
+          @for (order of orders(); track order.id) {
+            <li class="panel overflow-hidden">
+              <div class="flex flex-wrap items-start justify-between gap-3 px-5 pt-5">
+                <div>
+                  <h2 class="text-2xl">Pedido #{{ order.id }}</h2>
+                  <p class="mt-1 text-sm text-brand-gray">
+                    {{ order.createdAt | date: 'd MMM y, HH:mm' }}
+                  </p>
                 </div>
+                <span class="badge" [ngClass]="statusConfig(order.status).classes">
+                  {{ statusConfig(order.status).label }}
+                </span>
+              </div>
 
-                <!-- Ítems -->
-                <div class="px-5 py-4 space-y-3">
-                  @for (item of order.items; track item.productId) {
-                    <div class="flex items-center justify-between">
-                      <div class="flex items-center gap-3">
-                        <span
-                          class="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-600"
-                        >
-                          {{ item.quantity }}
-                        </span>
-                        <span class="text-sm">{{ item.productName }}</span>
-                      </div>
-                      <span class="text-sm text-brand-gray">
-                        {{ item.unitPrice * item.quantity | currency: 'ARS' : '$' : '1.0-0' }}
-                      </span>
-                    </div>
+              <ul class="px-5 py-4">
+                @for (item of order.items; track item.productId) {
+                  <li class="data-row">
+                    <span class="!text-brand-black">{{ item.quantity }} × {{ item.productName }}</span>
+                    <span class="font-normal">
+                      {{ item.unitPrice * item.quantity | currency: 'ARS' : '$' : '1.0-0' }}
+                    </span>
+                  </li>
+                }
+              </ul>
+
+              @if (order.requiresShippingQuote || (order.payableNow && order.status === 'QUOTE_READY_PAYMENT_PENDING') || showQuoteDeadline(order)) {
+                <div class="px-5 pb-4 space-y-1 text-sm">
+                  @if (order.requiresShippingQuote) {
+                    <p class="text-brand-gray">Estamos cotizando el envío. Te avisamos cuando esté listo.</p>
+                  }
+                  @if (order.payableNow && order.status === 'QUOTE_READY_PAYMENT_PENDING') {
+                    <p class="font-semibold">El envío ya está cotizado, podés pagar.</p>
+                  }
+                  @if (showQuoteDeadline(order)) {
+                    <p class="text-brand-gray">Válido hasta el {{ formatQuoteDeadline(order) }}</p>
+                    <p class="font-semibold text-brand-red">{{ quoteCountdownLabel(order) }}</p>
                   }
                 </div>
+              }
 
-                <!-- Footer del pedido -->
-                <div
-                  class="flex items-center justify-between px-5 py-3 bg-gray-50 border-t border-gray-100"
-                >
-                  <div class="space-y-1">
-                    <span class="text-xs text-brand-gray uppercase tracking-widest font-display"
-                      >Total</span
-                    >
-                    <span class="font-semibold ml-2">
-                      {{ order.totalAmount | currency: 'ARS' : '$' : '1.0-0' }}
-                    </span>
-                    <p class="text-xs text-brand-gray">Tel: {{ order.contactPhone || '-' }}</p>
-                    @if (order.requiresShippingQuote) {
-                      <p class="text-xs text-orange-700">Esperando cotización del vendedor</p>
-                    }
-                    @if (order.payableNow && order.status === 'QUOTE_READY_PAYMENT_PENDING') {
-                      <p class="text-xs text-cyan-700">Pago habilitado</p>
-                    }
-                    @if (showQuoteDeadline(order)) {
-                      <p class="text-xs text-brand-gray">Vence: {{ formatQuoteDeadline(order) }}</p>
-                      <p class="text-xs text-orange-700">{{ quoteCountdownLabel(order) }}</p>
-                    }
-                  </div>
-                  <div class="flex items-center gap-2">
-                    @if (canRenderPayNow(order)) {
-                      <button
-                        type="button"
-                        (click)="payNow(order)"
-                        class="px-3 py-1.5 rounded-lg bg-[#009EE3] text-white text-xs font-semibold hover:brightness-110 transition"
-                      >
-                        Pagar ahora
-                      </button>
-                    }
-                    <a
-                      [routerLink]="['/orders', order.id]"
-                      class="text-xs font-display uppercase tracking-widest text-brand-gray transition-colors group-hover:text-brand-black"
-                    >
-                      Ver detalle →
-                    </a>
-                  </div>
+              <div class="flex flex-wrap items-center justify-between gap-3 border-t border-brand-line bg-[#f4f5f6] px-5 py-3">
+                <p>
+                  <span class="text-brand-gray">Total</span>
+                  <span class="ml-2 text-lg font-bold tabular-nums">
+                    {{ order.totalAmount | currency: 'ARS' : '$' : '1.0-0' }}
+                  </span>
+                </p>
+                <div class="flex items-center gap-2">
+                  @if (canRenderPayNow(order)) {
+                    <button type="button" (click)="payNow(order)" class="btn btn--mp btn--sm">Pagar ahora</button>
+                  }
+                  <a [routerLink]="['/orders', order.id]" class="btn btn--outline btn--sm">Ver detalle</a>
                 </div>
               </div>
-            }
-          </div>
-
-          <!-- Paginación -->
-          @if (meta() && meta()!.totalPages > 1) {
-            <div class="flex items-center justify-center gap-3 mt-8">
-              <button
-                type="button"
-                [disabled]="currentPage() === 0"
-                (click)="goToPage(currentPage() - 1)"
-                class="px-4 py-2 rounded-lg border border-gray-200 text-sm font-display uppercase tracking-widest disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
-              >
-                Anterior
-              </button>
-              <span class="text-sm text-brand-gray">
-                {{ currentPage() + 1 }} / {{ meta()!.totalPages }}
-              </span>
-              <button
-                type="button"
-                [disabled]="currentPage() >= meta()!.totalPages - 1"
-                (click)="goToPage(currentPage() + 1)"
-                class="px-4 py-2 rounded-lg border border-gray-200 text-sm font-display uppercase tracking-widest disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
-              >
-                Siguiente
-              </button>
-            </div>
+            </li>
           }
+        </ul>
+
+        @if (meta() && meta()!.totalPages > 1) {
+          <nav class="mt-8 flex items-center justify-center gap-4" aria-label="Paginación">
+            <button type="button" [disabled]="currentPage() === 0" (click)="goToPage(currentPage() - 1)" class="btn btn--outline btn--sm">
+              Anterior
+            </button>
+            <span class="text-sm text-brand-gray tabular-nums">
+              Página {{ currentPage() + 1 }} de {{ meta()!.totalPages }}
+            </span>
+            <button type="button" [disabled]="currentPage() >= meta()!.totalPages - 1" (click)="goToPage(currentPage() + 1)" class="btn btn--outline btn--sm">
+              Siguiente
+            </button>
+          </nav>
         }
-      </div>
+      }
     </div>
   `,
 })

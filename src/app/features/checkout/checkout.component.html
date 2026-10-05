@@ -1,314 +1,256 @@
 @if (cartService.items().length === 0) {
-<!-- Empty cart -->
-<section class="min-h-screen flex flex-col items-center justify-center text-center px-4">
-    <svg class="w-16 h-16 text-brand-silver mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-    </svg>
-    <h2 class="text-2xl text-brand-black mb-2">Tu carrito está vacío</h2>
-    <p class="text-brand-gray mb-6">Agregá productos antes de continuar con el pago.</p>
-    <a routerLink="/catalog"
-        class="inline-block px-6 py-3 bg-brand-black text-brand-white font-display uppercase tracking-widest text-sm rounded-lg hover:bg-brand-dark transition-colors">
-        Ir al catálogo
-    </a>
-</section>
-} @else {
-<section class="min-h-screen pt-28 pb-16">
-    <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-
-        <h1 class="text-3xl lg:text-4xl mb-8">Resumen de compra</h1>
-
-        @if (resumedOrderNotice()) {
-        <div class="mb-6 rounded-xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm text-cyan-900">
-            {{ resumedOrderNotice() }}
-        </div>
-        }
-
-        <!-- Items list -->
-        <div class="divide-y divide-gray-200 border border-gray-200 rounded-xl overflow-hidden mb-8">
-            @for (item of cartService.items(); track item.productId) {
-            <div class="flex items-center gap-4 p-4 sm:p-5">
-                <div class="relative shrink-0">
-                    <img [src]="normalizeImageUrl(item.image)" [alt]="item.name" (error)="onItemImageError($event)"
-                        class="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-cover bg-gray-100" />
-                    @if (isGenericCheckoutImage(item)) {
-                    <span
-                        class="absolute -bottom-1 left-1 rounded bg-brand-black/70 px-1.5 py-0.5 text-[9px] text-brand-white">
-                        Referencia
-                    </span>
-                    }
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="font-medium text-brand-black truncate">{{ item.name }}</p>
-                    <p class="text-sm text-brand-gray mt-0.5">Cantidad: {{ item.quantity }}</p>
-                    @if (isGenericCheckoutImage(item)) {
-                    <p class="text-[11px] text-brand-gray mt-1">
-                        Imagen de referencia de la categoría. El modelo exacto puede variar.
-                    </p>
-                    }
-                </div>
-                <div class="flex items-center gap-3">
-                    <p class="text-brand-black font-bold tabular-nums whitespace-nowrap">
-                        {{ item.price * item.quantity | currency: '' : '$' : '1.0-0' }}
-                    </p>
-                    <button type="button" (click)="removeItem(item.productId)" aria-label="Quitar producto"
-                        class="w-8 h-8 rounded-lg flex items-center justify-center text-brand-gray hover:text-red-600 hover:bg-red-50 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-            }
-        </div>
-
-        <!-- Delivery method -->
-        <div class="mb-8">
-            <h2 class="text-lg font-medium text-brand-black mb-4">Método de entrega</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <button type="button" (click)="selectDeliveryMethod('STORE_PICKUP')"
-                    class="flex items-center gap-3 p-4 rounded-xl border-2 transition-colors" [class]="deliveryMethod() === 'STORE_PICKUP'
-                        ? 'border-brand-accent bg-brand-accent/5'
-                        : 'border-gray-200 hover:border-gray-300'">
-                    <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                    </svg>
-                    <div class="text-left">
-                        <p class="font-medium text-brand-black text-sm">Retiro en tienda</p>
-                        <p class="text-xs text-brand-gray">Gratis</p>
-                    </div>
-                </button>
-                <button type="button" (click)="selectDeliveryMethod('SHIPPING')"
-                    class="flex items-center gap-3 p-4 rounded-xl border-2 transition-colors" [class]="deliveryMethod() === 'SHIPPING'
-                        ? 'border-brand-accent bg-brand-accent/5'
-                        : 'border-gray-200 hover:border-gray-300'">
-                    <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
-                    </svg>
-                    <div class="text-left">
-                        <p class="font-medium text-brand-black text-sm">Envío a domicilio</p>
-                        <p class="text-xs text-brand-gray">
-                            @if (shippingQuote()) {
-                            {{ shippingCost() | currency: '' : '$' : '1.0-0' }} estimado
-                            } @else {
-                            Cotización manual
-                            }
-                        </p>
-                    </div>
-                </button>
-            </div>
-
-            <!-- Shipping fields -->
-            @if (isShipping()) {
-            <div class="mt-4 grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3">
-                <input type="text" placeholder="Dirección de envío" [ngModel]="shippingAddress()"
-                    (ngModelChange)="onShippingAddressChange($event)"
-                    class="w-full h-11 px-4 rounded-lg border text-sm text-brand-black placeholder:text-brand-gray/60 focus:outline-none focus:ring-2 focus:ring-brand-accent/40 transition-colors"
-                    [class.border-red-300]="shippingAddressError()"
-                    [class.focus:border-red-400]="shippingAddressError()"
-                    [class.border-gray-200]="!shippingAddressError()"
-                    [class.focus:border-brand-accent]="!shippingAddressError()" />
-                <input type="text" placeholder="Código postal" [ngModel]="zipCode()"
-                    (ngModelChange)="onZipCodeChange($event)"
-                    class="w-full sm:w-36 h-11 px-4 rounded-lg border text-sm text-brand-black placeholder:text-brand-gray/60 focus:outline-none focus:ring-2 focus:ring-brand-accent/40 transition-colors"
-                    [class.border-red-300]="zipCodeError()" [class.focus:border-red-400]="zipCodeError()"
-                    [class.border-gray-200]="!zipCodeError()" [class.focus:border-brand-accent]="!zipCodeError()" />
-            </div>
-
-            @if (shippingAddressError() || zipCodeError()) {
-            <div class="mt-2 space-y-1">
-                @if (shippingAddressError()) {
-                <p class="text-xs text-red-600">{{ shippingAddressError() }}</p>
-                }
-                @if (zipCodeError()) {
-                <p class="text-xs text-red-600">{{ zipCodeError() }}</p>
-                }
-            </div>
-            }
-
-            <div class="mt-3 flex flex-wrap items-center gap-3">
-                @if (shippingQuote()) {
-                <p class="text-xs text-brand-gray">
-                    {{ shippingQuote()!.provider }} • {{ shippingQuote()!.estimatedDays }} día(s) •
-                    {{ shippingQuote()!.cost | currency: '' : '$' : '1.0-0' }}
-                </p>
-                }
-
-                @if (shippingQuoteError()) {
-                <p class="text-xs text-red-600">{{ shippingQuoteError() }}</p>
-                }
-            </div>
-            }
-        </div>
-
-        <!-- Contact phone -->
-        <div class="mb-8">
-            <div class="flex items-center gap-2 mb-2">
-                <h2 class="text-lg font-medium text-brand-black">Contacto</h2>
-                <span
-                    class="inline-flex items-center rounded-full bg-red-50 px-2 py-0.5 text-[11px] font-semibold text-red-700 border border-red-200">
-                    Obligatorio
-                </span>
-            </div>
-
-            <p class="text-sm text-brand-gray mb-4">
-                Te pedimos un teléfono de contacto por si necesitamos avisarte sobre tu pago, entrega o retiro.
-                No lo usamos para enviarte spam.
-            </p>
-
-            <div class="space-y-3">
-                <label class="block text-sm font-medium text-brand-black" for="checkout-contact-phone">
-                    Teléfono de contacto <span class="text-red-600">*</span>
-                </label>
-
-                <input id="checkout-contact-phone" type="tel" placeholder="Ej: +5492235551234" autocomplete="tel"
-                    required [ngModel]="contactPhone()" (ngModelChange)="onContactPhoneChange($event)"
-                    class="w-full h-11 px-4 rounded-lg border text-sm text-brand-black placeholder:text-brand-gray/60 focus:outline-none focus:ring-2 focus:ring-brand-accent/40 transition-colors"
-                    [class.border-red-300]="phoneError()" [class.focus:border-red-400]="phoneError()"
-                    [class.border-gray-200]="!phoneError()" [class.focus:border-brand-accent]="!phoneError()" />
-
-                <p class="text-xs text-brand-gray">
-                    Incluí código de país y área para contactarte rápido si surge alguna validación.
-                </p>
-
-                @if (phoneError()) {
-                <p class="text-sm text-red-600">{{ phoneError() }}</p>
-                }
-
-                <label class="inline-flex items-center gap-3 text-sm text-brand-gray cursor-pointer">
-                    <input type="checkbox" [ngModel]="savePhoneToProfile()"
-                        (ngModelChange)="savePhoneToProfile.set(!!$event)"
-                        class="h-4 w-4 rounded border-gray-300 text-brand-accent focus:ring-brand-accent/50" />
-                    Guardar este teléfono en mi perfil
-                </label>
-            </div>
-        </div>
-
-        <!-- Subtotals -->
-        <div class="space-y-2 mb-2 px-1">
-            <div class="flex items-center justify-between text-sm text-brand-gray">
-                <span>Subtotal</span>
-                <span class="tabular-nums">{{ cartService.totalPrice() | currency: '' : '$' : '1.0-0' }}</span>
-            </div>
-            @if (isShipping()) {
-            <div class="flex items-center justify-between text-sm text-brand-gray">
-                <span>Envío</span>
-                <span class="tabular-nums">
-                    @if (shippingQuote()) {
-                    {{ shippingCost() | currency: '' : '$' : '1.0-0' }}
-                    } @else {
-                    A cotizar
-                    }
-                </span>
-            </div>
-            }
-        </div>
-
-        <!-- Total -->
-        <div class="flex items-center justify-between mb-8 px-1 pt-2 border-t border-gray-200">
-            <span class="text-lg text-brand-gray">Total</span>
-            <span class="text-2xl font-bold tabular-nums text-brand-black">
-                {{ orderTotal() | currency: '' : '$' : '1.0-0' }}
-            </span>
-        </div>
-
-        <!-- Stock error alert -->
-        @if (stockError()) {
-        <div class="mb-6 bg-brand-light border-l-4 border-brand-accent p-4 shadow-sm">
-            <div class="flex items-start gap-3">
-                <svg class="w-5 h-5 text-brand-black mt-0.5 shrink-0" fill="none" stroke="currentColor"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                <div>
-                    <p class="text-sm font-medium text-brand-black">{{ stockError() }}</p>
-                    @if (retryAfterSeconds() > 0) {
-                    <p class="mt-1 text-xs text-brand-gray">
-                        Reintento sugerido en {{ retryAfterSeconds() }} segundo(s).
-                    </p>
-                    }
-                    <button (click)="goToAdjustProduct()" type="button"
-                        class="mt-2 text-sm font-bold text-brand-black hover:text-brand-accent underline transition-colors">
-                        {{ stockErrorActionLabel() }}
-                    </button>
-                </div>
-            </div>
-        </div>
-        }
-
-        <!-- Checkout flow state -->
-        @if (showCheckoutState()) {
-        <div class="mb-6 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
-            <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
-                <p class="text-xs uppercase tracking-widest font-display text-brand-gray">Estado de checkout</p>
-                <span class="text-xs font-semibold text-brand-black">{{ getCheckoutStateLabel() }}</span>
-            </div>
-
-            @if (checkoutState() === 'SHIPPING_QUOTE_REQUESTED') {
-            <p class="text-sm text-brand-gray">
-                Cotización solicitada. Actualizamos automáticamente cada 12 segundos hasta que el pago quede habilitado.
-            </p>
-            } @else if (checkoutState() === 'QUOTE_READY_PAYMENT_PENDING') {
-            <p class="text-sm text-green-700">
-                Cotización lista. Ya podés continuar con el pago de Mercado Pago.
-            </p>
-            @if (quoteExpiresAt()) {
-            <p class="mt-1 text-xs text-brand-gray">
-                Fecha límite: {{ quoteExpiresAt() | date: 'dd/MM/yyyy HH:mm' }}
-            </p>
-            }
-            @if (quoteTimeLeftLabel()) {
-            <p class="mt-1 text-xs font-semibold text-orange-700">{{ quoteTimeLeftLabel() }}</p>
-            }
-            } @else if (checkoutState() === 'PAID') {
-            <p class="text-sm text-green-700">Pago confirmado para esta orden.</p>
-            } @else if (checkoutState() === 'CANCELLED') {
-            <p class="text-sm text-red-700">La orden fue cancelada o rechazada.</p>
-            } @else if (orderStatusLabel()) {
-            <p class="text-sm text-brand-gray">{{ orderStatusLabel() }}</p>
-            } @else {
-            <p class="text-sm text-brand-gray">Completá tus datos para solicitar la cotización manual.</p>
-            }
-        </div>
-        }
-
-        <!-- Reservation notice -->
-        <p class="text-center text-sm text-brand-gray mb-4">
-            Tus productos están reservados. Tenes 10 minutos para completar el pago antes de que se libere el stock.
-        </p>
-
-        <!-- Payments temporarily disabled notice -->
-        @if (paymentsTemporarilyDisabled) {
-        <div class="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 text-center">
-            Los pagos y las cotizaciones de envío están deshabilitados temporalmente. Muy pronto vas a poder
-            completar tu compra.
-        </div>
-        }
-
-        <!-- Pay button -->
-        <button (click)="pay()" type="button" [disabled]="!canTriggerPayment()"
-            class="w-full h-14 flex items-center justify-center gap-3 rounded-lg text-white font-bold text-base transition-all duration-200 hover:brightness-110 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
-            style="background-color: #009EE3; font-family: 'Helvetica Neue', Arial, sans-serif;" disabled>
-            @if (loading()) {
-            <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                </path>
-            </svg>
-            {{ paymentButtonLabel() }}
-            } @else {
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                <path
+<div class="page page--narrow">
+    <div class="panel state">
+        <span class="state__icon" aria-hidden="true">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
                     d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
-            {{ paymentButtonLabel() }}
-            }
-        </button>
+        </span>
+        <h1 class="text-3xl">Tu carrito está vacío</h1>
+        <p class="text-brand-gray">Cuando agregues una bici o un repuesto, lo vas a ver acá.</p>
+        <a routerLink="/catalog" class="btn btn--primary mt-2">Ver el catálogo</a>
     </div>
-</section>
+</div>
+} @else {
+<div class="page">
+    <h1 class="page-title">Tu compra</h1>
+
+    @if (resumedOrderNotice()) {
+    <div class="notice notice--info mt-6">
+        <p>{{ resumedOrderNotice() }}</p>
+    </div>
+    }
+
+    <div class="co-grid">
+        <!-- ── Steps ── -->
+        <div class="co-steps">
+            <!-- 1. Items -->
+            <section class="co-step" aria-labelledby="co-items">
+                <h2 id="co-items" class="co-step__title"><span class="co-step__num" aria-hidden="true">1</span>
+                    Productos</h2>
+                <ul class="panel divide-y divide-brand-line">
+                    @for (item of cartService.items(); track item.productId) {
+                    <li class="flex items-center gap-4 p-4">
+                        <div class="co-thumb">
+                            <img [src]="normalizeImageUrl(item.image)" [alt]="item.name"
+                                (error)="onItemImageError($event)" />
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <p class="font-semibold leading-snug">{{ item.name }}</p>
+                            <p class="mt-0.5 text-sm text-brand-gray">
+                                {{ item.quantity }} × {{ item.price | currency: 'ARS' : '$' : '1.0-0' }}
+                            </p>
+                            @if (isGenericCheckoutImage(item)) {
+                            <p class="mt-1 text-xs text-brand-gray">Foto de referencia de la categoría.</p>
+                            }
+                        </div>
+                        <p class="whitespace-nowrap font-bold tabular-nums">
+                            {{ item.price * item.quantity | currency: 'ARS' : '$' : '1.0-0' }}
+                        </p>
+                        <button type="button" (click)="removeItem(item.productId)"
+                            [attr.aria-label]="'Quitar ' + item.name + ' del carrito'"
+                            class="icon-btn icon-btn--danger">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </li>
+                    }
+                </ul>
+                <a routerLink="/catalog" class="text-link mt-3 inline-block text-sm">Seguir comprando</a>
+            </section>
+
+            <!-- 2. Delivery -->
+            <section class="co-step" aria-labelledby="co-delivery">
+                <h2 id="co-delivery" class="co-step__title"><span class="co-step__num" aria-hidden="true">2</span>
+                    Entrega</h2>
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2" role="radiogroup" aria-labelledby="co-delivery">
+                    <button type="button" role="radio" (click)="selectDeliveryMethod('STORE_PICKUP')"
+                        class="option" [attr.aria-checked]="deliveryMethod() === 'STORE_PICKUP'">
+                        <span class="option__dot" aria-hidden="true"></span>
+                        <span class="text-left">
+                            <span class="block font-semibold">Retiro en el local</span>
+                            <span class="block text-sm text-brand-gray">Gratis, en Mar del Plata</span>
+                        </span>
+                    </button>
+                    <button type="button" role="radio" (click)="selectDeliveryMethod('SHIPPING')" class="option"
+                        [attr.aria-checked]="deliveryMethod() === 'SHIPPING'">
+                        <span class="option__dot" aria-hidden="true"></span>
+                        <span class="text-left">
+                            <span class="block font-semibold">Envío a domicilio</span>
+                            <span class="block text-sm text-brand-gray">
+                                @if (shippingQuote()) {
+                                {{ shippingCost() | currency: 'ARS' : '$' : '1.0-0' }} estimado
+                                } @else {
+                                Te pasamos el costo antes de pagar
+                                }
+                            </span>
+                        </span>
+                    </button>
+                </div>
+
+                @if (isShipping()) {
+                <div class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-[1fr_10rem]">
+                    <div>
+                        <label for="co-address" class="field-label">Dirección de envío</label>
+                        <input id="co-address" type="text" placeholder="Calle, número, piso y ciudad"
+                            autocomplete="street-address" [ngModel]="shippingAddress()"
+                            (ngModelChange)="onShippingAddressChange($event)" class="field"
+                            [class.field--error]="shippingAddressError()" />
+                        @if (shippingAddressError()) {
+                        <p class="form-error">{{ shippingAddressError() }}</p>
+                        }
+                    </div>
+                    <div>
+                        <label for="co-zip" class="field-label">Código postal</label>
+                        <input id="co-zip" type="text" placeholder="7600" autocomplete="postal-code"
+                            [ngModel]="zipCode()" (ngModelChange)="onZipCodeChange($event)" class="field"
+                            [class.field--error]="zipCodeError()" />
+                        @if (zipCodeError()) {
+                        <p class="form-error">{{ zipCodeError() }}</p>
+                        }
+                    </div>
+                </div>
+
+                @if (shippingQuote()) {
+                <p class="mt-3 text-sm text-brand-gray">
+                    {{ shippingQuote()!.provider }}, llega en {{ shippingQuote()!.estimatedDays }} día(s) hábiles.
+                    Costo: {{ shippingQuote()!.cost | currency: 'ARS' : '$' : '1.0-0' }}
+                </p>
+                }
+                @if (shippingQuoteError()) {
+                <p class="form-error">{{ shippingQuoteError() }}</p>
+                }
+                }
+            </section>
+
+            <!-- 3. Contact -->
+            <section class="co-step" aria-labelledby="co-contact">
+                <h2 id="co-contact" class="co-step__title"><span class="co-step__num" aria-hidden="true">3</span>
+                    Contacto</h2>
+                <p class="mb-4 max-w-prose text-brand-gray">
+                    Te llamamos o escribimos solo si hay algo que coordinar sobre el pago, el envío o el retiro.
+                </p>
+
+                <label class="field-label" for="checkout-contact-phone">Teléfono</label>
+                <input id="checkout-contact-phone" type="tel" placeholder="+54 9 223 555 1234" autocomplete="tel"
+                    required [ngModel]="contactPhone()" (ngModelChange)="onContactPhoneChange($event)"
+                    class="field sm:max-w-sm" [class.field--error]="phoneError()"
+                    aria-describedby="co-phone-hint" />
+                @if (phoneError()) {
+                <p class="form-error">{{ phoneError() }}</p>
+                } @else {
+                <p id="co-phone-hint" class="field-hint">Con código de país y de área.</p>
+                }
+
+                <label class="mt-4 inline-flex cursor-pointer items-center gap-3 text-[0.9375rem]">
+                    <input type="checkbox" class="check" [ngModel]="savePhoneToProfile()"
+                        (ngModelChange)="savePhoneToProfile.set(!!$event)" />
+                    Guardar este teléfono en mi perfil
+                </label>
+            </section>
+        </div>
+
+        <!-- ── Summary ── -->
+        <aside class="co-summary" aria-labelledby="co-summary-title">
+            <div class="panel panel-pad">
+                <h2 id="co-summary-title" class="panel-title">Resumen</h2>
+
+                <dl class="mt-4">
+                    <div class="data-row">
+                        <dt>Productos</dt>
+                        <dd>{{ cartService.totalPrice() | currency: 'ARS' : '$' : '1.0-0' }}</dd>
+                    </div>
+                    <div class="data-row">
+                        <dt>Envío</dt>
+                        <dd>
+                            @if (!isShipping()) {
+                            Gratis
+                            } @else if (shippingQuote()) {
+                            {{ shippingCost() | currency: 'ARS' : '$' : '1.0-0' }}
+                            } @else {
+                            A cotizar
+                            }
+                        </dd>
+                    </div>
+                </dl>
+
+                <div class="co-total">
+                    <span>Total</span>
+                    <span class="price-tag">{{ orderTotal() | currency: 'ARS' : '$' : '1.0-0' }}</span>
+                </div>
+
+                @if (stockError()) {
+                <div class="notice notice--warn mt-5">
+                    <div>
+                        <p class="font-semibold">{{ stockError() }}</p>
+                        @if (retryAfterSeconds() > 0) {
+                        <p class="mt-1 text-sm">Probá de nuevo en {{ retryAfterSeconds() }} segundo(s).</p>
+                        }
+                        <button (click)="goToAdjustProduct()" type="button" class="text-link mt-2 text-sm">
+                            {{ stockErrorActionLabel() }}
+                        </button>
+                    </div>
+                </div>
+                }
+
+                @if (showCheckoutState()) {
+                <div class="mt-5 rounded border border-brand-line bg-[#f4f5f6] px-4 py-3">
+                    <p class="text-sm font-semibold">{{ getCheckoutStateLabel() }}</p>
+
+                    @if (checkoutState() === 'SHIPPING_QUOTE_REQUESTED') {
+                    <p class="mt-1 text-sm text-brand-gray">
+                        Pediste la cotización del envío. Esta pantalla se actualiza sola cada 12 segundos hasta que
+                        puedas pagar.
+                    </p>
+                    } @else if (checkoutState() === 'QUOTE_READY_PAYMENT_PENDING') {
+                    <p class="mt-1 text-sm text-[#1f7a45]">El envío ya está cotizado. Podés pagar.</p>
+                    @if (quoteExpiresAt()) {
+                    <p class="mt-1 text-xs text-brand-gray">
+                        Válido hasta el {{ quoteExpiresAt() | date: 'dd/MM/yyyy HH:mm' }}
+                    </p>
+                    }
+                    @if (quoteTimeLeftLabel()) {
+                    <p class="mt-1 text-xs font-semibold text-brand-red">{{ quoteTimeLeftLabel() }}</p>
+                    }
+                    } @else if (checkoutState() === 'PAID') {
+                    <p class="mt-1 text-sm text-[#1f7a45]">El pago de esta orden está confirmado.</p>
+                    } @else if (checkoutState() === 'CANCELLED') {
+                    <p class="mt-1 text-sm text-brand-red">La orden se canceló o el pago fue rechazado.</p>
+                    } @else if (orderStatusLabel()) {
+                    <p class="mt-1 text-sm text-brand-gray">{{ orderStatusLabel() }}</p>
+                    } @else {
+                    <p class="mt-1 text-sm text-brand-gray">Completá tus datos para pedir la cotización del envío.
+                    </p>
+                    }
+                </div>
+                }
+
+                @if (paymentsTemporarilyDisabled) {
+                <div class="notice notice--warn mt-5">
+                    <p>Por ahora no estamos tomando pagos ni cotizando envíos online. Muy pronto vas a poder
+                        terminar tu compra acá; mientras tanto, <a routerLink="/contacto"
+                            class="text-link">escribinos</a>.</p>
+                </div>
+                }
+
+                <button (click)="pay()" type="button" [disabled]="!canTriggerPayment()" class="btn btn--mp btn--lg btn--block mt-5"
+                    disabled>
+                    @if (loading()) {
+                    <span class="spinner border-white/40 border-t-white" aria-hidden="true"></span>
+                    }
+                    {{ paymentButtonLabel() }}
+                </button>
+
+                <p class="mt-3 text-xs leading-relaxed text-brand-gray">
+                    Reservamos tus productos por 10 minutos mientras completás el pago. Después se liberan para otros
+                    clientes.
+                </p>
+            </div>
+        </aside>
+    </div>
+</div>
 }

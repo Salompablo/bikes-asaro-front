@@ -1,14 +1,14 @@
-<div class="fixed top-5 right-5 z-[100] flex flex-col gap-2.5 max-w-sm w-full pointer-events-none">
+<div class="fixed bottom-4 left-4 right-4 z-[100] flex flex-col gap-2 sm:left-auto sm:right-6 sm:bottom-6 sm:w-96 pointer-events-none"
+    aria-live="polite">
     @for (toast of toastService.toasts(); track toast.id) {
-    <div class="pointer-events-auto px-4 py-3 rounded-lg shadow-lg text-sm font-medium flex items-center gap-3 toast-enter"
-        [class.bg-green-600]="toast.type === 'success'" [class.bg-red-600]="toast.type === 'error'"
-        [class.bg-brand-dark]="toast.type === 'info'" [class.border]="toast.type === 'info'"
-        [class.border-brand-gray]="toast.type === 'info'" [class.text-white]="toast.type !== 'info'"
-        [class.text-brand-silver]="toast.type === 'info'" role="alert">
+    <div class="toast toast-enter pointer-events-auto" [class.toast--success]="toast.type === 'success'"
+        [class.toast--error]="toast.type === 'error'" [class.toast--info]="toast.type === 'info'"
+        [attr.role]="toast.type === 'error' ? 'alert' : 'status'">
         <span class="flex-1">{{ toast.message }}</span>
-        <button type="button" class="opacity-70 hover:opacity-100 text-lg leading-none shrink-0"
-            (click)="toastService.dismiss(toast.id)" aria-label="Cerrar">
-            ×
+        <button type="button" class="toast__close" (click)="toastService.dismiss(toast.id)" aria-label="Cerrar aviso">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
         </button>
     </div>
     }
