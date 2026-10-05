@@ -156,7 +156,15 @@ const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
                 </div>
                 <div class="data-row">
                   <dt>Envío</dt>
-                  <dd>{{ order()!.shippingCost | currency: 'ARS' : '$' : '1.0-0' }}</dd>
+                  <dd>
+                    @if (order()!.deliveryMethod !== 'SHIPPING') {
+                      Gratis
+                    } @else if (order()!.requiresShippingQuote) {
+                      A cotizar
+                    } @else {
+                      {{ order()!.shippingCost | currency: 'ARS' : '$' : '1.0-0' }}
+                    }
+                  </dd>
                 </div>
               </dl>
               <div class="mt-2 flex items-center justify-between border-t-2 border-brand-black pt-3">

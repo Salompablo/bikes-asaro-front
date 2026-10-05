@@ -139,7 +139,8 @@ export class AdminOrderDetailComponent implements OnInit {
     this.adminService.getOrderById(orderId).subscribe({
       next: (order) => {
         this.order.set(order);
-        this.shippingCostInput.set(order.shippingCost != null ? String(order.shippingCost) : '');
+        // Pending quotes come back with cost 0; start empty so the admin types the real amount.
+        this.shippingCostInput.set(order.shippingCost ? String(order.shippingCost) : '');
         this.statusActionError.set(null);
         this.confirmStatusModalVisible.set(false);
         this.loading.set(false);

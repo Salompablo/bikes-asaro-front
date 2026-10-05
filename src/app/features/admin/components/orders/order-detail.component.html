@@ -45,7 +45,8 @@
           <div class="sm:w-56">
             <label for="shipping-cost" class="field-label">Costo de envío ($)</label>
             <input id="shipping-cost" type="number" min="1" step="0.01" inputmode="decimal"
-              [ngModel]="shippingCostInput()" (ngModelChange)="onShippingCostInput($event)" class="field" />
+              [ngModel]="shippingCostInput()" (ngModelChange)="onShippingCostInput($event)" class="field"
+              placeholder="15000" />
           </div>
           <button type="button" (click)="publishQuote()" [disabled]="!canPublishQuote()" class="btn btn--dark">
             @if (submittingQuote()) {
@@ -104,7 +105,15 @@
           </div>
           <div class="data-row">
             <dt>Envío</dt>
-            <dd>{{ (order()!.shippingCost ?? 0) | currency: 'ARS' : '$' : '1.0-0' }}</dd>
+            <dd>
+              @if (order()!.deliveryMethod !== 'SHIPPING') {
+              Retiro (gratis)
+              } @else if (order()!.requiresShippingQuote) {
+              A cotizar
+              } @else {
+              {{ (order()!.shippingCost ?? 0) | currency: 'ARS' : '$' : '1.0-0' }}
+              }
+            </dd>
           </div>
           <div class="data-row text-lg">
             <dt class="!text-brand-black font-bold">Total</dt>
