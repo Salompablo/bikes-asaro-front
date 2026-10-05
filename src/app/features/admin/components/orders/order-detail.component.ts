@@ -3,6 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ConfirmModalComponent } from '../../../../shared/components/confirm-modal/confirm-modal.component';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { AdminOrderDetailResponse, OrderStatus } from '../../models/admin.models';
 import { AdminService } from '../../services/admin.service';
@@ -23,7 +24,7 @@ const STATUS_CLASSES: Record<string, string> = {
 @Component({
   selector: 'app-admin-order-detail',
   standalone: true,
-  imports: [RouterLink, CurrencyPipe, NgClass, FormsModule],
+  imports: [RouterLink, CurrencyPipe, NgClass, FormsModule, ConfirmModalComponent],
   templateUrl: './order-detail.component.html',
 })
 export class AdminOrderDetailComponent implements OnInit {
