@@ -75,7 +75,7 @@ const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
                   @for (step of orderSteps(); track step; let i = $index) {
                     <li
                       class="od-step"
-                      [class.od-step--done]="i < currentStepIndex()"
+                      [class.od-step--done]="i <= currentStepIndex()"
                       [class.od-step--current]="i === currentStepIndex()"
                       [attr.aria-current]="i === currentStepIndex() ? 'step' : null"
                     >
@@ -230,10 +230,6 @@ const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
       }
       .od-step--done .od-step__label {
         color: var(--ink);
-      }
-      .od-step--current .od-step__bar {
-        background: var(--yellow);
-        box-shadow: inset 0 0 0 1px var(--ink);
       }
       .od-step--current .od-step__label {
         color: var(--ink);

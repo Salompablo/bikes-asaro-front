@@ -6,7 +6,7 @@ import { RouterLink } from '@angular/router';
   standalone: true,
   imports: [RouterLink],
   template: `
-    <div class="page page--narrow">
+    <div class="page page--narrow min-h-[calc(100vh-var(--header-h))]">
       <div class="result-head">
         <span class="result-mark result-mark--wait" aria-hidden="true">
           <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">

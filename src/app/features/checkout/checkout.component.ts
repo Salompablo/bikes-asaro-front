@@ -100,6 +100,11 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   readonly isShipping = computed(() => this.deliveryMethod() === 'SHIPPING');
   readonly shippingCost = computed(() => this.shippingQuote()?.cost ?? 0);
   readonly orderTotal = computed(() => this.cartService.totalPrice() + this.shippingCost());
+  // Mercado Pago blue only when the button actually opens the payment.
+  readonly isPaymentStep = computed(
+    () => !this.isShipping() || this.checkoutState() === 'QUOTE_READY_PAYMENT_PENDING',
+  );
+
   readonly paymentButtonLabel = computed(() => {
     if (this.loading()) return 'Procesando...';
 

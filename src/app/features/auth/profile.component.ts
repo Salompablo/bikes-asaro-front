@@ -139,7 +139,10 @@ export class ProfileComponent implements OnInit {
       return 'Desconocido';
     }
 
-    return provider.toUpperCase() === 'LOCAL' ? 'Local' : provider;
+    const normalized = provider.toUpperCase();
+    if (normalized === 'LOCAL') return 'Correo y contraseña';
+    if (normalized === 'GOOGLE') return 'Google';
+    return provider;
   }
 
   private loadProfile(force = false): void {

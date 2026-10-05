@@ -237,7 +237,7 @@
                 </div>
                 }
 
-                <button (click)="pay()" type="button" [disabled]="!canTriggerPayment()" class="btn btn--mp btn--lg btn--block mt-5"
+                <button (click)="pay()" type="button" [disabled]="!canTriggerPayment()" class="btn btn--lg btn--block mt-5" [class.btn--mp]="isPaymentStep()" [class.btn--dark]="!isPaymentStep()"
                     disabled>
                     @if (loading()) {
                     <span class="spinner border-white/40 border-t-white" aria-hidden="true"></span>

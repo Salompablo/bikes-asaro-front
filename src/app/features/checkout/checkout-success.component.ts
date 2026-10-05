@@ -12,7 +12,7 @@ import { CheckoutService, MercadoPagoReturnParams } from './services/checkout.se
   standalone: true,
   imports: [CurrencyPipe, DatePipe, RouterLink],
   template: `
-    <div class="page page--narrow">
+    <div class="page page--narrow min-h-[calc(100vh-var(--header-h))]">
       @if (loading()) {
         <div class="panel state" aria-live="polite">
           <span class="spinner spinner--lg"></span>
