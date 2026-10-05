@@ -1,135 +1,128 @@
-<header class="w-full bg-brand-black border-b-4 border-brand-accent fixed top-0 z-50">
-    <div class="w-full px-3 sm:px-6 lg:px-10 xl:px-14">
-        <div class="relative h-20">
-            <div class="grid grid-cols-[auto_1fr_auto] items-center gap-4 h-full">
-                <a class="flex items-center justify-start" routerLink="/" aria-label="Ir al inicio">
-                    <img src="assets/images/bikes-asaro-logo.png" alt="Bikes Asaro" class="brand-logo" loading="eager"
-                        decoding="async" />
-                </a>
+<header class="site-header">
+    <div class="site-header__inner">
+        <a class="brand" routerLink="/" aria-label="Bikes Asaro, ir al inicio">
+            <img src="assets/images/bikes-asaro-logo.png" alt="" class="brand-logo" loading="eager"
+                decoding="async" />
+        </a>
 
-                <nav class="hidden md:flex justify-center items-center gap-12 lg:gap-16">
-                    <a routerLink="/catalog"
-                        class="nav-link text-brand-silver font-display uppercase tracking-widest text-sm font-bold px-2 lg:px-3">Productos</a>
-                    <a routerLink="/contacto"
-                        class="nav-link text-brand-silver font-display uppercase tracking-widest text-sm font-bold px-2 lg:px-3">Contacto</a>
-                </nav>
+        <nav class="main-nav" aria-label="Principal">
+            <a routerLink="/catalog" routerLinkActive="nav-link--active" class="nav-link">Bicicletas y repuestos</a>
+            <a routerLink="/contacto" routerLinkActive="nav-link--active" class="nav-link">Contacto</a>
+        </nav>
 
-                <div class="header-actions flex items-center justify-end">
-                    <div #accountMenuWrap class="account-trigger-wrap" (mouseenter)="openAccountMenu()"
-                        (mouseleave)="onAccountHoverLeave()">
-                        <button type="button"
-                            class="icon-button text-brand-silver hover:text-brand-accent transition-colors duration-200"
-                            (click)="toggleAccountMenu()" [attr.aria-expanded]="isAccountMenuOpen" aria-haspopup="menu"
-                            (focus)="openAccountMenu()" aria-label="Cuenta">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                            </svg>
-                        </button>
-
-                        <div class="account-menu" [class.account-menu--open]="isAccountMenuOpen" role="menu"
-                            aria-label="Opciones de cuenta">
-                            @if (authService.isLoggedIn()) {
-                            <div class="account-menu-header">
-                                Hola, {{ authService.firstName() ?? authService.userEmail() }}
-                            </div>
-                            @if (authService.isAdmin()) {
-                            <button type="button" class="account-menu-item" role="menuitem"
-                                (click)="logout()">Desconectar</button>
-                            } @else {
-                            <a routerLink="/profile" class="account-menu-item" role="menuitem" (click)="closeMenus()">Mi
-                                perfil</a>
-                            <a routerLink="/orders" class="account-menu-item" role="menuitem" (click)="closeMenus()">Mis
-                                pedidos</a>
-                            <button type="button" class="account-menu-item" role="menuitem" (click)="logout()">Cerrar
-                                sesión</button>
-                            }
-                            } @else {
-                            <a routerLink="/auth/login" class="account-menu-item" role="menuitem"
-                                (click)="closeMenus()">Iniciar sesión</a>
-                            <a routerLink="/auth/register" class="account-menu-item" role="menuitem"
-                                (click)="closeMenus()">Crear cuenta</a>
-                            }
-                        </div>
-                    </div>
-
-                    @if (authService.isAdmin()) {
-                    <a routerLink="/admin"
-                        class="icon-button text-brand-silver hover:text-brand-accent transition-colors duration-200"
-                        aria-label="Panel de administración">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
-                            </path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        </svg>
-                    </a>
+        <div class="header-actions">
+            <div #accountMenuWrap class="account-trigger-wrap" (mouseenter)="openAccountMenu()"
+                (mouseleave)="onAccountHoverLeave()">
+                <button type="button" class="header-icon" (click)="toggleAccountMenu()"
+                    [attr.aria-expanded]="isAccountMenuOpen" aria-haspopup="menu" (focus)="openAccountMenu()"
+                    aria-label="Tu cuenta">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    @if (authService.isLoggedIn()) {
+                    <span class="header-icon__label">{{ authService.firstName() ?? 'Mi cuenta' }}</span>
+                    } @else {
+                    <span class="header-icon__label">Ingresar</span>
                     }
+                </button>
 
-                    <button routerLink="/checkout" type="button"
-                        class="relative icon-button text-brand-silver hover:text-brand-accent transition-colors duration-200 group"
-                        aria-label="Carrito">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
-                            </path>
-                        </svg>
+                <div class="account-menu" [class.account-menu--open]="isAccountMenuOpen" role="menu"
+                    aria-label="Opciones de cuenta">
+                    @if (authService.isLoggedIn()) {
+                    <div class="account-menu-header">
+                        {{ authService.userEmail() }}
+                    </div>
+                    @if (authService.isAdmin()) {
+                    <a routerLink="/admin" class="account-menu-item" role="menuitem" (click)="closeMenus()">Panel de
+                        administración</a>
+                    <button type="button" class="account-menu-item" role="menuitem" (click)="logout()">Cerrar
+                        sesión</button>
+                    } @else {
+                    <a routerLink="/profile" class="account-menu-item" role="menuitem" (click)="closeMenus()">Mi
+                        perfil</a>
+                    <a routerLink="/orders" class="account-menu-item" role="menuitem" (click)="closeMenus()">Mis
+                        pedidos</a>
+                    <button type="button" class="account-menu-item" role="menuitem" (click)="logout()">Cerrar
+                        sesión</button>
+                    }
+                    } @else {
+                    <a routerLink="/auth/login" class="account-menu-item" role="menuitem" (click)="closeMenus()">Iniciar
+                        sesión</a>
+                    <a routerLink="/auth/register" class="account-menu-item" role="menuitem"
+                        (click)="closeMenus()">Crear cuenta</a>
+                    }
+                </div>
+            </div>
 
-                        @if (cartState.totalItems() > 0) {
-                        <span
-                            class="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-black text-brand-black bg-brand-accent rounded-full border-2 border-brand-black group-hover:scale-110 transition-transform duration-200">
-                            {{ cartState.totalItems() }}
-                        </span>
-                        }
-                    </button>
+            @if (authService.isAdmin()) {
+            <a routerLink="/admin" class="header-icon header-icon--admin" aria-label="Panel de administración">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+                    </path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+            </a>
+            }
 
-                    <div #mobileMenuWrap class="mobile-menu-wrap">
-                        <button type="button"
-                            class="icon-button mobile-menu-toggle text-brand-silver hover:text-brand-accent transition-colors duration-200"
-                            (click)="toggleMobileMenu()" [attr.aria-expanded]="isMobileMenuOpen" aria-haspopup="menu"
-                            [attr.aria-label]="isMobileMenuOpen ? 'Cerrar menu movil' : 'Abrir menu movil'">
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    [attr.d]="isMobileMenuOpen ? 'M6 18L18 6M6 6l12 12' : 'M4 6h16M4 12h16m-7 6h7'">
-                                </path>
-                            </svg>
-                        </button>
+            <a routerLink="/checkout" class="cart-button"
+                [attr.aria-label]="cartState.totalItems() > 0 ? 'Carrito, ' + cartState.totalItems() + ' productos' : 'Carrito vacío'">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                        d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
+                    </path>
+                </svg>
+                @if (cartState.totalItems() > 0) {
+                <span class="cart-count" aria-hidden="true">{{ cartState.totalItems() }}</span>
+                }
+            </a>
 
-                        <div class="mobile-account-menu" [class.mobile-account-menu--open]="isMobileMenuOpen"
-                            role="menu" aria-label="Opciones de cuenta móvil">
-                            <a routerLink="/catalog" class="account-menu-item" role="menuitem" (click)="closeMenus()">
-                                Productos
-                            </a>
-                            <a routerLink="/contacto" class="account-menu-item" role="menuitem" (click)="closeMenus()">
-                                Contacto
-                            </a>
-                            @if (authService.isLoggedIn()) {
-                            <div class="account-menu-header">
-                                Hola, {{ authService.firstName() ?? authService.userEmail() }}
-                            </div>
-                            @if (authService.isAdmin()) {
-                            <button type="button" class="account-menu-item" role="menuitem"
-                                (click)="logout()">Desconectar</button>
-                            } @else {
-                            <a routerLink="/profile" class="account-menu-item" role="menuitem" (click)="closeMenus()">Mi
-                                perfil</a>
-                            <a routerLink="/orders" class="account-menu-item" role="menuitem" (click)="closeMenus()">Mis
-                                pedidos</a>
-                            <button type="button" class="account-menu-item" role="menuitem" (click)="logout()">Cerrar
-                                sesión</button>
-                            }
-                            } @else {
-                            <a routerLink="/auth/login" class="account-menu-item" role="menuitem"
-                                (click)="closeMenus()">Iniciar sesión</a>
-                            <a routerLink="/auth/register" class="account-menu-item" role="menuitem"
-                                (click)="closeMenus()">Crear cuenta</a>
-                            }
+            <div #mobileMenuWrap class="mobile-menu-wrap">
+                <button type="button" class="header-icon mobile-menu-toggle" (click)="toggleMobileMenu()"
+                    [attr.aria-expanded]="isMobileMenuOpen" aria-haspopup="menu"
+                    [attr.aria-label]="isMobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                            [attr.d]="isMobileMenuOpen ? 'M6 18L18 6M6 6l12 12' : 'M4 7h16M4 12h16M4 17h10'">
+                        </path>
+                    </svg>
+                </button>
+
+                <div class="mobile-menu" [class.mobile-menu--open]="isMobileMenuOpen" role="menu"
+                    aria-label="Menú">
+                    <a routerLink="/catalog" class="mobile-menu__primary" role="menuitem" (click)="closeMenus()">
+                        Bicicletas y repuestos
+                    </a>
+                    <a routerLink="/contacto" class="mobile-menu__primary" role="menuitem" (click)="closeMenus()">
+                        Contacto
+                    </a>
+
+                    <div class="mobile-menu__group">
+                        @if (authService.isLoggedIn()) {
+                        <div class="account-menu-header">
+                            {{ authService.userEmail() }}
                         </div>
+                        @if (authService.isAdmin()) {
+                        <a routerLink="/admin" class="account-menu-item" role="menuitem" (click)="closeMenus()">Panel
+                            de administración</a>
+                        <button type="button" class="account-menu-item" role="menuitem" (click)="logout()">Cerrar
+                            sesión</button>
+                        } @else {
+                        <a routerLink="/profile" class="account-menu-item" role="menuitem" (click)="closeMenus()">Mi
+                            perfil</a>
+                        <a routerLink="/orders" class="account-menu-item" role="menuitem" (click)="closeMenus()">Mis
+                            pedidos</a>
+                        <button type="button" class="account-menu-item" role="menuitem" (click)="logout()">Cerrar
+                            sesión</button>
+                        }
+                        } @else {
+                        <a routerLink="/auth/login" class="account-menu-item" role="menuitem"
+                            (click)="closeMenus()">Iniciar sesión</a>
+                        <a routerLink="/auth/register" class="account-menu-item" role="menuitem"
+                            (click)="closeMenus()">Crear cuenta</a>
+                        }
                     </div>
                 </div>
             </div>

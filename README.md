@@ -30,12 +30,37 @@ Angular client for **Bikes Asaro**, a full-stack e-commerce platform focused on 
     </td>
   </tr>
   <tr>
-    <td colspan="2" align="center">
+    <td align="center">
+      <strong>Contact</strong><br />
+      <img src="public/assets/images/Bikes-asaro-contact.png" alt="Bikes Asaro contact page" width="100%" />
+    </td>
+    <td align="center">
+      <strong>Sign In</strong><br />
+      <img src="public/assets/images/Bikes-asaro-login.png" alt="Bikes Asaro sign in page" width="100%" />
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
       <strong>Admin Dashboard</strong><br />
       <img src="public/assets/images/Bikes-asaro-admin-dashboard.png" alt="Bikes Asaro admin dashboard" width="100%" />
     </td>
+    <td align="center">
+      <strong>Mobile</strong><br />
+      <img src="public/assets/images/Bikes-asaro-mobile.png" alt="Bikes Asaro home page on mobile" width="45%" />
+    </td>
   </tr>
 </table>
+
+## Design System
+
+The storefront has its own visual identity, taken from the physical shop in Mar del Plata:
+
+- **Palette:** concrete-grey canvas (the shop floor), graphite ink, and the facade's signal yellow used as a surface rather than a glow. The mural's red is reserved for out-of-stock and destructive actions.
+- **Typography:** a single variable family, [Archivo](https://fonts.google.com/specimen/Archivo). Headings use a condensed italic cut that echoes the slanted logo; body text uses the regular width.
+- **Signature device:** primary buttons and price tags are slanted yellow parallelograms, matching the logo's forward lean. It is the one bold element; everything else stays quiet.
+- **Implementation:** design tokens live as CSS custom properties in `src/styles.css`, mirrored as `brand-*` colors in `tailwind.config.js`. Shared building blocks (`.btn`, `.field`, `.chip`, `.panel`, `.notice`, `.product-card`, `.price-tag`, `.skeleton`) sit in `@layer components`, so Tailwind utilities can still override them.
+- **Accessibility:** visible keyboard focus, a skip link, labelled form controls, AA contrast for text and links, keyboard-operable rating input, and `prefers-reduced-motion` support.
+- **Locale:** prices and dates use the `es-AR` locale (`$ 1.800.000`).
 
 ## Key Features & AI Integration
 
@@ -43,7 +68,7 @@ Angular client for **Bikes Asaro**, a full-stack e-commerce platform focused on 
 - **Checkout workflow:** integrated purchase flow with store pickup or shipping, shipping quote estimation, payment handoff, and order tracking.
 - **Administrative workspace:** protected admin area for managing products, categories, users, and orders.
 - **Customer account flows:** registration, login, email verification, password recovery, profile management, and order history.
-- **AI-powered image cropping:** product image preparation uses **WebAssembly** through **ONNX Runtime Web** and `@imgly/background-removal` to run image-processing models directly in the browser. This enables client-side background removal before upload, reducing backend processing and improving the admin media workflow.
+- **AI-powered image cropping:** product image preparation uses **WebAssembly** through **ONNX Runtime Web** and `@imgly/background-removal` to run image-processing models directly in the browser. This enables client-side background removal before upload, reducing backend processing and improving the admin media workflow. Both libraries are loaded on demand from the product form, so they never reach the storefront's initial bundle.
 
 ## Security & Authentication
 
@@ -60,7 +85,7 @@ The Angular client is tightly integrated with the backend security model exposed
 
 - **Language & framework:** **TypeScript** + **Angular 20**
 - **UI architecture:** standalone components, lazy-loaded feature routes, client hydration, and view transitions
-- **Styling:** CSS with **Tailwind CSS 4**
+- **Styling:** CSS with **Tailwind CSS 4** plus a small component layer (see [Design System](#design-system))
 - **Reactive layer:** **RxJS**
 - **AI in the browser:** **ONNX Runtime Web** + `@imgly/background-removal`
 - **Commerce integrations:** Mercado Pago checkout flow and shipping quote support

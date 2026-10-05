@@ -1,0 +1,113 @@
+.co-grid {
+  margin-top: 2rem;
+  display: grid;
+  gap: 2.5rem;
+}
+
+@media (min-width: 1024px) {
+  .co-grid {
+    grid-template-columns: minmax(0, 1fr) 24rem;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  .co-summary {
+    position: sticky;
+    top: calc(var(--header-h) + 1.5rem);
+  }
+}
+
+.co-steps {
+  display: grid;
+  gap: 2.75rem;
+}
+
+.co-step__title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  font-size: 1.75rem;
+}
+
+.co-step__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  font-size: 1.125rem;
+  color: var(--ink);
+  background: var(--yellow);
+  transform: skewX(var(--slant));
+}
+
+.co-thumb {
+  flex-shrink: 0;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.co-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Radio-like option cards */
+.option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 1rem;
+  background: var(--surface);
+  border: 1px solid #b9bec2;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.option:hover {
+  border-color: var(--ink);
+}
+
+.option[aria-checked='true'] {
+  border-color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+
+.option__dot {
+  flex-shrink: 0;
+  margin-top: 0.2rem;
+  width: 1.125rem;
+  height: 1.125rem;
+  border-radius: 999px;
+  border: 2px solid #8a9095;
+  background: var(--surface);
+}
+
+.option[aria-checked='true'] .option__dot {
+  border-color: var(--ink);
+  background: radial-gradient(circle, var(--ink) 0 40%, var(--yellow) 45% 100%);
+}
+
+.co-total {
+  margin-top: 0.75rem;
+  padding-top: 1rem;
+  border-top: 2px solid var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
+.co-total .price-tag {
+  font-size: 1.5rem;
+}

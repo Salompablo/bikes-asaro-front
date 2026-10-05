@@ -92,9 +92,9 @@ export class LoginComponent {
         google.accounts.id.renderButton(container, {
           theme: 'filled_black',
           size: 'large',
-          shape: 'pill',
+          shape: 'rectangular',
           width: container.offsetWidth,
-          text: 'signin_with',
+          text: 'continue_with',
           locale: 'es',
         });
         this.googleReady.set(true);

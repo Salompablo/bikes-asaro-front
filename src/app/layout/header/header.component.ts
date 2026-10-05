@@ -1,12 +1,12 @@
 import { Component, ElementRef, HostListener, ViewChild, inject } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CartStateService } from '../../core/services/cart-state.service';
 import { AuthService } from '../../features/auth/services/auth.service';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, RouterLinkActive],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css'],
 })

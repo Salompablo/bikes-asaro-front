@@ -1,0 +1,53 @@
+.catalog-head {
+  margin-bottom: 1.5rem;
+}
+
+.filter-bar {
+  position: sticky;
+  top: var(--header-h);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-inline: -1rem;
+  padding: 0.75rem 1rem;
+  background: rgba(236, 237, 238, 0.94);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+
+@media (min-width: 640px) {
+  .filter-bar {
+    margin-inline: -1.5rem;
+    padding-inline: 1.5rem;
+  }
+}
+
+@media (min-width: 900px) {
+  .filter-bar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+@media (min-width: 1024px) {
+  .filter-bar {
+    margin-inline: -2rem;
+    padding-inline: 2rem;
+  }
+}
+
+.filter-bar__tools {
+  display: flex;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+
+.pager {
+  margin-top: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}

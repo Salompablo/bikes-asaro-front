@@ -9,7 +9,7 @@ const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
   INITIATED: { label: 'Iniciado', classes: 'bg-slate-100 text-slate-700' },
   QUOTE_REQUESTED: { label: 'Esperando cotización', classes: 'bg-orange-100 text-orange-800' },
   QUOTE_READY_PAYMENT_PENDING: {
-    label: 'Cotización publicada',
+    label: 'Cotización lista, falta pago',
     classes: 'bg-cyan-100 text-cyan-800',
   },
   PENDING: { label: 'Pendiente de confirmacion', classes: 'bg-yellow-100 text-yellow-800' },
@@ -26,245 +26,230 @@ const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
   standalone: true,
   imports: [RouterLink, CurrencyPipe, DatePipe, NgClass],
   template: `
-    <div class="min-h-screen bg-brand-light pt-28 pb-16 px-4">
-      <div class="max-w-6xl mx-auto">
-        <a
-          routerLink="/orders"
-          class="inline-flex items-center gap-2 text-sm text-brand-gray hover:text-brand-black transition-colors"
-        >
-          <span aria-hidden="true">←</span>
-          Volver a mis pedidos
-        </a>
+    <div class="page">
+      <a routerLink="/orders" class="inline-flex items-center gap-2 text-sm font-semibold text-brand-gray hover:text-brand-black">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        Mis pedidos
+      </a>
 
-        @if (loading()) {
-          <div class="flex items-center justify-center py-24">
-            <div
-              class="w-10 h-10 border-4 border-brand-accent border-t-transparent rounded-full animate-spin"
-            ></div>
+      @if (loading()) {
+        <div class="mt-6 grid gap-6 xl:grid-cols-[1fr_22rem]">
+          <div class="skeleton h-96"></div>
+          <div class="skeleton h-64"></div>
+        </div>
+      } @else if (notFound()) {
+        <div class="panel state mt-6">
+          <p class="text-xl font-semibold">No encontramos este pedido</p>
+          <p class="text-brand-gray">Puede que el número esté mal o que el pedido sea de otra cuenta.</p>
+          <a routerLink="/orders" class="btn btn--dark mt-2">Ver mis pedidos</a>
+        </div>
+      } @else if (error()) {
+        <div class="notice notice--error mt-6" role="alert">
+          <div class="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p>No pudimos cargar este pedido. Revisá tu conexión y probá de nuevo.</p>
+            <button type="button" (click)="load()" class="btn btn--outline btn--sm">Reintentar</button>
           </div>
-        } @else if (notFound()) {
-          <div class="mt-6 rounded-lg border border-gray-200 bg-gray-50 px-6 py-12 text-center">
-            <svg
-              class="w-12 h-12 text-gray-300 mx-auto mb-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="1.5"
-                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-              />
-            </svg>
-            <p class="text-lg font-display uppercase tracking-widest text-brand-black mb-2">
-              Orden no encontrada
-            </p>
-            <p class="text-sm text-brand-gray mb-6">
-              Este pedido no existe o no pertenece a tu cuenta.
-            </p>
-            <a
-              routerLink="/orders"
-              class="inline-block px-5 py-2 bg-brand-black text-brand-white font-display uppercase tracking-widest text-sm rounded-lg hover:bg-brand-dark transition-colors"
-            >
-              Ver mis pedidos
-            </a>
+        </div>
+      } @else if (order()) {
+        <div class="mt-4 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h1 class="page-title">Pedido #{{ order()!.id }}</h1>
+            <p class="mt-2 text-brand-gray">Hecho el {{ order()!.createdAt | date: 'd/MM/yyyy, HH:mm' }}</p>
           </div>
-        } @else if (error()) {
-          <div class="mt-6 rounded-lg border border-red-200 bg-red-50 px-6 py-8 text-center">
-            <p class="text-red-700 mb-4">No pudimos cargar este pedido. Intentá de nuevo.</p>
-            <button
-              type="button"
-              (click)="load()"
-              class="px-5 py-2 bg-brand-black text-brand-white font-display uppercase tracking-widest text-sm rounded-lg hover:bg-brand-dark transition-colors"
-            >
-              Reintentar
-            </button>
-          </div>
-        } @else if (order()) {
-          <div class="mt-6 grid grid-cols-1 xl:grid-cols-3 gap-6">
-            <section class="xl:col-span-2 space-y-6">
-              <div class="rounded-2xl border border-gray-200 bg-brand-white p-6 shadow-sm">
-                <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                  <div>
-                    <p class="text-xs text-brand-gray font-display uppercase tracking-widest">
-                      Pedido
-                    </p>
-                    <h1 class="font-display uppercase tracking-widest text-2xl mt-1">
-                      #{{ order()!.id }}
-                    </h1>
-                    <p class="text-sm text-brand-gray mt-2">
-                      Realizado el {{ order()!.createdAt | date: 'dd/MM/yyyy HH:mm' }}
-                    </p>
-                  </div>
-                  <span
-                    class="inline-flex self-start items-center px-3 py-1 rounded-full text-xs font-semibold"
-                    [ngClass]="statusConfig(order()!.status).classes"
-                  >
-                    {{ statusConfig(order()!.status).label }}
-                  </span>
+          <span class="badge text-sm" [ngClass]="statusConfig(order()!.status).classes">
+            {{ statusConfig(order()!.status).label }}
+          </span>
+        </div>
+
+        <div class="mt-8 grid items-start gap-6 xl:grid-cols-[1fr_22rem]">
+          <div class="space-y-6">
+            <section class="panel panel-pad" aria-labelledby="od-progress">
+              <h2 id="od-progress" class="panel-title">Seguimiento</h2>
+
+              @if (order()!.status === 'CANCELLED') {
+                <div class="notice notice--error mt-4"><p>Este pedido se canceló.</p></div>
+              } @else {
+                <ol class="od-steps mt-5">
+                  @for (step of orderSteps(); track step; let i = $index) {
+                    <li
+                      class="od-step"
+                      [class.od-step--done]="i < currentStepIndex() || (i === currentStepIndex() && !currentStepPending())"
+                      [class.od-step--current]="i === currentStepIndex()"
+                      [class.od-step--pending]="i === currentStepIndex() && currentStepPending()"
+                      [attr.aria-current]="i === currentStepIndex() ? 'step' : null"
+                    >
+                      <span class="od-step__bar" aria-hidden="true"></span>
+                      <span class="od-step__label">{{ step }}</span>
+                    </li>
+                  }
+                </ol>
+              }
+
+              @if (order()!.requiresShippingQuote) {
+                <div class="notice notice--info mt-5">
+                  <p>Estamos cotizando el envío. Te avisamos cuando puedas pagar.</p>
                 </div>
+              }
 
-                @if (order()!.requiresShippingQuote) {
-                  <div
-                    class="mt-4 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-800"
-                  >
-                    Esperando cotización del vendedor.
-                  </div>
-                }
-
-                @if (canRenderPayNow(order()!)) {
-                  <div class="mt-4">
-                    <button
-                      type="button"
-                      (click)="payNow()"
-                      class="h-11 px-4 rounded-lg bg-[#009EE3] text-white font-semibold hover:brightness-110 transition"
-                    >
-                      Pagar ahora
-                    </button>
-                    @if (showQuoteDeadline(order()!)) {
-                      <p class="mt-2 text-xs text-brand-gray">
-                        Fecha límite: {{ formatQuoteDeadline(order()!) }}
-                      </p>
-                      <p class="mt-1 text-xs font-semibold text-orange-700">
-                        {{ quoteCountdownLabel(order()!) }}
-                      </p>
-                    }
-                  </div>
-                }
-
-                @if (order()!.status === 'CANCELLED') {
-                  <div
-                    class="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-                  >
-                    Este pedido fue cancelado.
-                  </div>
-                } @else {
-                  <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3">
-                    @for (step of orderSteps(); track step; let i = $index) {
-                      <div
-                        class="rounded-xl border px-3 py-3 text-center text-xs font-display uppercase tracking-wider"
-                        [ngClass]="
-                          i <= currentStepIndex()
-                            ? 'border-brand-black bg-brand-black text-brand-white'
-                            : 'border-gray-200 bg-gray-50 text-gray-500'
-                        "
-                      >
-                        {{ step }}
-                      </div>
-                    }
-                  </div>
-                }
-              </div>
-
-              <div class="rounded-2xl border border-gray-200 bg-brand-white p-6 shadow-sm">
-                <h2 class="font-display uppercase tracking-widest text-sm mb-4">Productos</h2>
-                <div class="space-y-4">
-                  @for (item of order()!.items; track item.productId) {
-                    <div
-                      class="flex flex-col sm:flex-row sm:items-center gap-4 pb-4 border-b border-gray-100 last:border-b-0 last:pb-0"
-                    >
-                      <a
-                        [routerLink]="['/products', item.productId]"
-                        class="w-20 h-20 rounded-xl bg-gray-100 overflow-hidden shrink-0"
-                        aria-label="Ver producto"
-                      >
-                        @if (item.imageUrl) {
-                          <img
-                            [src]="item.imageUrl"
-                            [alt]="item.productName"
-                            class="w-full h-full object-cover"
-                            loading="lazy"
-                            (error)="onImageError($event)"
-                          />
-                        } @else {
-                          <div
-                            class="w-full h-full flex items-center justify-center text-xs text-gray-500 text-center px-2"
-                          >
-                            Sin imagen
-                          </div>
-                        }
-                      </a>
-
-                      <div class="flex-1 min-w-0">
-                        <a
-                          [routerLink]="['/products', item.productId]"
-                          class="font-medium text-brand-black hover:underline"
-                        >
-                          {{ item.productName }}
-                        </a>
-                        <p class="text-sm text-brand-gray mt-1">Cantidad: {{ item.quantity }}</p>
-                        <p class="text-sm text-brand-gray">
-                          {{ item.unitPrice | currency: 'ARS' : '$' : '1.0-0' }} c/u
-                        </p>
-                      </div>
-
-                      <div class="text-right">
-                        <p class="text-xs text-brand-gray uppercase tracking-widest font-display">
-                          Subtotal
-                        </p>
-                        <p class="font-semibold">
-                          {{ item.unitPrice * item.quantity | currency: 'ARS' : '$' : '1.0-0' }}
-                        </p>
-                      </div>
+              @if (canRenderPayNow(order()!)) {
+                <div class="mt-5 flex flex-wrap items-center gap-4">
+                  <button type="button" (click)="payNow()" class="btn btn--mp">Pagar con Mercado Pago</button>
+                  @if (showQuoteDeadline(order()!)) {
+                    <div class="text-sm">
+                      <p class="text-brand-gray">Válido hasta el {{ formatQuoteDeadline(order()!) }}</p>
+                      <p class="font-semibold text-brand-red">{{ quoteCountdownLabel(order()!) }}</p>
                     </div>
                   }
                 </div>
+              }
+            </section>
+
+            <section class="panel panel-pad" aria-labelledby="od-items">
+              <h2 id="od-items" class="panel-title">Productos</h2>
+              <ul class="mt-2">
+                @for (item of order()!.items; track item.productId) {
+                  <li class="flex items-center gap-4 border-b border-brand-line py-4 last:border-b-0 last:pb-0">
+                    <a
+                      [routerLink]="['/products', item.productId]"
+                      class="h-20 w-20 shrink-0 overflow-hidden rounded border border-brand-line bg-white"
+                      [attr.aria-label]="'Ver ' + item.productName"
+                    >
+                      @if (item.imageUrl) {
+                        <img
+                          [src]="item.imageUrl"
+                          alt=""
+                          class="h-full w-full object-contain p-1"
+                          loading="lazy"
+                          (error)="onImageError($event)"
+                        />
+                      } @else {
+                        <span class="flex h-full w-full items-center justify-center px-2 text-center text-xs text-brand-gray">
+                          Sin foto
+                        </span>
+                      }
+                    </a>
+                    <div class="min-w-0 flex-1">
+                      <a [routerLink]="['/products', item.productId]" class="font-semibold hover:underline">
+                        {{ item.productName }}
+                      </a>
+                      <p class="mt-1 text-sm text-brand-gray">
+                        {{ item.quantity }} × {{ item.unitPrice | currency: 'ARS' : '$' : '1.0-0' }}
+                      </p>
+                    </div>
+                    <p class="font-bold tabular-nums">
+                      {{ item.unitPrice * item.quantity | currency: 'ARS' : '$' : '1.0-0' }}
+                    </p>
+                  </li>
+                }
+              </ul>
+            </section>
+          </div>
+
+          <aside class="space-y-6">
+            <section class="panel panel-pad" aria-labelledby="od-summary">
+              <h2 id="od-summary" class="panel-title">Resumen</h2>
+              <dl class="mt-3">
+                <div class="data-row">
+                  <dt>Productos</dt>
+                  <dd>{{ itemsSubtotal() | currency: 'ARS' : '$' : '1.0-0' }}</dd>
+                </div>
+                <div class="data-row">
+                  <dt>Envío</dt>
+                  <dd>
+                    @if (order()!.deliveryMethod !== 'SHIPPING') {
+                      Gratis
+                    } @else if (order()!.requiresShippingQuote) {
+                      A cotizar
+                    } @else {
+                      {{ order()!.shippingCost | currency: 'ARS' : '$' : '1.0-0' }}
+                    }
+                  </dd>
+                </div>
+              </dl>
+              <div class="mt-2 flex items-center justify-between border-t-2 border-brand-black pt-3">
+                <span class="font-bold">Total</span>
+                <span class="price-tag text-xl">
+                  {{ order()!.totalAmount | currency: 'ARS' : '$' : '1.0-0' }}
+                </span>
               </div>
             </section>
 
-            <aside class="space-y-6">
-              <div class="rounded-2xl border border-gray-200 bg-brand-white p-6 shadow-sm">
-                <h2 class="font-display uppercase tracking-widest text-sm mb-4">Resumen</h2>
-                <div class="space-y-3 text-sm">
-                  <div class="flex items-center justify-between">
-                    <span class="text-brand-gray">Subtotal productos</span>
-                    <span>{{ itemsSubtotal() | currency: 'ARS' : '$' : '1.0-0' }}</span>
-                  </div>
-                  <div class="flex items-center justify-between">
-                    <span class="text-brand-gray">Envio</span>
-                    <span>{{ order()!.shippingCost | currency: 'ARS' : '$' : '1.0-0' }}</span>
-                  </div>
-                  <div class="pt-3 border-t border-gray-100 flex items-center justify-between">
-                    <span class="font-display uppercase tracking-widest text-xs">Total</span>
-                    <span class="font-semibold text-lg">{{
-                      order()!.totalAmount | currency: 'ARS' : '$' : '1.0-0'
-                    }}</span>
-                  </div>
+            <section class="panel panel-pad" aria-labelledby="od-delivery">
+              <h2 id="od-delivery" class="panel-title">Entrega</h2>
+              <dl class="mt-3">
+                <div class="data-row">
+                  <dt>Método</dt>
+                  <dd>{{ deliveryMethodLabel(order()!.deliveryMethod) }}</dd>
                 </div>
-              </div>
-
-              <div class="rounded-2xl border border-gray-200 bg-brand-white p-6 shadow-sm">
-                <h2 class="font-display uppercase tracking-widest text-sm mb-4">Entrega</h2>
-                <dl class="space-y-3 text-sm">
-                  <div class="flex items-center justify-between gap-4">
-                    <dt class="text-brand-gray">Telefono de contacto</dt>
-                    <dd class="text-right">{{ order()!.contactPhone || '-' }}</dd>
+                @if (order()!.deliveryMethod === 'SHIPPING') {
+                  <div class="data-row">
+                    <dt>Dirección</dt>
+                    <dd>{{ order()!.shippingAddress || '-' }}</dd>
                   </div>
-
-                  <div class="flex items-center justify-between gap-4">
-                    <dt class="text-brand-gray">Metodo</dt>
-                    <dd class="text-right">{{ deliveryMethodLabel(order()!.deliveryMethod) }}</dd>
+                  <div class="data-row">
+                    <dt>Código postal</dt>
+                    <dd>{{ order()!.zipCode || '-' }}</dd>
                   </div>
-
-                  @if (order()!.deliveryMethod === 'SHIPPING') {
-                    <div class="flex items-start justify-between gap-4">
-                      <dt class="text-brand-gray">Direccion</dt>
-                      <dd class="text-right">{{ order()!.shippingAddress || '-' }}</dd>
-                    </div>
-                    <div class="flex items-center justify-between gap-4">
-                      <dt class="text-brand-gray">Codigo postal</dt>
-                      <dd class="text-right">{{ order()!.zipCode || '-' }}</dd>
-                    </div>
-                  }
-                </dl>
-              </div>
-            </aside>
-          </div>
-        }
-      </div>
+                }
+                <div class="data-row">
+                  <dt>Teléfono</dt>
+                  <dd>{{ order()!.contactPhone || '-' }}</dd>
+                </div>
+              </dl>
+              <p class="mt-4 text-sm text-brand-gray">
+                ¿Algo no está bien?
+                <a routerLink="/contacto" class="text-link">Escribinos</a>
+                con el número de pedido.
+              </p>
+            </section>
+          </aside>
+        </div>
+      }
     </div>
   `,
+  styles: [
+    `
+      .od-steps {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem 0.5rem;
+      }
+      @media (min-width: 640px) {
+        .od-steps {
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+      }
+      .od-step__bar {
+        display: block;
+        height: 6px;
+        border-radius: 2px;
+        background: var(--line);
+        transform: skewX(var(--slant));
+      }
+      .od-step__label {
+        display: block;
+        margin-top: 0.6rem;
+        font-size: 0.875rem;
+        color: var(--muted);
+      }
+      .od-step--done .od-step__bar {
+        background: var(--ink);
+      }
+      .od-step--done .od-step__label {
+        color: var(--ink);
+      }
+      .od-step--pending .od-step__bar {
+        background: var(--yellow);
+        box-shadow: inset 0 0 0 1px var(--ink);
+      }
+      .od-step--current .od-step__label {
+        color: var(--ink);
+        font-weight: 700;
+      }
+    `,
+  ],
 })
 export class OrderDetailComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
@@ -296,6 +281,17 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
     }
 
     return null;
+  });
+
+  // The current step is still waiting on someone (quote or payment) rather than completed.
+  readonly currentStepPending = computed(() => {
+    const status = this.order()?.status;
+    return (
+      status === 'QUOTE_REQUESTED' ||
+      status === 'QUOTE_READY_PAYMENT_PENDING' ||
+      status === 'PENDING' ||
+      status === 'INITIATED'
+    );
   });
 
   readonly currentStepIndex = computed(() => {

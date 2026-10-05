@@ -5,22 +5,30 @@ module.exports = {
     extend: {
       colors: {
         brand: {
-          black: '#0B0B0B',
-          dark: '#1A1A1A',
-          gray: '#4A4A4A',
-          silver: '#D1D5DB',
-          light: '#F3F4F6',
+          // Graphite "asphalt" ink: text, header and dark surfaces
+          black: '#1B1D1F',
+          dark: '#2A2D30',
+          // Muted text (AA on white and on concrete)
+          gray: '#565C61',
+          silver: '#C4C8CB',
+          // Concrete floor of the shop: page canvas
+          light: '#ECEDEE',
           white: '#FFFFFF',
-          accent: '#FFD600', 
+          // Facade signal yellow
+          accent: '#FFD400',
+          // Mural red: sale / out of stock / destructive
+          red: '#C8321F',
+          // Hairlines
+          line: '#D8DBDE',
         },
       },
       fontFamily: {
-        sans: ['"Inter"', 'system-ui', '-apple-system', 'sans-serif'],
-        display: ['"Montserrat"', '"Arial Black"', 'sans-serif'],
+        sans: ['"Archivo"', 'system-ui', '-apple-system', 'sans-serif'],
+        display: ['"Archivo"', '"Arial Narrow"', 'sans-serif'],
       },
       letterSpacing: {
-        tight: '-0.05em',
-        widest: '0.15em',
+        tight: '-0.02em',
+        widest: '0.08em',
       },
     },
   },

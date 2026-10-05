@@ -6,4 +6,21 @@
 
 .app-content {
 	flex: 1;
+	padding-top: var(--header-h);
+}
+
+.skip-link {
+	position: absolute;
+	left: 1rem;
+	top: -4rem;
+	z-index: 100;
+	padding: 0.6rem 1rem;
+	background: var(--yellow);
+	color: var(--ink);
+	font-weight: 700;
+	border-radius: 4px;
+}
+
+.skip-link:focus {
+	top: 1rem;
 }

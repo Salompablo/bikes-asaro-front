@@ -134,7 +134,7 @@ export class ProductListComponent implements OnInit {
   }
 
   formatPrice(price: number): string {
-    return `$${Math.round(price).toLocaleString('en-US').replace(/,/g, '.')}`;
+    return `$ ${Math.round(price).toLocaleString('es-AR')}`;
   }
 
   private placeholderImage(): string {
