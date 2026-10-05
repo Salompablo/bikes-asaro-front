@@ -254,7 +254,8 @@
             </div>
             } @else if (!authService.isLoggedIn()) {
             <p class="mt-4 text-brand-gray">
-                <a routerLink="/auth/login" class="text-link">Iniciá sesión</a> para dejar tu reseña.
+                <a routerLink="/auth/login" [queryParams]="{ returnUrl: '/products/' + product()!.id }"
+                    class="text-link">Iniciá sesión</a> para dejar tu reseña.
             </p>
             }
         </div>
