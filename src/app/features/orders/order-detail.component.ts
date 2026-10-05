@@ -9,7 +9,7 @@ const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
   INITIATED: { label: 'Iniciado', classes: 'bg-slate-100 text-slate-700' },
   QUOTE_REQUESTED: { label: 'Esperando cotización', classes: 'bg-orange-100 text-orange-800' },
   QUOTE_READY_PAYMENT_PENDING: {
-    label: 'Cotización publicada',
+    label: 'Cotización lista, falta pago',
     classes: 'bg-cyan-100 text-cyan-800',
   },
   PENDING: { label: 'Pendiente de confirmacion', classes: 'bg-yellow-100 text-yellow-800' },
@@ -75,8 +75,9 @@ const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
                   @for (step of orderSteps(); track step; let i = $index) {
                     <li
                       class="od-step"
-                      [class.od-step--done]="i <= currentStepIndex()"
+                      [class.od-step--done]="i < currentStepIndex() || (i === currentStepIndex() && !currentStepPending())"
                       [class.od-step--current]="i === currentStepIndex()"
+                      [class.od-step--pending]="i === currentStepIndex() && currentStepPending()"
                       [attr.aria-current]="i === currentStepIndex() ? 'step' : null"
                     >
                       <span class="od-step__bar" aria-hidden="true"></span>
@@ -239,6 +240,10 @@ const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
       .od-step--done .od-step__label {
         color: var(--ink);
       }
+      .od-step--pending .od-step__bar {
+        background: var(--yellow);
+        box-shadow: inset 0 0 0 1px var(--ink);
+      }
       .od-step--current .od-step__label {
         color: var(--ink);
         font-weight: 700;
@@ -276,6 +281,17 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
     }
 
     return null;
+  });
+
+  // The current step is still waiting on someone (quote or payment) rather than completed.
+  readonly currentStepPending = computed(() => {
+    const status = this.order()?.status;
+    return (
+      status === 'QUOTE_REQUESTED' ||
+      status === 'QUOTE_READY_PAYMENT_PENDING' ||
+      status === 'PENDING' ||
+      status === 'INITIATED'
+    );
   });
 
   readonly currentStepIndex = computed(() => {
