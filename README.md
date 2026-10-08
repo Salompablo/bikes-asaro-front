@@ -6,6 +6,12 @@
 
 Angular client for **Bikes Asaro**, a full-stack e-commerce platform focused on bicycle sales, catalog management, secure checkout, and operational administration, integrated with the custom **bikestore-api** backend built with Java and Spring Boot.
 
+## Status
+
+- **Live (pre-launch):** [www.bikesasaro.com.ar](https://www.bikesasaro.com.ar). Deployed on Vercel against the production API; online payments stay disabled until the shop's official launch.
+- **Backend:** [Salompablo/bikestore-api](https://github.com/Salompablo/bikestore-api) (Spring Boot, PostgreSQL on Supabase, hosted on AWS Lightsail, product images on AWS S3).
+- **Roadmap:** appointment scheduling for bike service and maintenance.
+
 ## Screenshots
 
 <table>
