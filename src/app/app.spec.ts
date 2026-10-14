@@ -24,10 +24,14 @@ describe('App', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should render title', () => {
+  it('should render the app shell: skip link, header, main content and footer', () => {
     const fixture = TestBed.createComponent(App);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, bikes-asaro-front');
+
+    expect(compiled.querySelector('a.skip-link')?.getAttribute('href')).toBe('#contenido');
+    expect(compiled.querySelector('app-header')).not.toBeNull();
+    expect(compiled.querySelector('main#contenido router-outlet')).not.toBeNull();
+    expect(compiled.querySelector('app-footer')).not.toBeNull();
   });
 });
